@@ -30,6 +30,7 @@
   - bloco existente de upload e triagem imediata
   - bloco novo de listagem real dos contratos persistidos
 - O upload continua com comportamento local imediato, sem depender da listagem para mostrar a triagem recem-concluida.
+- Apos upload bem-sucedido, a listagem deve ser recarregada a partir de `GET /api/contracts`, em vez de fabricar localmente um novo item com payload parcial.
 
 ### 2. Separar claramente os boundaries de dados
 - `web/src/lib/api/contracts.ts` deve ficar responsavel apenas por transporte:
@@ -59,6 +60,7 @@
   - analise mais recente
   - findings persistidos
 - Se `latest_analysis` for `null`, a tela deve assumir um estado parcial honesto, explicando que a analise ainda nao esta disponivel.
+- Se `latest_version` for `null`, a tela deve assumir um estado parcial honesto para origem e documento, sem presumir texto extraido ou metadata inexistente.
 - Se o backend responder `404`, a tela deve assumir estado de contrato nao encontrado, sem fallback enganoso.
 
 ### 5. Loading, empty, error e refresh sao parte do contrato
@@ -108,10 +110,12 @@
   - empty
   - erro
   - refresh
+  - refresh da lista apos upload bem-sucedido
   - navegacao para detalhe
 - Testes de screen para o detalhe cobrindo:
   - detalhe completo
   - detalhe sem analise
+  - detalhe sem versao recente
   - contrato inexistente
 - E2E cobrindo o fluxo:
   - operador abre `/contracts`
