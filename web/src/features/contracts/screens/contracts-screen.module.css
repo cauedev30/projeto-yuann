@@ -1,0 +1,341 @@
+.page {
+  --contracts-ink: #1f2933;
+  --contracts-muted: #5f6f7d;
+  --contracts-line: rgba(123, 101, 74, 0.18);
+  --contracts-line-strong: rgba(65, 53, 38, 0.2);
+  --contracts-paper: #fffaf1;
+  --contracts-surface: rgba(255, 253, 249, 0.92);
+  --contracts-surface-strong: #ffffff;
+  --contracts-accent: #0f766e;
+  --contracts-accent-soft: rgba(15, 118, 110, 0.12);
+  --contracts-attention: #9a6700;
+  --contracts-attention-soft: rgba(245, 158, 11, 0.16);
+  --contracts-danger: #9f1239;
+  --contracts-danger-soft: rgba(225, 29, 72, 0.14);
+  --contracts-success: #166534;
+  --contracts-success-soft: rgba(34, 197, 94, 0.14);
+  min-height: 100vh;
+  padding: clamp(1.25rem, 2vw + 1rem, 2.75rem);
+  display: grid;
+  gap: 1.25rem;
+  color: var(--contracts-ink);
+  background:
+    radial-gradient(circle at top left, rgba(15, 118, 110, 0.14), transparent 34rem),
+    linear-gradient(180deg, #f5efe3 0%, #f8f4eb 48%, #fbf8f3 100%);
+  font-family: "Avenir Next", "Trebuchet MS", sans-serif;
+}
+
+.hero,
+.panel {
+  border: 1px solid var(--contracts-line);
+  border-radius: 1.75rem;
+  background: var(--contracts-surface);
+  box-shadow: 0 24px 60px rgba(87, 62, 39, 0.08);
+}
+
+.hero {
+  padding: clamp(1.5rem, 1.2rem + 1.1vw, 2.4rem);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(250, 242, 229, 0.94)),
+    var(--contracts-surface);
+}
+
+.eyebrow,
+.panelEyebrow,
+.summaryLabel {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.eyebrow,
+.panelEyebrow {
+  color: var(--contracts-accent);
+}
+
+.heroTitle {
+  margin: 0.5rem 0 0;
+  font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
+  font-size: clamp(2rem, 3.2vw, 3.6rem);
+  line-height: 0.98;
+}
+
+.heroDescription {
+  max-width: 48rem;
+  margin: 0.85rem 0 0;
+  color: var(--contracts-muted);
+  font-size: 1rem;
+  line-height: 1.65;
+}
+
+.topGrid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(0, 1.35fr) minmax(18rem, 0.85fr);
+  align-items: start;
+}
+
+.uploadPanel,
+.sessionCard,
+.summarySection,
+.findingsSection,
+.textPanel,
+.emptyPanel {
+  padding: 1.3rem;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.sectionTitle {
+  margin: 0.35rem 0 0;
+  font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
+  font-size: clamp(1.4rem, 1rem + 1vw, 2rem);
+  line-height: 1.1;
+}
+
+.panelDescription,
+.sessionDescription,
+.emptyCopy,
+.summaryMeta,
+.findingDescription,
+.findingMeta {
+  color: var(--contracts-muted);
+  line-height: 1.6;
+}
+
+.panelDescription {
+  margin: 0.75rem 0 1.2rem;
+}
+
+.statusChip,
+.summaryCallout,
+.sectionMeta {
+  align-self: flex-start;
+  padding: 0.45rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(31, 41, 51, 0.06);
+  color: var(--contracts-ink);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.summaryCallout {
+  background: var(--contracts-accent-soft);
+  color: var(--contracts-accent);
+}
+
+.sessionCard {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.sessionToneEmpty {
+  background: linear-gradient(180deg, rgba(255, 253, 249, 0.95), rgba(247, 243, 234, 0.95));
+}
+
+.sessionToneLoading {
+  background: linear-gradient(180deg, rgba(240, 250, 249, 0.96), rgba(229, 244, 241, 0.96));
+}
+
+.sessionToneError {
+  background: linear-gradient(180deg, rgba(255, 245, 247, 0.97), rgba(255, 238, 242, 0.97));
+}
+
+.sessionToneSuccess {
+  background: linear-gradient(180deg, rgba(244, 252, 246, 0.97), rgba(236, 248, 239, 0.97));
+}
+
+.sessionMessage {
+  margin: 0;
+  padding: 0.95rem 1rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(31, 41, 51, 0.08);
+  background: rgba(255, 255, 255, 0.78);
+  font-weight: 700;
+}
+
+.uploadShell {
+  display: grid;
+  gap: 1rem;
+}
+
+.uploadHint {
+  display: grid;
+  gap: 0.45rem;
+  padding: 1rem;
+  border-radius: 1.1rem;
+  background: linear-gradient(135deg, rgba(15, 118, 110, 0.08), rgba(255, 255, 255, 0.8));
+  border: 1px solid rgba(15, 118, 110, 0.16);
+}
+
+.uploadHint strong {
+  font-size: 1rem;
+}
+
+.uploadHint p {
+  margin: 0;
+  color: var(--contracts-muted);
+  line-height: 1.5;
+}
+
+.summaryGrid {
+  margin-top: 1.1rem;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.summaryCard {
+  padding: 1rem;
+  border-radius: 1.3rem;
+  border: 1px solid var(--contracts-line);
+  background: var(--contracts-surface-strong);
+}
+
+.summaryLabel {
+  color: var(--contracts-muted);
+}
+
+.summaryValue {
+  display: block;
+  margin-top: 0.4rem;
+  font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
+  font-size: clamp(1.65rem, 1.15rem + 1vw, 2.2rem);
+  line-height: 1;
+}
+
+.summaryMeta {
+  margin: 0.65rem 0 0;
+  font-size: 0.95rem;
+}
+
+.findingsList {
+  margin: 1.1rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.95rem;
+}
+
+.findingItem {
+  padding: 1rem;
+  border-radius: 1.2rem;
+  border: 1px solid var(--contracts-line);
+  background: var(--contracts-surface-strong);
+}
+
+.findingHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+}
+
+.findingTitle {
+  font-size: 1rem;
+}
+
+.statusPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border-radius: 999px;
+  padding: 0.35rem 0.7rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.statusCritico {
+  background: var(--contracts-danger-soft);
+  color: var(--contracts-danger);
+}
+
+.statusAtencao {
+  background: var(--contracts-attention-soft);
+  color: var(--contracts-attention);
+}
+
+.statusConforme {
+  background: var(--contracts-success-soft);
+  color: var(--contracts-success);
+}
+
+.findingDescription {
+  margin: 0.8rem 0 0;
+}
+
+.findingMeta {
+  margin: 0.45rem 0 0;
+  font-size: 0.94rem;
+}
+
+.textPanel {
+  display: grid;
+  gap: 1rem;
+}
+
+.extractedText {
+  margin: 0;
+  padding: 1rem;
+  border-radius: 1.2rem;
+  border: 1px solid var(--contracts-line);
+  background: rgba(247, 242, 231, 0.95);
+  color: var(--contracts-ink);
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow: auto;
+  max-height: 22rem;
+  line-height: 1.65;
+  font-family: "IBM Plex Mono", "SFMono-Regular", monospace;
+  font-size: 0.92rem;
+}
+
+.emptyPanel {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.emptyCallout {
+  align-self: flex-start;
+  padding: 0.4rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(15, 118, 110, 0.08);
+  color: var(--contracts-accent);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+@media (max-width: 900px) {
+  .topGrid,
+  .summaryGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .page {
+    padding: 1rem;
+  }
+
+  .hero,
+  .uploadPanel,
+  .sessionCard,
+  .summarySection,
+  .findingsSection,
+  .textPanel,
+  .emptyPanel {
+    padding: 1rem;
+    border-radius: 1.3rem;
+  }
+
+  .sectionHeader {
+    flex-direction: column;
+  }
+}
