@@ -6,10 +6,15 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.db.models.contract import Contract, ContractSource, ContractVersion
+from app.infrastructure.pdf_text import TextExtractionError
 from app.infrastructure.ocr import OCRClient
 from app.infrastructure.storage import LocalStorageService
 from app.tasks.archive import process_signed_contract_archive
 from app.tasks.ingestion import TextExtractionResult, ingest_contract_version
+
+
+class ContractUploadError(Exception):
+    pass
 
 
 @dataclass(slots=True)
@@ -34,7 +39,6 @@ def upload_contract_file(
     if contract is None:
         contract = Contract(title=title, external_reference=external_reference, status="uploaded")
         session.add(contract)
-        session.flush()
     else:
         contract.title = title
 
@@ -46,18 +50,30 @@ def upload_contract_file(
         storage_key=storage_key,
     )
     session.add(contract_version)
-    session.commit()
+
+    try:
+        session.flush()
+        extraction = ingest_contract_version(
+            session,
+            contract_version,
+            storage_service=storage_service,
+            ocr_client=ocr_client,
+        )
+
+        if contract_version.source == ContractSource.signed_contract:
+            process_signed_contract_archive(session, contract_version=contract_version)
+        session.commit()
+    except TextExtractionError as exc:
+        session.rollback()
+        storage_service.delete(storage_key)
+        raise ContractUploadError("Uploaded file is not a readable PDF") from exc
+    except Exception:
+        session.rollback()
+        storage_service.delete(storage_key)
+        raise
+
+    session.refresh(contract)
     session.refresh(contract_version)
-
-    extraction = ingest_contract_version(
-        session,
-        contract_version,
-        storage_service=storage_service,
-        ocr_client=ocr_client,
-    )
-
-    if contract_version.source == ContractSource.signed_contract:
-        process_signed_contract_archive(session, contract_version=contract_version)
 
     return ContractUploadResult(
         contract=contract,

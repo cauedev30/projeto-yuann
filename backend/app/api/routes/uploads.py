@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, Uplo
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from app.application.contract_upload import upload_contract_file
+from app.application.contract_upload import ContractUploadError, upload_contract_file
 from app.api.dependencies import get_session
 from app.db.models.contract import ContractSource
 from app.infrastructure.storage import LocalStorageService
@@ -40,16 +40,19 @@ async def upload_contract(
 
     content = await file.read()
     ocr_client = getattr(request.app.state, "ocr_client", None)
-    result = upload_contract_file(
-        session=session,
-        title=title,
-        external_reference=external_reference,
-        source=source_enum,
-        filename=file.filename or "contract.pdf",
-        content=content,
-        storage_service=storage_service,
-        ocr_client=ocr_client,
-    )
+    try:
+        result = upload_contract_file(
+            session=session,
+            title=title,
+            external_reference=external_reference,
+            source=source_enum,
+            filename=file.filename or "contract.pdf",
+            content=content,
+            storage_service=storage_service,
+            ocr_client=ocr_client,
+        )
+    except ContractUploadError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
 
     return UploadContractResponse(
         contract_id=result.contract.id,

@@ -8,6 +8,10 @@ import fitz
 from app.infrastructure.ocr import OCRClient
 
 
+class TextExtractionError(Exception):
+    pass
+
+
 @dataclass(slots=True)
 class TextExtractionResult:
     text: str
@@ -25,8 +29,11 @@ def extract_contract_text(
     ocr_client: OCRClient | None = None,
     minimum_text_length: int = 10,
 ) -> TextExtractionResult:
-    with fitz.open(pdf_path) as document:
-        embedded_text = _normalize_text(" ".join(page.get_text("text") for page in document))
+    try:
+        with fitz.open(pdf_path) as document:
+            embedded_text = _normalize_text(" ".join(page.get_text("text") for page in document))
+    except fitz.FileDataError as exc:
+        raise TextExtractionError("Uploaded file is not a readable PDF") from exc
 
     if len(embedded_text) >= minimum_text_length:
         return TextExtractionResult(

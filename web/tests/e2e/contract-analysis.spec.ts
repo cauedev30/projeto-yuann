@@ -64,3 +64,15 @@ test("operator uploads a contract and reviews the findings", async ({ page }) =>
   await expect(page.getByRole("cell", { name: "Prazo de vigencia" })).toBeVisible();
   await expect(page.getByText("critical")).toBeVisible();
 });
+
+test("operator sees a readable error for an unreadable pdf upload", async ({ page }) => {
+  await page.goto("/contracts");
+  await page.getByLabel("Titulo do contrato").fill("Loja Centro");
+  await page.getByLabel("Referencia externa").fill("LOC-ERR-001");
+  await page.getByLabel("Contrato PDF").setInputFiles("tests/fixtures/unreadable-upload.pdf");
+  await page.getByRole("button", { name: "Enviar contrato" }).click();
+
+  await expect(page.locator("p[role='alert']")).toContainText(
+    "O arquivo enviado nao e um PDF legivel.",
+  );
+});

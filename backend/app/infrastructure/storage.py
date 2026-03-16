@@ -17,3 +17,6 @@ class LocalStorageService:
 
     def read_bytes(self, storage_key: str) -> bytes:
         return (self.root / storage_key).read_bytes()
+
+    def delete(self, storage_key: str) -> None:
+        (self.root / storage_key).unlink(missing_ok=True)

@@ -1,7 +1,9 @@
 import React from "react";
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+
+import { uploadContract } from "../../../lib/api/contracts";
 
 vi.mock("../components/upload-form", () => ({
   UploadForm: ({
@@ -46,6 +48,10 @@ function buildUploadResult() {
 }
 
 describe("ContractsScreen", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
   function getScreenScope() {
     return within(screen.getAllByRole("main").at(-1) as HTMLElement);
   }
@@ -121,5 +127,26 @@ describe("ContractsScreen", () => {
       findingsHeading.compareDocumentPosition(extractedTextHeading) &
         Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
+  });
+
+  it("shows the mapped upload error returned by the transport client", async () => {
+    vi.stubEnv("NEXT_PUBLIC_API_URL", "http://127.0.0.1:8000");
+    const user = userEvent.setup();
+    const fetchImpl: typeof fetch = async () =>
+      new Response(JSON.stringify({ detail: "Uploaded file is not a readable PDF" }), {
+        status: 422,
+        headers: { "Content-Type": "application/json" },
+      });
+
+    render(
+      <ContractsScreen submitContract={(payload) => uploadContract(payload, fetchImpl)} />,
+    );
+    const scope = getScreenScope();
+
+    await user.click(scope.getByRole("button", { name: "Enviar contrato" }));
+
+    expect(await scope.findByRole("alert")).toHaveTextContent(
+      "O arquivo enviado nao e um PDF legivel.",
+    );
   });
 });
