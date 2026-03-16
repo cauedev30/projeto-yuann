@@ -4,13 +4,14 @@ import type { DashboardNotification } from "@/entities/dashboard/model";
 
 type NotificationHistoryProps = {
   items: DashboardNotification[];
+  showTitle?: boolean;
 };
 
-export function NotificationHistory({ items }: NotificationHistoryProps) {
+export function NotificationHistory({ items, showTitle = true }: NotificationHistoryProps) {
   if (items.length === 0) {
     return (
       <section>
-        <h2>Historico de notificacoes</h2>
+        {showTitle ? <h2>Historico de notificacoes</h2> : null}
         <p>Nenhuma notificacao registrada.</p>
       </section>
     );
@@ -18,7 +19,7 @@ export function NotificationHistory({ items }: NotificationHistoryProps) {
 
   return (
     <section>
-      <h2>Historico de notificacoes</h2>
+      {showTitle ? <h2>Historico de notificacoes</h2> : null}
       <ul>
         {items.map((item) => (
           <li key={item.id}>
