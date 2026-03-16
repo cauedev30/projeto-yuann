@@ -1,6 +1,7 @@
 # AGENTS
 
 ## Workflow de memoria
+- A memoria persistente deste projeto vive fora do repositorio e deve ser acessada apenas por `./.codex-memory`.
 - Antes de comecar qualquer tarefa, ler `./.codex-memory/current-state.md` e resumir o estado atual.
 - Consultar `./.codex-memory/source-of-truth.md` antes de navegar no projeto.
 - Consultar `./.codex-memory/decisions.md` antes de mudar arquitetura, convencoes ou padroes.
@@ -23,6 +24,7 @@
 - Se o harness atual nao permitir rodar um papel exatamente como descrito, seguir o equivalente mais proximo e registrar a lacuna explicitamente.
 
 ## Contexto inicial do projeto
-- Projeto atual: MVP LegalTech para ingestao, analise e governanca de contratos de expansao.
-- Estrutura principal atual: `backend/` para API e servicos, `web/` para app operador, `docs/` para planos, specs e sistema do squad.
-- Fontes principais iniciais: `README.md`, `docs/squad/README.md`, `docs/superpowers/plans/2026-03-15-legaltech-mvp.md`, `backend/app/`, `web/src/app/`.
+- Projeto atual: monorepo `projeto-yuann` do MVP LegalTech para ingestao, analise e governanca de contratos de expansao e franquias.
+- Estrutura principal atual: `backend/` para API e servicos, `web/` para app operador e `docs/` para planos, specs e sistema do squad.
+- Memoria persistente: `/home/dvdev/Documents/Codex Memory/projects/projeto-yuann`, acessada localmente por `./.codex-memory`.
+- Fontes principais iniciais: `README.md`, `docs/squad/README.md`, `docs/squad/routing-matrix.md`, `docs/superpowers/plans/2026-03-15-legaltech-mvp.md`, `backend/app/` e `web/src/app/`.
