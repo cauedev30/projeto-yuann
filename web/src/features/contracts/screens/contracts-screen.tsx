@@ -9,7 +9,13 @@ import {
   type ContractUploadResult,
 } from "../../../entities/contracts/model";
 import { uploadContract } from "../../../lib/api/contracts";
+import { ContractsHero } from "../components/contracts-hero";
+import { ExtractedTextPanel } from "../components/extracted-text-panel";
+import { FindingsSection } from "../components/findings-section";
+import { SessionStatusCard } from "../components/session-status-card";
+import { UploadSummaryCards } from "../components/upload-summary-cards";
 import { UploadForm } from "../components/upload-form";
+import styles from "./contracts-screen.module.css";
 
 type ContractsScreenProps = {
   submitContract?: (payload: ContractUploadInput) => Promise<ContractUploadResult>;
@@ -90,49 +96,65 @@ export function ContractsScreen({
   }
 
   return (
-    <main>
-      <header>
-        <p>Governanca contratual</p>
-        <h1>Envie um contrato para triagem inicial</h1>
-        <p>Suba um PDF para revisar a sessao atual e a triagem inicial do contrato.</p>
-      </header>
+    <main className={styles.page}>
+      <ContractsHero />
 
-      <UploadForm onSubmit={handleSubmit} isSubmitting={isSubmitting} />
+      <div className={styles.topGrid}>
+        <section className={`${styles.panel} ${styles.uploadPanel}`}>
+          <div className={styles.sectionHeader}>
+            <div>
+              <p className={styles.panelEyebrow}>Entrada principal</p>
+              <h2 className={styles.sectionTitle}>Upload do contrato</h2>
+            </div>
+          </div>
 
-      <section aria-live="polite">
-        <h2>Estado da sessao</h2>
-        <p>{statusMessage}</p>
-      </section>
+          <p className={styles.panelDescription}>
+            Escolha o tipo do documento e envie o PDF para iniciar a leitura automatizada da sessao.
+          </p>
 
-      {error ? <p role="alert">{error}</p> : null}
+          <div className={styles.uploadShell}>
+            <div className={styles.uploadHint}>
+              <strong>Fluxo guiado</strong>
+              <p>
+                O retorno desta tela prioriza status da sessao, resumo executivo e findings antes do texto completo.
+              </p>
+            </div>
+
+            <UploadForm onSubmit={handleSubmit} isSubmitting={isSubmitting} />
+          </div>
+        </section>
+
+        <SessionStatusCard
+          state={statusState}
+          message={statusState === "error" && error ? error : statusMessage}
+        />
+      </div>
 
       {result ? (
         <>
-          <section>
-            <h2>Resumo da triagem</h2>
-            <p>Tipo enviado: {result.source}</p>
-            <p>Status geral: {findings.some((item) => item.status === "critical") ? "Atencao" : "Conforme"}</p>
-            <p>Score de risco: {riskScore}</p>
-            <p>OCR utilizado: {result.usedOcr ? "sim" : "nao"}.</p>
-          </section>
-
-          <section>
-            <h2>Findings principais</h2>
-            <ul>
-              {findings.map((item) => (
-                <li key={`${item.clauseName}-${item.status}`}>
-                  <strong>{item.clauseName}</strong>: {item.status} - {item.riskExplanation}
-                </li>
-              ))}
-            </ul>
-          </section>
-          <section>
-            <h2>Texto extraido</h2>
-            <pre>{result.text}</pre>
-          </section>
+          <UploadSummaryCards
+            hasCriticalFinding={findings.some((item) => item.status === "critical")}
+            riskScore={riskScore}
+            source={result.source}
+            usedOcr={result.usedOcr}
+          />
+          <FindingsSection items={findings} />
+          <ExtractedTextPanel text={result.text} />
         </>
       ) : (
-        <p>Envie um PDF para liberar o resumo da triagem, os findings e o texto extraido.</p>
+        <section className={`${styles.panel} ${styles.emptyPanel}`}>
+          <div className={styles.sectionHeader}>
+            <div>
+              <p className={styles.panelEyebrow}>Resultado</p>
+              <h2 className={styles.sectionTitle}>A triagem aparece aqui</h2>
+            </div>
+            <span className={styles.emptyCallout}>Pronto para revisar</span>
+          </div>
+
+          <p className={styles.emptyCopy}>
+            Envie um PDF para liberar o resumo da triagem, os findings e o texto extraido.
+          </p>
+        </section>
       )}
     </main>
   );
