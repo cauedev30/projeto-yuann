@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import React from "react";
 import { useEffect, useState } from "react";
 
@@ -61,6 +62,7 @@ export function ContractsScreen({
   refreshContracts = loadContracts,
   navigateToContract,
 }: ContractsScreenProps) {
+  const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [result, setResult] = useState<ContractUploadResult | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -78,8 +80,9 @@ export function ContractsScreen({
       : result
         ? "success"
         : "empty";
-
   let statusMessage = "Nenhuma triagem foi executada nesta sessao.";
+  const openContract =
+    navigateToContract ?? ((contractId: string) => router.push(`/contracts/${contractId}`));
 
   if (statusState === "loading") {
     statusMessage = "Processando triagem inicial...";
@@ -234,7 +237,7 @@ export function ContractsScreen({
         isLoading={isLoadingContracts}
         isRefreshing={isRefreshingContracts}
         items={contracts}
-        navigateToContract={navigateToContract}
+        navigateToContract={openContract}
         onRefresh={refreshPersistedContracts}
       />
     </main>

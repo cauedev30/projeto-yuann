@@ -5,6 +5,14 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { uploadContract } from "../../../lib/api/contracts";
 
+const pushMock = vi.fn();
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: pushMock,
+  }),
+}));
+
 vi.mock("../components/upload-form", () => ({
   UploadForm: ({
     onSubmit,
@@ -70,6 +78,7 @@ function buildContractsListResult() {
 describe("ContractsScreen", () => {
   afterEach(() => {
     vi.unstubAllEnvs();
+    pushMock.mockReset();
   });
 
   function getScreenScope() {
@@ -271,5 +280,18 @@ describe("ContractsScreen", () => {
     await user.click(contractLink);
 
     expect(navigateToContract).toHaveBeenCalledWith("ctr-1");
+  });
+
+  it("uses the app router fallback when no navigation callback is injected", async () => {
+    const user = userEvent.setup();
+    const loadContracts = vi.fn().mockResolvedValue(buildContractsListResult());
+
+    render(<ContractsScreen submitContract={vi.fn()} loadContracts={loadContracts} />);
+    const scope = getScreenScope();
+
+    const contractLink = await scope.findByRole("link", { name: /Loja Centro/i });
+    await user.click(contractLink);
+
+    expect(pushMock).toHaveBeenCalledWith("/contracts/ctr-1");
   });
 });
