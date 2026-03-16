@@ -1,0 +1,320 @@
+:root {
+  --bg: #f2f1ea;
+  --surface: rgba(255, 255, 255, 0.82);
+  --surface-strong: #ffffff;
+  --line: rgba(22, 39, 52, 0.12);
+  --line-strong: rgba(22, 39, 52, 0.22);
+  --ink: #18242f;
+  --ink-muted: #5a6770;
+  --brand-blue: #184f73;
+  --brand-green: #1f6b5c;
+  --shadow-soft: 0 18px 40px rgba(16, 34, 48, 0.08);
+  --radius-lg: 28px;
+  --radius-md: 20px;
+  --radius-sm: 14px;
+  --max-width: 1180px;
+  --font-body: "Avenir Next", "Segoe UI", sans-serif;
+  --font-display: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+body.app-root {
+  color: var(--ink);
+  font-family: var(--font-body);
+  background:
+    radial-gradient(circle at top left, rgba(24, 79, 115, 0.12), transparent 34%),
+    radial-gradient(circle at top right, rgba(31, 107, 92, 0.12), transparent 28%),
+    linear-gradient(180deg, #f9f8f3 0%, var(--bg) 48%, #eef1ee 100%);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+.marketingPage {
+  width: min(calc(100% - 2rem), var(--max-width));
+  margin: 0 auto;
+  padding: 1.5rem 0 4rem;
+}
+
+.marketingTopbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.62);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 14px 28px rgba(16, 34, 48, 0.04);
+}
+
+.marketingBrand {
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.78rem;
+}
+
+.marketingNav {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: var(--ink-muted);
+  font-size: 0.94rem;
+}
+
+.marketingNav a:last-child {
+  padding: 0.7rem 1rem;
+  border-radius: 999px;
+  color: var(--surface-strong);
+  background: linear-gradient(135deg, var(--brand-blue), var(--brand-green));
+}
+
+.marketingHero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(18rem, 0.75fr);
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.marketingHeroCopy,
+.marketingHeroPanel,
+.marketingSection,
+.marketingFeature,
+.marketingValueCard {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  backdrop-filter: blur(14px);
+  box-shadow: var(--shadow-soft);
+}
+
+.marketingHeroCopy {
+  border-radius: clamp(1.5rem, 4vw, 3rem);
+  padding: clamp(1.5rem, 3vw, 3rem);
+}
+
+.marketingEyebrow {
+  margin: 0 0 0.9rem;
+  color: var(--brand-blue);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.marketingHero h1,
+.marketingSection h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  line-height: 0.98;
+  letter-spacing: -0.04em;
+}
+
+.marketingHero h1 {
+  max-width: 11ch;
+  font-size: clamp(3rem, 8vw, 6.2rem);
+}
+
+.marketingLead {
+  max-width: 36rem;
+  margin: 1.1rem 0 0;
+  color: var(--ink-muted);
+  line-height: 1.6;
+  font-size: 1.02rem;
+}
+
+.marketingHeroActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  margin-top: 1.5rem;
+}
+
+.primaryCta,
+.secondaryCta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.9rem;
+  padding: 0.85rem 1.2rem;
+  border-radius: 999px;
+}
+
+.primaryCta {
+  color: var(--surface-strong);
+  background: linear-gradient(135deg, var(--brand-blue), var(--brand-green));
+  box-shadow: 0 18px 30px rgba(24, 79, 115, 0.18);
+}
+
+.secondaryCta {
+  border: 1px solid var(--line-strong);
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.68);
+}
+
+.marketingHeroPanel {
+  display: grid;
+  gap: 1rem;
+  border-radius: var(--radius-lg);
+  padding: 1.4rem;
+}
+
+.marketingPanelLabel {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.marketingPanelTitle {
+  margin: 0;
+  font-size: 1.5rem;
+  line-height: 1.15;
+}
+
+.marketingPanelBody {
+  color: var(--ink-muted);
+  line-height: 1.6;
+}
+
+.marketingValueList {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.marketingValueCard {
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  background: var(--surface-strong);
+}
+
+.marketingValueCard strong {
+  display: block;
+  font-size: 1.4rem;
+}
+
+.marketingValueCard span {
+  display: block;
+  margin-top: 0.2rem;
+  color: var(--ink-muted);
+}
+
+.marketingSection {
+  margin-top: 1.5rem;
+  border-radius: clamp(1.4rem, 3vw, 2.2rem);
+  padding: clamp(1.3rem, 2vw, 2rem);
+}
+
+.marketingSectionHeader {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.marketingSectionHeader p,
+.marketingSectionIntro {
+  margin: 0;
+  max-width: 38rem;
+  color: var(--ink-muted);
+  line-height: 1.6;
+}
+
+.marketingFeatures {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.marketingFeature {
+  border-radius: var(--radius-md);
+  padding: 1.2rem;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(246, 249, 248, 0.88));
+}
+
+.marketingFeature h3 {
+  margin: 0 0 0.6rem;
+  font-size: 1.1rem;
+}
+
+.marketingFeature p {
+  margin: 0;
+  color: var(--ink-muted);
+  line-height: 1.6;
+}
+
+.marketingProof {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 1rem;
+}
+
+.marketingProofCard {
+  border-radius: var(--radius-md);
+  padding: 1.35rem;
+  background: linear-gradient(180deg, rgba(24, 79, 115, 0.06), rgba(31, 107, 92, 0.05));
+}
+
+.marketingProofCard p,
+.marketingProofCard ul {
+  margin: 0;
+}
+
+.marketingProofCard ul {
+  padding-left: 1rem;
+  color: var(--ink-muted);
+  line-height: 1.7;
+}
+
+@media (max-width: 960px) {
+  .marketingHero,
+  .marketingFeatures,
+  .marketingProof {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .marketingPage {
+    width: min(calc(100% - 1.25rem), var(--max-width));
+    padding-top: 1rem;
+  }
+
+  .marketingTopbar,
+  .marketingSectionHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .marketingNav {
+    flex-wrap: wrap;
+  }
+
+  .marketingHero h1 {
+    font-size: clamp(2.5rem, 14vw, 4rem);
+  }
+}

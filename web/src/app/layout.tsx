@@ -1,4 +1,6 @@
-import type { ReactNode } from "react";
+import React, { type ReactNode } from "react";
+
+import "./globals.css";
 
 type RootLayoutProps = {
   children: ReactNode;
@@ -6,8 +8,8 @@ type RootLayoutProps = {
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
-    <html lang="en">
-      <body>{children}</body>
+    <html lang="pt-BR">
+      <body className="app-root">{children}</body>
     </html>
   );
 }
