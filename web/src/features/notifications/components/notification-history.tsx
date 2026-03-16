@@ -1,6 +1,6 @@
 import React from "react";
 
-import type { DashboardNotification } from "@/lib/api/dashboard";
+import type { DashboardNotification } from "@/entities/dashboard/model";
 
 type NotificationHistoryProps = {
   items: DashboardNotification[];

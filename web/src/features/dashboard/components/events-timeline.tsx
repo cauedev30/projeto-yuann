@@ -1,6 +1,6 @@
 import React from "react";
 
-import type { DashboardEvent } from "@/lib/api/dashboard";
+import type { DashboardEvent } from "@/entities/dashboard/model";
 
 type EventsTimelineProps = {
   events: DashboardEvent[];

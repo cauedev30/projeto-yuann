@@ -1,9 +1,9 @@
 import React from "react";
 
-import type { FindingItem } from "@/lib/api/contracts";
+import type { ContractFinding } from "@/entities/contracts/model";
 
 type FindingsTableProps = {
-  items: FindingItem[];
+  items: ContractFinding[];
 };
 
 export function FindingsTable({ items }: FindingsTableProps) {

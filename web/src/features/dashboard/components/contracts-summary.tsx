@@ -1,6 +1,6 @@
 import React from "react";
 
-import type { DashboardSummary } from "@/lib/api/dashboard";
+import type { DashboardSummary } from "@/entities/dashboard/model";
 
 type ContractsSummaryProps = {
   summary: DashboardSummary;

@@ -3,7 +3,7 @@
 import React from "react";
 import { useId, useState } from "react";
 
-import type { ContractSource, ContractUploadInput } from "@/lib/api/contracts";
+import type { ContractSource, ContractUploadInput } from "@/entities/contracts/model";
 
 type UploadFormProps = {
   onSubmit: (payload: ContractUploadInput) => Promise<void> | void;

@@ -2,18 +2,18 @@
 
 import { useMemo, useState } from "react";
 
+import {
+  type ContractFinding,
+  type ContractUploadInput,
+  type ContractUploadResult,
+} from "@/entities/contracts/model";
 import { FindingsTable } from "@/features/analysis/components/findings-table";
 import { RiskScoreCard } from "@/features/analysis/components/risk-score-card";
 import { UploadForm } from "@/features/contracts/components/upload-form";
-import {
-  type ContractUploadInput,
-  type ContractUploadResponse,
-  type FindingItem,
-  uploadContract,
-} from "@/lib/api/contracts";
+import { uploadContract } from "@/lib/api/contracts";
 
 
-function buildPreviewFindings(text: string): FindingItem[] {
+function buildPreviewFindings(text: string): ContractFinding[] {
   const termMatch = text.match(/(\d+)\s*meses/i);
   const termMonths = termMatch ? Number(termMatch[1]) : null;
 
@@ -45,7 +45,7 @@ function buildPreviewFindings(text: string): FindingItem[] {
 
 export default function ContractsPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [result, setResult] = useState<ContractUploadResponse | null>(null);
+  const [result, setResult] = useState<ContractUploadResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const findings = useMemo(() => (result ? buildPreviewFindings(result.text) : []), [result]);
