@@ -1,3 +1,8 @@
+import React from "react";
+
+import { PageHeader } from "../../../../components/ui/page-header";
+import { SurfaceCard } from "../../../../components/ui/surface-card";
+
 type ContractDetailPageProps = {
   params: Promise<{ contractId: string }>;
 };
@@ -6,10 +11,16 @@ export default async function ContractDetailPage({ params }: ContractDetailPageP
   const { contractId } = await params;
 
   return (
-    <main>
-      <p>Detalhe do contrato</p>
-      <h1>{contractId}</h1>
-      <p>A timeline detalhada e os findings persistidos entram na proxima iteracao.</p>
-    </main>
+    <section>
+      <PageHeader
+        eyebrow="Contracts"
+        title={contractId}
+        description="Detalhe do contrato ainda em placeholder, mas agora dentro da moldura compartilhada do workspace."
+      />
+
+      <SurfaceCard>
+        <p>A timeline detalhada e os findings persistidos entram na proxima iteracao.</p>
+      </SurfaceCard>
+    </section>
   );
 }

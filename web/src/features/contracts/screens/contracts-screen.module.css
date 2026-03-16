@@ -1,27 +1,21 @@
 .page {
-  --contracts-ink: #1f2933;
-  --contracts-muted: #5f6f7d;
-  --contracts-line: rgba(123, 101, 74, 0.18);
-  --contracts-line-strong: rgba(65, 53, 38, 0.2);
-  --contracts-paper: #fffaf1;
-  --contracts-surface: rgba(255, 253, 249, 0.92);
-  --contracts-surface-strong: #ffffff;
-  --contracts-accent: #0f766e;
-  --contracts-accent-soft: rgba(15, 118, 110, 0.12);
+  --contracts-ink: var(--ink);
+  --contracts-muted: var(--ink-muted);
+  --contracts-line: var(--line);
+  --contracts-line-strong: var(--line-strong);
+  --contracts-surface: var(--surface);
+  --contracts-surface-strong: var(--surface-strong);
+  --contracts-accent: var(--brand-green);
+  --contracts-accent-soft: rgba(31, 107, 92, 0.12);
   --contracts-attention: #9a6700;
   --contracts-attention-soft: rgba(245, 158, 11, 0.16);
   --contracts-danger: #9f1239;
   --contracts-danger-soft: rgba(225, 29, 72, 0.14);
   --contracts-success: #166534;
   --contracts-success-soft: rgba(34, 197, 94, 0.14);
-  min-height: 100vh;
-  padding: clamp(1.25rem, 2vw + 1rem, 2.75rem);
   display: grid;
   gap: 1.25rem;
   color: var(--contracts-ink);
-  background:
-    radial-gradient(circle at top left, rgba(15, 118, 110, 0.14), transparent 34rem),
-    linear-gradient(180deg, #f5efe3 0%, #f8f4eb 48%, #fbf8f3 100%);
   font-family: "Avenir Next", "Trebuchet MS", sans-serif;
 }
 
@@ -30,13 +24,13 @@
   border: 1px solid var(--contracts-line);
   border-radius: 1.75rem;
   background: var(--contracts-surface);
-  box-shadow: 0 24px 60px rgba(87, 62, 39, 0.08);
+  box-shadow: var(--shadow-soft);
 }
 
 .hero {
   padding: clamp(1.5rem, 1.2rem + 1.1vw, 2.4rem);
   background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(250, 242, 229, 0.94)),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(238, 244, 242, 0.94)),
     var(--contracts-surface);
 }
 
@@ -286,7 +280,7 @@
   padding: 1rem;
   border-radius: 1.2rem;
   border: 1px solid var(--contracts-line);
-  background: rgba(247, 242, 231, 0.95);
+  background: rgba(248, 249, 247, 0.95);
   color: var(--contracts-ink);
   white-space: pre-wrap;
   word-break: break-word;
@@ -320,10 +314,6 @@
 }
 
 @media (max-width: 640px) {
-  .page {
-    padding: 1rem;
-  }
-
   .hero,
   .uploadPanel,
   .sessionCard,
