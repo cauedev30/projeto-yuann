@@ -47,6 +47,26 @@ function buildUploadResult() {
   };
 }
 
+function buildContractsListResult() {
+  return {
+    items: [
+      {
+        id: "ctr-1",
+        title: "Loja Centro",
+        externalReference: "LOC-001",
+        status: "uploaded",
+        signatureDate: null,
+        startDate: null,
+        endDate: null,
+        termMonths: 36,
+        latestAnalysisStatus: "completed",
+        latestRiskScore: 80,
+        latestVersionSource: "third_party_draft" as const,
+      },
+    ],
+  };
+}
+
 describe("ContractsScreen", () => {
   afterEach(() => {
     vi.unstubAllEnvs();
@@ -56,17 +76,23 @@ describe("ContractsScreen", () => {
     return within(screen.getAllByRole("main").at(-1) as HTMLElement);
   }
 
-  it("shows the guided empty state before any upload", () => {
-    render(<ContractsScreen submitContract={vi.fn()} />);
+  it("shows the guided empty state before any upload", async () => {
+    const loadContracts = vi.fn().mockResolvedValue({ items: [] });
+
+    render(<ContractsScreen submitContract={vi.fn()} loadContracts={loadContracts} />);
     const scope = getScreenScope();
+
+    await waitFor(() => expect(loadContracts).toHaveBeenCalledTimes(1));
 
     expect(scope.getByText("Mesa de analise")).toBeInTheDocument();
     expect(scope.getByText("Triagem contratual com criterio juridico")).toBeInTheDocument();
     expect(scope.getByText("Nenhuma triagem foi executada nesta sessao.")).toBeInTheDocument();
+    expect(scope.getByText("Nenhum contrato persistido ainda.")).toBeInTheDocument();
   });
 
   it("shows processing feedback while the upload is pending", async () => {
     const user = userEvent.setup();
+    const loadContracts = vi.fn().mockResolvedValue({ items: [] });
     let resolveUpload:
       | ((value: ReturnType<typeof buildUploadResult>) => void)
       | undefined;
@@ -77,9 +103,10 @@ describe("ContractsScreen", () => {
         }),
     );
 
-    render(<ContractsScreen submitContract={submitContract} />);
+    render(<ContractsScreen submitContract={submitContract} loadContracts={loadContracts} />);
     const scope = getScreenScope();
 
+    await waitFor(() => expect(loadContracts).toHaveBeenCalledTimes(1));
     await user.click(scope.getByRole("button", { name: "Enviar contrato" }));
 
     expect(scope.getByText("Processando triagem inicial...")).toBeInTheDocument();
@@ -92,11 +119,13 @@ describe("ContractsScreen", () => {
 
   it("shows a contextual error and keeps the form available after a failed upload", async () => {
     const user = userEvent.setup();
+    const loadContracts = vi.fn().mockResolvedValue({ items: [] });
     const submitContract = vi.fn().mockRejectedValue(new Error("Falha no envio"));
 
-    render(<ContractsScreen submitContract={submitContract} />);
+    render(<ContractsScreen submitContract={submitContract} loadContracts={loadContracts} />);
     const scope = getScreenScope();
 
+    await waitFor(() => expect(loadContracts).toHaveBeenCalledTimes(1));
     await user.click(scope.getByRole("button", { name: "Enviar contrato" }));
 
     expect(await scope.findByRole("alert")).toHaveTextContent("Falha no envio");
@@ -105,11 +134,13 @@ describe("ContractsScreen", () => {
 
   it("renders the summary before findings and extracted text after success", async () => {
     const user = userEvent.setup();
+    const loadContracts = vi.fn().mockResolvedValue({ items: [] });
     const submitContract = vi.fn().mockResolvedValue(buildUploadResult());
 
-    render(<ContractsScreen submitContract={submitContract} />);
+    render(<ContractsScreen submitContract={submitContract} loadContracts={loadContracts} />);
     const scope = getScreenScope();
 
+    await waitFor(() => expect(loadContracts).toHaveBeenCalledTimes(1));
     await user.click(scope.getByRole("button", { name: "Enviar contrato" }));
 
     await waitFor(() =>
@@ -133,6 +164,7 @@ describe("ContractsScreen", () => {
   it("shows the mapped upload error returned by the transport client", async () => {
     vi.stubEnv("NEXT_PUBLIC_API_URL", "http://127.0.0.1:8000");
     const user = userEvent.setup();
+    const loadContracts = vi.fn().mockResolvedValue({ items: [] });
     const fetchImpl: typeof fetch = async () =>
       new Response(JSON.stringify({ detail: "Uploaded file is not a readable PDF" }), {
         status: 422,
@@ -140,14 +172,104 @@ describe("ContractsScreen", () => {
       });
 
     render(
-      <ContractsScreen submitContract={(payload) => uploadContract(payload, fetchImpl)} />,
+      <ContractsScreen
+        submitContract={(payload) => uploadContract(payload, fetchImpl)}
+        loadContracts={loadContracts}
+      />,
     );
     const scope = getScreenScope();
 
+    await waitFor(() => expect(loadContracts).toHaveBeenCalledTimes(1));
     await user.click(scope.getByRole("button", { name: "Enviar contrato" }));
 
     expect(await scope.findByRole("alert")).toHaveTextContent(
       "O arquivo enviado nao e um PDF legivel.",
     );
+  });
+
+  it("shows a loading state while the persisted contracts list is loading", () => {
+    const loadContracts = vi.fn(
+      () =>
+        new Promise<ReturnType<typeof buildContractsListResult>>(() => {
+          // keep pending
+        }),
+    );
+
+    render(<ContractsScreen submitContract={vi.fn()} loadContracts={loadContracts} />);
+    const scope = getScreenScope();
+
+    expect(scope.getByText("Carregando contratos...")).toBeInTheDocument();
+  });
+
+  it("shows a contextual error when the persisted contracts list fails", async () => {
+    const loadContracts = vi.fn().mockRejectedValue(new Error("Falha ao carregar contratos"));
+
+    render(<ContractsScreen submitContract={vi.fn()} loadContracts={loadContracts} />);
+    const scope = getScreenScope();
+
+    expect(await scope.findByRole("alert")).toHaveTextContent("Falha ao carregar contratos");
+  });
+
+  it("refreshes the persisted contracts list on demand", async () => {
+    const user = userEvent.setup();
+    const loadContracts = vi.fn().mockResolvedValue({ items: [] });
+    const refreshContracts = vi.fn().mockResolvedValue(buildContractsListResult());
+
+    render(
+      <ContractsScreen
+        submitContract={vi.fn()}
+        loadContracts={loadContracts}
+        refreshContracts={refreshContracts}
+      />,
+    );
+    const scope = getScreenScope();
+
+    expect(await scope.findByText("Nenhum contrato persistido ainda.")).toBeInTheDocument();
+    await user.click(scope.getByRole("button", { name: "Atualizar lista" }));
+
+    expect(refreshContracts).toHaveBeenCalledTimes(1);
+    expect(await scope.findByText("Loja Centro")).toBeInTheDocument();
+  });
+
+  it("refreshes the persisted contracts list after a successful upload", async () => {
+    const user = userEvent.setup();
+    const loadContracts = vi.fn().mockResolvedValue({ items: [] });
+    const refreshContracts = vi.fn().mockResolvedValue(buildContractsListResult());
+    const submitContract = vi.fn().mockResolvedValue(buildUploadResult());
+
+    render(
+      <ContractsScreen
+        submitContract={submitContract}
+        loadContracts={loadContracts}
+        refreshContracts={refreshContracts}
+      />,
+    );
+    const scope = getScreenScope();
+
+    expect(await scope.findByText("Nenhum contrato persistido ainda.")).toBeInTheDocument();
+    await user.click(scope.getByRole("button", { name: "Enviar contrato" }));
+
+    await waitFor(() => expect(refreshContracts).toHaveBeenCalledTimes(1));
+    expect(await scope.findByText("Loja Centro")).toBeInTheDocument();
+  });
+
+  it("navigates to the canonical contract detail route from the persisted list", async () => {
+    const user = userEvent.setup();
+    const loadContracts = vi.fn().mockResolvedValue(buildContractsListResult());
+    const navigateToContract = vi.fn();
+
+    render(
+      <ContractsScreen
+        submitContract={vi.fn()}
+        loadContracts={loadContracts}
+        navigateToContract={navigateToContract}
+      />,
+    );
+    const scope = getScreenScope();
+
+    const contractLink = await scope.findByRole("link", { name: /Loja Centro/i });
+    await user.click(contractLink);
+
+    expect(navigateToContract).toHaveBeenCalledWith("ctr-1");
   });
 });

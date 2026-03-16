@@ -1,14 +1,16 @@
 "use client";
 
 import React from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
   type ContractFinding,
+  type ContractListResponse,
   type ContractUploadInput,
   type ContractUploadResult,
 } from "../../../entities/contracts/model";
-import { uploadContract } from "../../../lib/api/contracts";
+import { listContracts, uploadContract } from "../../../lib/api/contracts";
+import { ContractsListPanel } from "../components/contracts-list-panel";
 import { ContractsHero } from "../components/contracts-hero";
 import { ExtractedTextPanel } from "../components/extracted-text-panel";
 import { FindingsSection } from "../components/findings-section";
@@ -19,6 +21,9 @@ import styles from "./contracts-screen.module.css";
 
 type ContractsScreenProps = {
   submitContract?: (payload: ContractUploadInput) => Promise<ContractUploadResult>;
+  loadContracts?: () => Promise<ContractListResponse>;
+  refreshContracts?: () => Promise<ContractListResponse>;
+  navigateToContract?: (contractId: string) => void;
 };
 
 function buildPreviewFindings(text: string): ContractFinding[] {
@@ -52,10 +57,17 @@ function buildPreviewFindings(text: string): ContractFinding[] {
 
 export function ContractsScreen({
   submitContract = uploadContract,
+  loadContracts = listContracts,
+  refreshContracts = loadContracts,
+  navigateToContract,
 }: ContractsScreenProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [result, setResult] = useState<ContractUploadResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [contracts, setContracts] = useState<ContractListResponse["items"]>([]);
+  const [isLoadingContracts, setIsLoadingContracts] = useState(true);
+  const [isRefreshingContracts, setIsRefreshingContracts] = useState(false);
+  const [contractsError, setContractsError] = useState<string | null>(null);
 
   const findings = result ? buildPreviewFindings(result.text) : [];
   const riskScore = findings.some((item) => item.status === "critical") ? 80 : 10;
@@ -77,6 +89,62 @@ export function ContractsScreen({
     statusMessage = "Triagem inicial concluida";
   }
 
+  useEffect(() => {
+    let isActive = true;
+
+    async function loadPersistedContracts() {
+      setIsLoadingContracts(true);
+      setContractsError(null);
+
+      try {
+        const response = await loadContracts();
+        if (!isActive) {
+          return;
+        }
+
+        setContracts(response.items);
+      } catch (loadError) {
+        if (!isActive) {
+          return;
+        }
+
+        setContractsError(
+          loadError instanceof Error
+            ? loadError.message
+            : "Nao foi possivel carregar os contratos.",
+        );
+      } finally {
+        if (isActive) {
+          setIsLoadingContracts(false);
+        }
+      }
+    }
+
+    void loadPersistedContracts();
+
+    return () => {
+      isActive = false;
+    };
+  }, [loadContracts]);
+
+  async function refreshPersistedContracts() {
+    setIsRefreshingContracts(true);
+    setContractsError(null);
+
+    try {
+      const response = await refreshContracts();
+      setContracts(response.items);
+    } catch (refreshError) {
+      setContractsError(
+        refreshError instanceof Error
+          ? refreshError.message
+          : "Nao foi possivel carregar os contratos.",
+      );
+    } finally {
+      setIsRefreshingContracts(false);
+    }
+  }
+
   async function handleSubmit(payload: ContractUploadInput) {
     setIsSubmitting(true);
     setError(null);
@@ -84,6 +152,7 @@ export function ContractsScreen({
     try {
       const response = await submitContract(payload);
       setResult(response);
+      await refreshPersistedContracts();
     } catch (submissionError) {
       setError(
         submissionError instanceof Error
@@ -159,6 +228,15 @@ export function ContractsScreen({
           </p>
         </section>
       )}
+
+      <ContractsListPanel
+        error={contractsError}
+        isLoading={isLoadingContracts}
+        isRefreshing={isRefreshingContracts}
+        items={contracts}
+        navigateToContract={navigateToContract}
+        onRefresh={refreshPersistedContracts}
+      />
     </main>
   );
 }
