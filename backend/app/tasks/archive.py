@@ -37,4 +37,4 @@ def process_signed_contract_archive(
         )
 
     session.add(contract)
-    session.commit()
+    session.flush()

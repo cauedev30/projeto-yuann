@@ -6,6 +6,29 @@ import {
   mapUploadResponseToContractUploadResult,
 } from "../../entities/contracts/model";
 
+const GENERIC_UPLOAD_ERROR = "Nao foi possivel enviar o contrato.";
+
+function mapUploadErrorDetail(detail: unknown): string | null {
+  if (detail === "Uploaded file is not a readable PDF") {
+    return "O arquivo enviado nao e um PDF legivel.";
+  }
+
+  if (typeof detail === "string" && detail.trim()) {
+    return detail;
+  }
+
+  return null;
+}
+
+async function getUploadErrorMessage(response: Response): Promise<string> {
+  try {
+    const payload = (await response.json()) as { detail?: unknown };
+    return mapUploadErrorDetail(payload.detail) ?? GENERIC_UPLOAD_ERROR;
+  } catch {
+    return GENERIC_UPLOAD_ERROR;
+  }
+}
+
 export async function uploadContract(
   input: ContractUploadInput,
   fetchImpl: typeof fetch = fetch,
@@ -23,7 +46,7 @@ export async function uploadContract(
   });
 
   if (!response.ok) {
-    throw new Error("Nao foi possivel enviar o contrato.");
+    throw new Error(await getUploadErrorMessage(response));
   }
 
   const payload = (await response.json()) as ContractUploadResponsePayload;

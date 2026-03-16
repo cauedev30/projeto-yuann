@@ -30,3 +30,28 @@ def test_upload_contract_creates_version_and_persists_extracted_text(client) -> 
     assert contract.title == "Loja Centro"
     assert version.source == ContractSource.third_party_draft
     assert version.text_content == "Prazo de vigencia 60 meses"
+
+
+def test_upload_contract_rejects_invalid_pdf_without_persisting_partial_records(client) -> None:
+    response = client.post(
+        "/api/uploads/contracts",
+        data={
+            "title": "Loja Centro",
+            "external_reference": "LOC-001",
+            "source": "third_party_draft",
+        },
+        files={"file": ("broken.pdf", b"not-a-real-pdf", "application/pdf")},
+    )
+
+    assert response.status_code == 422
+    assert response.json() == {"detail": "Uploaded file is not a readable PDF"}
+
+    session = client.app.state.session_factory()
+    try:
+        contracts = session.query(Contract).all()
+        versions = session.query(ContractVersion).all()
+    finally:
+        session.close()
+
+    assert contracts == []
+    assert versions == []

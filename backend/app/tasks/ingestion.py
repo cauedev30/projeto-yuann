@@ -39,7 +39,6 @@ def ingest_contract_version(
     contract_version.text_content = result.text
     contract_version.extraction_metadata = result.metadata
     session.add(contract_version)
-    session.commit()
-    session.refresh(contract_version)
+    session.flush()
 
     return result
