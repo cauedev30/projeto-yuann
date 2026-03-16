@@ -119,6 +119,27 @@ describe("ContractDetailScreen", () => {
     );
   });
 
+  it("retries the detail loading from the generic error state", async () => {
+    const user = userEvent.setup();
+    const loadContractDetail = vi
+      .fn()
+      .mockRejectedValueOnce(new Error("Falha ao carregar o contrato."))
+      .mockResolvedValueOnce(buildContractDetail());
+
+    render(
+      <ContractDetailScreen contractId="ctr-1" loadContractDetail={loadContractDetail} />,
+    );
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Falha ao carregar o contrato.",
+    );
+
+    await user.click(screen.getByRole("button", { name: "Tentar novamente" }));
+
+    expect(await screen.findByRole("heading", { name: "Loja Centro" })).toBeInTheDocument();
+    expect(loadContractDetail).toHaveBeenCalledTimes(2);
+  });
+
   it("refreshes the contract detail on demand", async () => {
     const user = userEvent.setup();
     const loadContractDetail = vi.fn().mockResolvedValue(buildContractDetail());
@@ -131,5 +152,30 @@ describe("ContractDetailScreen", () => {
     await user.click(screen.getByRole("button", { name: "Atualizar detalhe" }));
 
     await waitFor(() => expect(loadContractDetail).toHaveBeenCalledTimes(2));
+  });
+
+  it("keeps recovery available when a manual refresh fails", async () => {
+    const user = userEvent.setup();
+    const loadContractDetail = vi
+      .fn()
+      .mockResolvedValueOnce(buildContractDetail())
+      .mockRejectedValueOnce(new Error("Falha ao atualizar o contrato."))
+      .mockResolvedValueOnce(buildContractDetail());
+
+    render(
+      <ContractDetailScreen contractId="ctr-1" loadContractDetail={loadContractDetail} />,
+    );
+
+    await screen.findByRole("heading", { name: "Loja Centro" });
+    await user.click(screen.getByRole("button", { name: "Atualizar detalhe" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Falha ao atualizar o contrato.",
+    );
+
+    await user.click(screen.getByRole("button", { name: "Tentar novamente" }));
+
+    expect(await screen.findByRole("heading", { name: "Loja Centro" })).toBeInTheDocument();
+    expect(loadContractDetail).toHaveBeenCalledTimes(3);
   });
 });

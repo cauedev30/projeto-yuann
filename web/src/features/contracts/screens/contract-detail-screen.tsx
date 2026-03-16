@@ -26,6 +26,12 @@ function isNotFoundError(error: unknown): error is ContractsApiError {
   return error instanceof ContractsApiError && error.statusCode === 404;
 }
 
+function normalizeDetailError(detailError: unknown): Error {
+  return detailError instanceof Error
+    ? detailError
+    : new Error("Nao foi possivel carregar o contrato.");
+}
+
 export function ContractDetailScreen({
   contractId,
   loadContractDetail = getContractDetail,
@@ -55,11 +61,7 @@ export function ContractDetailScreen({
         }
 
         setDetail(null);
-        setError(
-          detailError instanceof Error
-            ? detailError
-            : new Error("Nao foi possivel carregar o contrato."),
-        );
+        setError(normalizeDetailError(detailError));
       } finally {
         if (isActive) {
           setIsLoading(false);
@@ -83,13 +85,24 @@ export function ContractDetailScreen({
       setDetail(response);
     } catch (detailError) {
       setDetail(null);
-      setError(
-        detailError instanceof Error
-          ? detailError
-          : new Error("Nao foi possivel carregar o contrato."),
-      );
+      setError(normalizeDetailError(detailError));
     } finally {
       setIsRefreshing(false);
+    }
+  }
+
+  async function handleRetry() {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await loadContractDetail(contractId);
+      setDetail(response);
+    } catch (detailError) {
+      setDetail(null);
+      setError(normalizeDetailError(detailError));
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -133,9 +146,20 @@ export function ContractDetailScreen({
           description="Falha ao carregar a leitura completa deste contrato."
         />
         <SurfaceCard title="Detalhe do contrato">
-          <p className={styles.alert} role="alert">
-            {error?.message ?? "Nao foi possivel carregar o contrato."}
-          </p>
+          <div className={styles.stack}>
+            <p className={styles.alert} role="alert">
+              {error?.message ?? "Nao foi possivel carregar o contrato."}
+            </p>
+            <div className={styles.refreshRow}>
+              <button
+                className={styles.refreshButton}
+                onClick={() => void handleRetry()}
+                type="button"
+              >
+                Tentar novamente
+              </button>
+            </div>
+          </div>
         </SurfaceCard>
       </section>
     );
