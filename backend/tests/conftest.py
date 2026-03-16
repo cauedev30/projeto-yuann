@@ -1,6 +1,6 @@
 from collections.abc import Generator
 from pathlib import Path
-from tempfile import TemporaryDirectory
+from uuid import uuid4
 
 import pytest
 from sqlalchemy import create_engine
@@ -13,11 +13,11 @@ from app.db.session import create_session_factory
 
 @pytest.fixture()
 def workspace_tmp_path() -> Generator[Path, None, None]:
-    base_dir = Path(__file__).resolve().parent / ".tmp"
+    base_dir = Path(__file__).resolve().parents[2] / "tmp" / "backend-tests"
     base_dir.mkdir(parents=True, exist_ok=True)
-
-    with TemporaryDirectory(dir=base_dir) as temp_dir:
-        yield Path(temp_dir)
+    temp_dir = base_dir / str(uuid4())
+    temp_dir.mkdir(parents=True, exist_ok=True)
+    yield temp_dir
 
 
 @pytest.fixture()
