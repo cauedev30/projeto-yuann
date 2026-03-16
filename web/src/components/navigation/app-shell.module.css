@@ -1,0 +1,130 @@
+.shell {
+  display: grid;
+  grid-template-columns: 18rem minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+.sidebar {
+  position: sticky;
+  top: 0;
+  display: grid;
+  align-content: start;
+  gap: 1.5rem;
+  min-height: 100vh;
+  padding: 1.4rem 1.1rem;
+  border-right: 1px solid var(--line);
+  background: rgba(248, 248, 244, 0.88);
+  backdrop-filter: blur(16px);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.7rem;
+  padding: 0.85rem 1rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(24, 79, 115, 0.1), rgba(31, 107, 92, 0.08));
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.sidebarNav {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.navLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.85rem;
+  padding: 0.85rem 1rem;
+  border-radius: 16px;
+  color: var(--ink-muted);
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid transparent;
+}
+
+.navLink:hover {
+  color: var(--ink);
+  border-color: var(--line);
+}
+
+.sidebarMeta {
+  display: grid;
+  gap: 0.45rem;
+  margin-top: 0.4rem;
+  color: var(--ink-muted);
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+.contentFrame {
+  min-width: 0;
+  display: grid;
+  grid-template-rows: auto 1fr;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.2rem 0;
+}
+
+.topbarCopy {
+  color: var(--ink-muted);
+  font-size: 0.94rem;
+}
+
+.mobileNav {
+  display: none;
+}
+
+.mobileSummary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.8rem;
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.76);
+  cursor: pointer;
+  list-style: none;
+}
+
+.mobileSummary::-webkit-details-marker {
+  display: none;
+}
+
+.mobilePanel {
+  display: grid;
+  gap: 0.55rem;
+  padding-top: 0.75rem;
+}
+
+.content {
+  min-width: 0;
+  padding: 1rem 1.2rem 2rem;
+}
+
+@media (max-width: 900px) {
+  .shell {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    display: none;
+  }
+
+  .mobileNav {
+    display: block;
+  }
+
+  .topbar {
+    padding-top: 1rem;
+  }
+}
