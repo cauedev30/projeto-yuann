@@ -61,8 +61,9 @@ test("operator uploads a contract and reviews the findings", async ({ page }) =>
   });
   await page.getByRole("button", { name: "Enviar contrato" }).click();
 
-  await expect(page.getByRole("cell", { name: "Prazo de vigencia" })).toBeVisible();
-  await expect(page.getByText("critical")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Findings principais" })).toBeVisible();
+  await expect(page.getByText("Prazo de vigencia", { exact: true })).toBeVisible();
+  await expect(page.getByText("Critico", { exact: true })).toBeVisible();
 });
 
 test("operator sees a readable error for an unreadable pdf upload", async ({ page }) => {
