@@ -1,0 +1,98 @@
+.page {
+  display: grid;
+  gap: 1rem;
+}
+
+.refreshRow {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.refreshButton {
+  min-height: 2.75rem;
+  padding: 0.7rem 1rem;
+  border: 1px solid rgba(196, 173, 129, 0.18);
+  border-radius: 999px;
+  background: rgba(10, 18, 29, 0.8);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.refreshButton:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
+.stack {
+  display: grid;
+  gap: 1rem;
+}
+
+.statGrid,
+.detailGrid {
+  display: grid;
+  gap: 1rem;
+}
+
+.statGrid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.detailGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.summaryList {
+  margin: 0;
+  display: grid;
+  gap: 0.85rem;
+}
+
+.summaryRow {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.summaryRow dt {
+  color: var(--ink-muted);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.summaryRow dd {
+  margin: 0;
+  color: var(--ink);
+  line-height: 1.6;
+}
+
+.sectionText {
+  margin: 0;
+  color: var(--ink-muted);
+  line-height: 1.7;
+}
+
+.inlineText {
+  margin: 0;
+  color: var(--ink);
+  line-height: 1.6;
+}
+
+.alert {
+  margin: 0;
+  padding: 1rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(242, 141, 141, 0.2);
+  background: rgba(60, 21, 29, 0.4);
+  color: #f5b1b1;
+  line-height: 1.6;
+}
+
+@media (max-width: 900px) {
+  .statGrid,
+  .detailGrid {
+    grid-template-columns: 1fr;
+  }
+}

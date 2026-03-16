@@ -1,21 +1,23 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+
+vi.mock("../../../../features/contracts/screens/contract-detail-screen", () => ({
+  ContractDetailScreen: ({ contractId }: { contractId: string }) => (
+    <div>Contract detail screen {contractId}</div>
+  ),
+}));
 
 import ContractDetailPage from "./page";
 
 describe("ContractDetailPage", () => {
-  it("keeps the placeholder content inside the shared contracts framing", async () => {
+  it("passes the route contract id to the detail screen composition root", async () => {
     const page = await ContractDetailPage({
       params: Promise.resolve({ contractId: "CTR-001" }),
     });
 
     render(page);
 
-    expect(screen.getByText("Contracts")).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "CTR-001" })).toBeInTheDocument();
-    expect(
-      screen.getByText("A timeline detalhada e os findings persistidos entram na proxima iteracao."),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Contract detail screen CTR-001")).toBeInTheDocument();
   });
 });
