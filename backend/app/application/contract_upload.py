@@ -6,8 +6,8 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.db.models.contract import Contract, ContractSource, ContractVersion
-from app.services.ocr import OCRClient
-from app.services.storage import LocalStorageService
+from app.infrastructure.ocr import OCRClient
+from app.infrastructure.storage import LocalStorageService
 from app.tasks.archive import process_signed_contract_archive
 from app.tasks.ingestion import TextExtractionResult, ingest_contract_version
 

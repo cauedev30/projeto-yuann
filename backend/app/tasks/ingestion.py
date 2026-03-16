@@ -6,9 +6,9 @@ from uuid import uuid4
 from sqlalchemy.orm import Session
 
 from app.db.models.contract import ContractVersion
-from app.services.ocr import OCRClient
-from app.services.pdf_text import TextExtractionResult, extract_contract_text
-from app.services.storage import LocalStorageService
+from app.infrastructure.ocr import OCRClient
+from app.infrastructure.pdf_text import TextExtractionResult, extract_contract_text
+from app.infrastructure.storage import LocalStorageService
 
 
 def _build_ingestion_tmp_root() -> Path:

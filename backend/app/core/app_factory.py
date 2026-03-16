@@ -12,8 +12,8 @@ from app.api.routes.notifications import router as notifications_router
 from app.api.routes.policies import router as policies_router
 from app.api.routes.uploads import router as uploads_router
 from app.db.base import Base
-from app.services.ocr import NoopOcrClient
-from app.services.storage import LocalStorageService
+from app.infrastructure.ocr import NoopOcrClient
+from app.infrastructure.storage import LocalStorageService
 
 
 def create_app(

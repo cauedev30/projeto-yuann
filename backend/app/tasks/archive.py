@@ -4,8 +4,8 @@ from sqlalchemy.orm import Session
 
 from app.db.models.contract import ContractVersion
 from app.db.models.event import ContractEvent, EventType
-from app.services.contract_metadata import extract_contract_metadata
-from app.services.event_scheduler import build_contract_events
+from app.domain.contract_metadata import extract_contract_metadata
+from app.domain.events import build_contract_events
 
 
 def process_signed_contract_archive(

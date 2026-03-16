@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from app.application.contract_upload import upload_contract_file
 from app.api.dependencies import get_session
 from app.db.models.contract import ContractSource
-from app.services.storage import LocalStorageService
+from app.infrastructure.storage import LocalStorageService
 
 router = APIRouter(prefix="/api/uploads", tags=["uploads"])
 

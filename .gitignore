@@ -20,5 +20,7 @@ backend/.ruff_cache/
 backend/htmlcov/
 backend/.coverage
 backend/legaltech.db
+backend/tests/.tmp/
+legaltech.db
 uploads/
 tmp/
