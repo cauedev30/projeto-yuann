@@ -17,6 +17,7 @@ describe("AppShell", () => {
     });
 
     expect(navigation).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "LegalTech" })).toHaveAttribute("href", "/");
     expect(within(navigation).getByRole("link", { name: "Dashboard" })).toHaveAttribute(
       "href",
       "/dashboard",
@@ -25,6 +26,9 @@ describe("AppShell", () => {
       "href",
       "/contracts",
     );
+    expect(
+      screen.getByText("Workspace juridico para contratos, risco e decisoes em andamento."),
+    ).toBeInTheDocument();
     expect(screen.getByText("Conteudo interno")).toBeInTheDocument();
   });
 });

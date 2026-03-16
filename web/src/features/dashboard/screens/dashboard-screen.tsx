@@ -17,9 +17,9 @@ export function DashboardScreen({ snapshot }: DashboardScreenProps) {
   return (
     <section className={styles.page}>
       <PageHeader
-        eyebrow="Portifolio contratual"
-        title="Dashboard de renovacoes"
-        description="Acompanhe contratos ativos, eventos e sinais de risco sem mascarar a ausencia de dados runtime."
+        eyebrow="Mesa juridica"
+        title="Governanca contratual em andamento"
+        description="Portfolio, eventos e notificacoes sob a mesma leitura executiva, sem mascarar a ausencia de dados runtime."
       />
 
       {snapshot ? (

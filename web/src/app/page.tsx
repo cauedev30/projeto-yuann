@@ -10,42 +10,71 @@ export default function HomePage() {
 
       <section className="marketingHero">
         <div className="marketingHeroCopy">
-          <p className="marketingEyebrow">Governanca executiva</p>
-          <h1>Governanca contratual para times de expansao</h1>
+          <p className="marketingEyebrow">Plataforma juridica operacional</p>
+          <h1>A materia contratual em formato de decisao.</h1>
           <p className="marketingLead">
-            Estruture intake, triagem e acompanhamento de contratos em uma interface clara
-            para times juridicos e operacionais.
+            Leitura juridica, trilha operacional e proximas acoes em uma mesma
+            cadencia visual.
           </p>
-          <p className="marketingLead">
-            Uma interface clara para revisar contratos, risco e proximas acoes.
+          <p className="marketingSublead">
+            LegalTech organiza intake, risco, aprovacao e acompanhamento em um
+            workspace escuro, sofisticado e construido para times que precisam decidir
+            sem perder contexto.
           </p>
           <div className="marketingHeroActions">
             <Link className="primaryCta" href="/dashboard">
-              Entrar no workspace
+              Abrir workspace
             </Link>
             <Link className="secondaryCta" href="#fluxo">
-              Ver o fluxo
+              Explorar o fluxo
             </Link>
+          </div>
+          <div className="marketingHeroNotes">
+            <span>Intake estruturado</span>
+            <span>Triagem orientada por politica</span>
+            <span>Ritmo executivo de acompanhamento</span>
           </div>
         </div>
 
         <aside className="marketingHeroPanel">
-          <p className="marketingPanelLabel">Workspace</p>
-          <h2 className="marketingPanelTitle">
-            Portifolio, triagem e proximos passos em uma so camada visual.
-          </h2>
-          <p className="marketingPanelBody">
-            O produto combina leitura operacional, findings e monitoramento sem cair em
-            um painel pesado ou em uma landing generica.
-          </p>
+          <div className="marketingPanelFrame">
+            <p className="marketingPanelLabel">Mesa viva</p>
+            <h2 className="marketingPanelTitle">
+              Termos, risco e proximos marcos sob a mesma pauta.
+            </h2>
+            <p className="marketingPanelBody">
+              O visual nao imita um dashboard comum: ele conduz leitura, contexto e
+              prioridade com mais cadencia editorial e menos ruido.
+            </p>
+          </div>
+
           <div className="marketingValueList">
             <div className="marketingValueCard">
-              <strong>+12 contratos</strong>
-              <span>Visao executiva para areas juridicas e de expansao.</span>
+              <strong>12</strong>
+              <span>Dossies em revisao no workspace.</span>
             </div>
             <div className="marketingValueCard">
-              <strong>3 sinais criticos</strong>
-              <span>Priorizacao de risco antes da proxima rodada de analise.</span>
+              <strong>03</strong>
+              <span>Pontos de risco exigindo rodada juridica.</span>
+            </div>
+            <div className="marketingValueCard">
+              <strong>48h</strong>
+              <span>Janela operacional para a proxima decisao.</span>
+            </div>
+          </div>
+
+          <div className="marketingLedger">
+            <div className="marketingLedgerRow">
+              <span>Triagem inicial</span>
+              <strong>Em pauta</strong>
+            </div>
+            <div className="marketingLedgerRow">
+              <span>Renovacao critica</span>
+              <strong>2 sinais</strong>
+            </div>
+            <div className="marketingLedgerRow">
+              <span>Historico acionavel</span>
+              <strong>Consolidado</strong>
             </div>
           </div>
         </aside>
@@ -53,52 +82,68 @@ export default function HomePage() {
 
       <section className="marketingSection" id="fluxo">
         <div className="marketingSectionHeader">
-          <h2>Do intake ao acompanhamento</h2>
+          <div>
+            <p className="marketingSectionKicker">Fluxo continuo</p>
+            <h2>Do intake ao acompanhamento</h2>
+          </div>
           <p>
-            O produto organiza o caminho completo de decisao sem quebrar a operacao em
-            telas desconectadas.
+            Uma estrutura unica para intake, leitura juridica e acompanhamento sem
+            espalhar o trabalho em telas desconectadas.
           </p>
         </div>
         <div className="marketingFeatures">
           <article className="marketingFeature">
-            <h3>Upload e triagem inicial</h3>
-            <p>Centralize o envio do PDF e a leitura inicial da sessao atual.</p>
+            <h3>Intake com lastro operacional</h3>
+            <p>Entrada clara para PDF, origem do documento e contexto minimo de revisao.</p>
           </article>
           <article className="marketingFeature">
-            <h3>Politicas e findings</h3>
-            <p>Organize o que exige atencao juridica sem depender de planilhas paralelas.</p>
+            <h3>Triagem orientada por risco</h3>
+            <p>Encontrar pontos sensiveis cedo o suficiente para sustentar a decisao juridica.</p>
           </article>
           <article className="marketingFeature">
-            <h3>Monitoramento de eventos</h3>
-            <p>Conecte contratos, riscos e proximas acoes em um unico workspace.</p>
+            <h3>Acompanhamento com trilha executiva</h3>
+            <p>Eventos, notificacoes e proximos passos sob a mesma logica visual.</p>
           </article>
         </div>
       </section>
 
-      <section className="marketingSection" id="produto">
-        <div className="marketingSectionHeader">
-          <h2>Workspace orientado a decisao</h2>
-          <p className="marketingSectionIntro">
-            A area logada herda a mesma linguagem visual da home, mas com densidade
-            operacional suficiente para dashboard e contracts.
+      <section className="marketingEditorialBand" id="produto">
+        <div className="marketingEditorialQuote">
+          <p className="marketingPanelLabel">Direcao aprovada</p>
+          <h2>Um produto juridico premium, nao uma landing intercambiavel.</h2>
+          <p>
+            A mesma identidade percorre a home, o dashboard e a mesa de contracts:
+            tipografia com presenca, superficies escuras, textura discreta e hierarquia
+            precisa.
           </p>
         </div>
         <div className="marketingProof">
           <div className="marketingProofCard">
-            <p className="marketingEyebrow">Direcao aprovada</p>
-            <p className="marketingLead">
-              Produto empresarial premium, com navegacao clara, superfícies consistentes
-              e hierarquia executiva.
-            </p>
+            <p className="marketingProofLabel">Ritmo visual</p>
+            <strong>Editorial, controlado e juridico.</strong>
+            <span>Composicao assimetrica, mas ainda objetiva para leitura de produto.</span>
           </div>
           <div className="marketingProofCard">
-            <ul>
-              <li>Home comercial com CTA objetivo</li>
-              <li>Shell compartilhado para as areas logadas</li>
-              <li>Dashboard e contracts sob a mesma identidade</li>
-            </ul>
+            <p className="marketingProofLabel">Camada operacional</p>
+            <strong>Dashboard e contracts no mesmo enquadramento.</strong>
+            <span>Uma linguagem unica para risco, revisao e proxima acao.</span>
+          </div>
+          <div className="marketingProofCard">
+            <p className="marketingProofLabel">Acabamento</p>
+            <strong>Tipografia forte e interacao discreta.</strong>
+            <span>Sem efeitos vazios e sem cara de template de IA.</span>
           </div>
         </div>
+      </section>
+
+      <section className="marketingClosing">
+        <div>
+          <p className="marketingSectionKicker">LegalTech workspace</p>
+          <h2>Entre no produto e valide o fluxo na pratica.</h2>
+        </div>
+        <Link className="primaryCta" href="/dashboard">
+          Ir para o dashboard
+        </Link>
       </section>
     </main>
   );

@@ -1,7 +1,7 @@
 # App-Wide Visual Refresh Design
 
 ## Objetivo
-- Modernizar a experiencia visual do produto inteiro, transformando a home e a area logada em uma interface mais executiva, clara e consistente, sem alterar contratos de API nem reescrever o modelo atual de dados do frontend.
+- Reposicionar visualmente o produto inteiro como `LegalTech`, com uma interface escura, juridica, sofisticada e premium, sem alterar contratos de API nem reescrever o modelo atual de dados do frontend.
 
 ## Contexto Atual
 - O frontend atual em `web/` possui rotas funcionais para `/`, `/dashboard`, `/contracts` e `/contracts/[contractId]`.
@@ -29,10 +29,16 @@
 ## Direcao Escolhida
 
 ### Direcao Visual
-- Opcao escolhida: `B`, produto empresarial premium.
-- A home deve herdar parte da linguagem do site de referencia, mas a area logada precisa manter cara de SaaS operacional.
-- A interface deve ser mais executiva do que promocional: clara, sofisticada e previsivel.
-- "Site de referencia" neste spec significa direcao de linguagem e composicao, nao copia literal da interface externa.
+- Direcao escolhida: `editorial juridico premium`.
+- A marca visivel na interface deve ser `LegalTech`, substituindo `YUANN` como nome principal do produto.
+- A referencia externa serve apenas como gatilho para coragem de composicao, escala tipografica e acabamento premium; nao deve haver copia literal de layout ou linguagem visual.
+- A interface precisa evitar explicitamente a aparencia generica de "site de IA": nada de gradientes roxos padrao, brilho excessivo, blobs arbitrarios ou hero genérico de startup.
+- A experiencia visual deve ser mais juridica do que "tech chamativa": escura, forte, controlada e memoravel.
+
+### Tom de Marca
+- Voz de produto direta e corporativa.
+- Visual forte, mas sem texto publicitario exagerado.
+- A originalidade deve aparecer em tipografia, ritmo, contraste, textura e proporcao, nao em efeitos chamativos.
 
 ### Principios de UX
 1. Hierarquia muito clara entre navegacao, contexto e conteudo.
@@ -40,6 +46,7 @@
 3. Superficies consistentes para cards, secoes e estados.
 4. Navegacao compartilhada entre modulos logados.
 5. Estados vazios, indisponiveis e de erro apresentados com honestidade, sem simular dados.
+6. A composicao pode ser mais editorial e menos previsivel, desde que a leitura operacional continue clara.
 
 ## Estrutura Proposta
 
@@ -47,32 +54,34 @@
 - `web/src/app/layout.tsx` passa a ser o composition root visual do frontend.
 - O layout global deve definir:
   - base tipografica
-  - variaveis de cor
+  - variaveis de cor escuras
   - fundo e superficies principais
   - espacamento padrao
   - estilo de links, botoes e texto utilitario
 - Essa camada deve servir tanto para a home quanto para o shell logado, evitando duplicacao visual entre rotas.
+- A base visual deve usar azul-noturno, grafite frio e acentos quentes muito discretos, com textura sutil e profundidade controlada.
 
 ### 2. Home Comercial em `/`
 - A rota `/` deixa de ser apenas um placeholder e passa a funcionar como entrada institucional do produto.
 - Estrutura recomendada:
-  - topbar institucional simples
-  - hero com mensagem principal e CTA
-  - faixa de prova de valor ou contexto de negocio
-  - secoes curtas explicando intake, analise, governanca e acompanhamento
+  - topbar institucional com marca `LegalTech`
+  - hero com tipografia de forte presenca e CTA claro
+  - painel lateral ou bloco visual que pareca produto premium, nao uma ilustracao genérica
+  - secoes de valor com ritmo mais editorial, incluindo alguma assimetria controlada
   - CTA final
-- A home deve vender clareza operacional e governanca contratual, nao apenas parecer uma landing generica.
+- A home deve vender governanca contratual de forma sofisticada e original, sem cair em landing SaaS intercambiavel.
 
 ### 3. Shell Logado para `/(app)`
 - Criar `web/src/app/(app)/layout.tsx` como shell compartilhado das areas logadas.
 - O shell escolhido combina:
-  - topbar compacta para marca, contexto e acoes globais
-  - sidebar esquerda leve para navegacao operacional
+  - topbar compacta e refinada para marca, contexto e acoes globais
+  - sidebar esquerda com mais presenca visual e acabamento premium
   - area central de conteudo com largura controlada
 - Em desktop, a sidebar permanece fixa.
 - Em mobile, a sidebar vira drawer ou menu colapsavel.
 - Nesta fase, a navegacao principal precisa cobrir apenas as entradas reais do app: `Dashboard` e `Contracts`.
 - A rota `/(app)/contracts/[contractId]` continua como tela contextual subordinada ao modulo de contratos, sem virar item primario da sidebar.
+- A area logada deve continuar extremamente usavel; a mudanca aqui e de enquadramento, contraste, tipografia e profundidade, nao de navegacao conceitual.
 
 ### 4. Dashboard
 - O dashboard deve passar a usar o shell compartilhado e blocos visuais mais executivos.
@@ -164,11 +173,11 @@
 - O refresh visual nao deve esconder o CTA principal nem deslocar a leitura prioritaria da sessao.
 
 ## Estilo e Tonalidade
-- Base clara e limpa.
-- Acentos em verde e azul.
-- Mais sobrio do que chamativo.
-- Tipografia com presenca, mas sem cair em visual editorial exagerado.
-- Bordas, sombras e superficies devem reforcar organizacao, nao decoracao excessiva.
+- Base escura azulada e grafite, com acentos discretos quentes e frios.
+- Tipografia de titulo com mais presenca e textura juridica; corpo mais tecnico e limpo.
+- Composicao mais editorial, com blocos deslocados e hierarquia menos previsivel, mas disciplinada.
+- Movimento sutil e intencional; a sensacao de premium vem mais de ritmo e acabamento do que de animacao.
+- Bordas, sombras, texturas e superficies devem reforcar sofisticacao controlada, nao decoracao vazia.
 
 ## Responsividade
 - Desktop:
@@ -214,8 +223,8 @@
   - contencao: implementar em camadas e validar cada rota principal.
 
 ## Criterios de Sucesso
-- A home passa a comunicar valor de produto de forma clara e profissional.
-- O app logado ganha um shell compartilhado coerente.
-- `dashboard` e `contracts` passam a parecer partes do mesmo produto.
-- O frontend fica visualmente mais executivo e consistente sem alterar contratos de dados.
+- A home passa a comunicar `LegalTech` como produto juridico premium, com identidade propria.
+- O app logado ganha um shell compartilhado coerente e visualmente mais forte.
+- `dashboard` e `contracts` passam a parecer partes do mesmo produto escuro e sofisticado.
+- O frontend evita visual generico de "site de IA" mesmo buscando mais impacto visual.
 - A experiencia continua clara em desktop e mobile.

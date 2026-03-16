@@ -109,14 +109,16 @@ export function ContractsScreen({
           </div>
 
           <p className={styles.panelDescription}>
-            Escolha o tipo do documento e envie o PDF para iniciar a leitura automatizada da sessao.
+            Escolha a origem do documento e envie o PDF para abrir a leitura inicial do
+            contrato com a mesa juridica da sessao.
           </p>
 
           <div className={styles.uploadShell}>
             <div className={styles.uploadHint}>
-              <strong>Fluxo guiado</strong>
+              <strong>Leitura guiada</strong>
               <p>
-                O retorno desta tela prioriza status da sessao, resumo executivo e findings antes do texto completo.
+                O retorno desta tela prioriza status da sessao, resumo executivo e
+                findings antes do texto integral.
               </p>
             </div>
 
@@ -146,13 +148,14 @@ export function ContractsScreen({
           <div className={styles.sectionHeader}>
             <div>
               <p className={styles.panelEyebrow}>Resultado</p>
-              <h2 className={styles.sectionTitle}>A triagem aparece aqui</h2>
+              <h2 className={styles.sectionTitle}>A leitura aparece aqui</h2>
             </div>
-            <span className={styles.emptyCallout}>Pronto para revisar</span>
+            <span className={styles.emptyCallout}>Mesa pronta</span>
           </div>
 
           <p className={styles.emptyCopy}>
-            Envie um PDF para liberar o resumo da triagem, os findings e o texto extraido.
+            Envie um PDF para liberar o resumo da triagem, os findings e o texto
+            extraido.
           </p>
         </section>
       )}

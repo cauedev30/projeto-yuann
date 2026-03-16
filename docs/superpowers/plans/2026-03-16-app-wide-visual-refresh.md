@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED: Use superpowers:subagent-driven-development (if subagents available) or superpowers:executing-plans to implement this plan. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Implementar o refresh visual aprovado para a home e para o app logado, criando um shell compartilhado e uma linguagem executiva consistente sem alterar contratos de API nem a logica central das features.
+**Goal:** Implementar o refresh visual aprovado para o `LegalTech`, com identidade escura, juridica e premium na home e no app logado, sem alterar contratos de API nem a logica central das features.
 
-**Architecture:** Introduzir uma camada fina de layout compartilhado em `web/src/app/` e `web/src/components/`, mantendo dados e comportamento dentro de `features/*/screens`. O refresh deve ser guiado por TDD onde houver comportamento verificavel, usando `globals.css` para tokens base e primitives pequenas (`MarketingTopbar`, `AppShell`, `PageHeader`, `SurfaceCard`, `StatCard`, `EmptyState`) para evitar duplicacao entre home, dashboard e contracts.
+**Architecture:** Introduzir uma camada fina de layout compartilhado em `web/src/app/` e `web/src/components/`, mantendo dados e comportamento dentro de `features/*/screens`. O refresh deve reposicionar a marca para `LegalTech`, trocar a base clara por uma linguagem escura e editorial, e usar tipografia, composicao, textura e superficies para gerar originalidade sem cair em visual genérico de IA.
 
 **Tech Stack:** Next.js App Router, React 19, TypeScript, Vitest, Testing Library, CSS Modules, Playwright (`a confirmar` no setup atual)
 
@@ -19,14 +19,15 @@
 - `cd web && npm run e2e` continua `a confirmar` ate a remocao do hardcode Windows em `web/playwright.config.ts`; usar evidencias manuais responsivas se isso continuar bloqueado.
 - Para manter YAGNI, `AppTopbar` e `AppSidebar` entram nesta iteracao como partes internas de `AppShell`, nao como arquivos separados.
 - `StatusBadge` e `ActionBar` ficam explicitamente adiados ate aparecer duplicacao real entre telas; nao implementar por antecipacao.
+- Evitar qualquer resultado com cara de "template de IA"; se um elemento parecer previsivel demais, simplificar ou redesenhar.
 
 ## Planned File Structure
 - Modify: `web/src/app/layout.tsx`
   - importar os estilos globais, ajustar `lang` e aplicar o wrapper raiz do frontend.
 - Create: `web/src/app/globals.css`
-  - definir tokens globais, fundo, superfícies, tipografia, links, botoes base e utilitarios de layout.
+  - definir tokens globais escuros, textura, superfícies, tipografia, links, botoes base e utilitarios de layout.
 - Modify: `web/src/app/page.tsx`
-  - transformar a rota `/` em uma home comercial com hero, secoes de valor e CTA para o workspace.
+  - transformar a rota `/` em uma home escura, editorial e premium com a marca `LegalTech`.
 - Create: `web/src/app/page.test.tsx`
   - proteger a narrativa principal da home e os links essenciais.
 - Create: `web/src/components/navigation/marketing-topbar.tsx`
@@ -66,7 +67,7 @@
 - Modify: `web/src/features/contracts/screens/contracts-screen.tsx`
   - alinhar a screen ao shell compartilhado e remover dependencias de viewport proprio.
 - Modify: `web/src/features/contracts/screens/contracts-screen.module.css`
-  - trocar tokens locais por tokens globais e ajustar espacamento para o shell novo.
+  - trocar tokens locais por tokens globais escuros e ajustar espacamento para o shell novo.
 - Modify: `web/src/features/contracts/components/contracts-hero.tsx`
   - alinhar a hero a linguagem executiva aprovada.
 - Modify: `web/src/features/contracts/screens/contracts-screen.test.tsx`

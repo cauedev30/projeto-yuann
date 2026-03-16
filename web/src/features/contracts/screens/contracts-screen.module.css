@@ -5,33 +5,45 @@
   --contracts-line-strong: var(--line-strong);
   --contracts-surface: var(--surface);
   --contracts-surface-strong: var(--surface-strong);
-  --contracts-accent: var(--brand-green);
-  --contracts-accent-soft: rgba(31, 107, 92, 0.12);
-  --contracts-attention: #9a6700;
-  --contracts-attention-soft: rgba(245, 158, 11, 0.16);
-  --contracts-danger: #9f1239;
-  --contracts-danger-soft: rgba(225, 29, 72, 0.14);
-  --contracts-success: #166534;
-  --contracts-success-soft: rgba(34, 197, 94, 0.14);
+  --contracts-accent: var(--brand-gold);
+  --contracts-accent-soft: rgba(196, 173, 129, 0.12);
+  --contracts-attention: #e7bc6b;
+  --contracts-attention-soft: rgba(231, 188, 107, 0.12);
+  --contracts-danger: #f28d8d;
+  --contracts-danger-soft: rgba(242, 141, 141, 0.12);
+  --contracts-success: #97d2bd;
+  --contracts-success-soft: rgba(151, 210, 189, 0.12);
   display: grid;
   gap: 1.25rem;
   color: var(--contracts-ink);
-  font-family: "Avenir Next", "Trebuchet MS", sans-serif;
+  font-family: var(--font-body);
 }
 
 .hero,
 .panel {
+  position: relative;
+  overflow: hidden;
   border: 1px solid var(--contracts-line);
-  border-radius: 1.75rem;
-  background: var(--contracts-surface);
+  border-radius: 1.9rem;
+  background: linear-gradient(180deg, rgba(12, 22, 36, 0.92), rgba(8, 15, 26, 0.96));
   box-shadow: var(--shadow-soft);
 }
 
-.hero {
-  padding: clamp(1.5rem, 1.2rem + 1.1vw, 2.4rem);
+.hero::before,
+.panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
   background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(238, 244, 242, 0.94)),
-    var(--contracts-surface);
+    linear-gradient(135deg, rgba(196, 173, 129, 0.07), transparent 42%),
+    linear-gradient(180deg, rgba(134, 168, 216, 0.08), transparent 44%);
+  pointer-events: none;
+}
+
+.hero {
+  display: grid;
+  gap: 0.85rem;
+  padding: clamp(1.6rem, 1.25rem + 1.2vw, 2.5rem);
 }
 
 .eyebrow,
@@ -40,7 +52,7 @@
   margin: 0;
   text-transform: uppercase;
   letter-spacing: 0.18em;
-  font-size: 0.75rem;
+  font-size: 0.74rem;
   font-weight: 700;
 }
 
@@ -49,19 +61,25 @@
   color: var(--contracts-accent);
 }
 
-.heroTitle {
-  margin: 0.5rem 0 0;
-  font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
-  font-size: clamp(2rem, 3.2vw, 3.6rem);
+.heroTitle,
+.sectionTitle {
+  margin: 0;
+  font-family: var(--font-display);
   line-height: 0.98;
+  letter-spacing: -0.04em;
+}
+
+.heroTitle {
+  font-size: clamp(2.5rem, 4vw, 4.6rem);
+  max-width: 12ch;
 }
 
 .heroDescription {
   max-width: 48rem;
-  margin: 0.85rem 0 0;
+  margin: 0;
   color: var(--contracts-muted);
   font-size: 1rem;
-  line-height: 1.65;
+  line-height: 1.72;
 }
 
 .topGrid {
@@ -77,7 +95,7 @@
 .findingsSection,
 .textPanel,
 .emptyPanel {
-  padding: 1.3rem;
+  padding: 1.35rem;
 }
 
 .sectionHeader {
@@ -88,10 +106,8 @@
 }
 
 .sectionTitle {
-  margin: 0.35rem 0 0;
-  font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
-  font-size: clamp(1.4rem, 1rem + 1vw, 2rem);
-  line-height: 1.1;
+  margin-top: 0.35rem;
+  font-size: clamp(1.6rem, 1.2rem + 1vw, 2.25rem);
 }
 
 .panelDescription,
@@ -101,27 +117,33 @@
 .findingDescription,
 .findingMeta {
   color: var(--contracts-muted);
-  line-height: 1.6;
+  line-height: 1.7;
 }
 
 .panelDescription {
-  margin: 0.75rem 0 1.2rem;
+  margin: 0.8rem 0 1.15rem;
 }
 
 .statusChip,
 .summaryCallout,
-.sectionMeta {
+.sectionMeta,
+.emptyCallout {
   align-self: flex-start;
-  padding: 0.45rem 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2rem;
+  padding: 0.45rem 0.8rem;
   border-radius: 999px;
-  background: rgba(31, 41, 51, 0.06);
+  border: 1px solid rgba(196, 173, 129, 0.14);
+  background: rgba(17, 29, 45, 0.8);
   color: var(--contracts-ink);
   font-size: 0.82rem;
-  font-weight: 600;
+  font-weight: 700;
 }
 
-.summaryCallout {
-  background: var(--contracts-accent-soft);
+.summaryCallout,
+.emptyCallout {
   color: var(--contracts-accent);
 }
 
@@ -131,27 +153,27 @@
 }
 
 .sessionToneEmpty {
-  background: linear-gradient(180deg, rgba(255, 253, 249, 0.95), rgba(247, 243, 234, 0.95));
+  background: linear-gradient(180deg, rgba(24, 20, 12, 0.92), rgba(10, 17, 28, 0.96));
 }
 
 .sessionToneLoading {
-  background: linear-gradient(180deg, rgba(240, 250, 249, 0.96), rgba(229, 244, 241, 0.96));
+  background: linear-gradient(180deg, rgba(12, 26, 33, 0.94), rgba(8, 15, 26, 0.96));
 }
 
 .sessionToneError {
-  background: linear-gradient(180deg, rgba(255, 245, 247, 0.97), rgba(255, 238, 242, 0.97));
+  background: linear-gradient(180deg, rgba(35, 15, 21, 0.94), rgba(8, 15, 26, 0.96));
 }
 
 .sessionToneSuccess {
-  background: linear-gradient(180deg, rgba(244, 252, 246, 0.97), rgba(236, 248, 239, 0.97));
+  background: linear-gradient(180deg, rgba(13, 29, 25, 0.94), rgba(8, 15, 26, 0.96));
 }
 
 .sessionMessage {
   margin: 0;
-  padding: 0.95rem 1rem;
-  border-radius: 1rem;
-  border: 1px solid rgba(31, 41, 51, 0.08);
-  background: rgba(255, 255, 255, 0.78);
+  padding: 1rem;
+  border-radius: 1.1rem;
+  border: 1px solid rgba(196, 173, 129, 0.12);
+  background: rgba(9, 18, 29, 0.68);
   font-weight: 700;
 }
 
@@ -164,9 +186,9 @@
   display: grid;
   gap: 0.45rem;
   padding: 1rem;
-  border-radius: 1.1rem;
-  background: linear-gradient(135deg, rgba(15, 118, 110, 0.08), rgba(255, 255, 255, 0.8));
-  border: 1px solid rgba(15, 118, 110, 0.16);
+  border-radius: 1.15rem;
+  border: 1px solid rgba(196, 173, 129, 0.12);
+  background: linear-gradient(180deg, rgba(18, 31, 49, 0.88), rgba(11, 21, 35, 0.92));
 }
 
 .uploadHint strong {
@@ -176,7 +198,7 @@
 .uploadHint p {
   margin: 0;
   color: var(--contracts-muted);
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
 .summaryGrid {
@@ -189,8 +211,8 @@
 .summaryCard {
   padding: 1rem;
   border-radius: 1.3rem;
-  border: 1px solid var(--contracts-line);
-  background: var(--contracts-surface-strong);
+  border: 1px solid rgba(196, 173, 129, 0.12);
+  background: linear-gradient(180deg, rgba(17, 29, 45, 0.92), rgba(11, 21, 35, 0.96));
 }
 
 .summaryLabel {
@@ -199,19 +221,19 @@
 
 .summaryValue {
   display: block;
-  margin-top: 0.4rem;
-  font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
-  font-size: clamp(1.65rem, 1.15rem + 1vw, 2.2rem);
-  line-height: 1;
+  margin-top: 0.45rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 1.2rem + 1vw, 2.5rem);
+  line-height: 0.95;
 }
 
 .summaryMeta {
-  margin: 0.65rem 0 0;
+  margin: 0.7rem 0 0;
   font-size: 0.95rem;
 }
 
 .findingsList {
-  margin: 1.1rem 0 0;
+  margin: 1.15rem 0 0;
   padding: 0;
   list-style: none;
   display: grid;
@@ -221,8 +243,8 @@
 .findingItem {
   padding: 1rem;
   border-radius: 1.2rem;
-  border: 1px solid var(--contracts-line);
-  background: var(--contracts-surface-strong);
+  border: 1px solid rgba(196, 173, 129, 0.12);
+  background: linear-gradient(180deg, rgba(17, 29, 45, 0.92), rgba(11, 21, 35, 0.96));
 }
 
 .findingHeader {
@@ -279,14 +301,14 @@
   margin: 0;
   padding: 1rem;
   border-radius: 1.2rem;
-  border: 1px solid var(--contracts-line);
-  background: rgba(248, 249, 247, 0.95);
+  border: 1px solid rgba(196, 173, 129, 0.12);
+  background: rgba(6, 13, 22, 0.82);
   color: var(--contracts-ink);
   white-space: pre-wrap;
   word-break: break-word;
   overflow: auto;
   max-height: 22rem;
-  line-height: 1.65;
+  line-height: 1.68;
   font-family: "IBM Plex Mono", "SFMono-Regular", monospace;
   font-size: 0.92rem;
 }
@@ -294,16 +316,6 @@
 .emptyPanel {
   display: grid;
   gap: 0.8rem;
-}
-
-.emptyCallout {
-  align-self: flex-start;
-  padding: 0.4rem 0.7rem;
-  border-radius: 999px;
-  background: rgba(15, 118, 110, 0.08);
-  color: var(--contracts-accent);
-  font-size: 0.82rem;
-  font-weight: 700;
 }
 
 @media (max-width: 900px) {
@@ -322,10 +334,12 @@
   .textPanel,
   .emptyPanel {
     padding: 1rem;
-    border-radius: 1.3rem;
+    border-radius: 1.4rem;
   }
 
-  .sectionHeader {
+  .sectionHeader,
+  .findingHeader {
     flex-direction: column;
+    align-items: flex-start;
   }
 }

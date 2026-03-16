@@ -54,8 +54,8 @@ describe("ContractsScreen", () => {
     render(<ContractsScreen submitContract={vi.fn()} />);
     const scope = getScreenScope();
 
-    expect(scope.getByText("Governanca contratual")).toBeInTheDocument();
-    expect(scope.getByText("Envie um contrato para triagem inicial")).toBeInTheDocument();
+    expect(scope.getByText("Mesa de analise")).toBeInTheDocument();
+    expect(scope.getByText("Triagem contratual com criterio juridico")).toBeInTheDocument();
     expect(scope.getByText("Nenhuma triagem foi executada nesta sessao.")).toBeInTheDocument();
   });
 

@@ -9,9 +9,9 @@ describe("DashboardScreen", () => {
   it("frames the unavailable state with an executive header", () => {
     render(<DashboardScreen snapshot={null} />);
 
-    expect(screen.getByText("Portifolio contratual")).toBeInTheDocument();
+    expect(screen.getByText("Mesa juridica")).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: "Dashboard de renovacoes" }),
+      screen.getByRole("heading", { name: "Governanca contratual em andamento" }),
     ).toBeInTheDocument();
     expect(screen.getByText("Dashboard indisponivel no momento.")).toBeInTheDocument();
   });
