@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { NotificationHistory } from "./notification-history";
@@ -7,7 +7,7 @@ import { NotificationHistory } from "./notification-history";
 
 describe("NotificationHistory", () => {
   it("renders recipient and notification status", () => {
-    render(
+    const { container } = render(
       <NotificationHistory
         items={[
           {
@@ -21,7 +21,7 @@ describe("NotificationHistory", () => {
       />,
     );
 
-    expect(screen.getByText("alerts@example.com")).toBeInTheDocument();
-    expect(screen.getByText("success")).toBeInTheDocument();
+    expect(within(container).getByText("alerts@example.com")).toBeInTheDocument();
+    expect(within(container).getByText("success")).toBeInTheDocument();
   });
 });

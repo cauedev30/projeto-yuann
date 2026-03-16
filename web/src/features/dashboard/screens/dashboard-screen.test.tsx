@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { buildDashboardSnapshotFixture } from "../fixtures/dashboard-snapshot";
@@ -13,9 +13,9 @@ describe("DashboardScreen", () => {
   });
 
   it("renders dashboard data when a test fixture snapshot is provided", () => {
-    render(<DashboardScreen snapshot={buildDashboardSnapshotFixture()} />);
+    const { container } = render(<DashboardScreen snapshot={buildDashboardSnapshotFixture()} />);
 
-    expect(screen.getByText("Timeline de eventos")).toBeInTheDocument();
-    expect(screen.getByText("alerts@example.com")).toBeInTheDocument();
+    expect(within(container).getByText("Timeline de eventos")).toBeInTheDocument();
+    expect(within(container).getByText("alerts@example.com")).toBeInTheDocument();
   });
 });
