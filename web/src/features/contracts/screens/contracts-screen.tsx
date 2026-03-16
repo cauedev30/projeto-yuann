@@ -9,8 +9,6 @@ import {
   type ContractUploadResult,
 } from "../../../entities/contracts/model";
 import { uploadContract } from "../../../lib/api/contracts";
-import { FindingsTable } from "../../analysis/components/findings-table";
-import { RiskScoreCard } from "../../analysis/components/risk-score-card";
 import { UploadForm } from "../components/upload-form";
 
 type ContractsScreenProps = {
@@ -55,10 +53,28 @@ export function ContractsScreen({
 
   const findings = result ? buildPreviewFindings(result.text) : [];
   const riskScore = findings.some((item) => item.status === "critical") ? 80 : 10;
+  const statusState = error
+    ? "error"
+    : isSubmitting
+      ? "loading"
+      : result
+        ? "success"
+        : "empty";
+
+  let statusMessage = "Nenhuma triagem foi executada nesta sessao.";
+
+  if (statusState === "loading") {
+    statusMessage = "Processando triagem inicial...";
+  } else if (statusState === "error") {
+    statusMessage = "Falha ao concluir a triagem inicial.";
+  } else if (statusState === "success") {
+    statusMessage = "Triagem inicial concluida";
+  }
 
   async function handleSubmit(payload: ContractUploadInput) {
     setIsSubmitting(true);
     setError(null);
+    setResult(null);
     try {
       const response = await submitContract(payload);
       setResult(response);
@@ -76,25 +92,47 @@ export function ContractsScreen({
   return (
     <main>
       <header>
-        <p>Governanca de contratos de expansao</p>
-        <h1>Contratos recebidos</h1>
+        <p>Governanca contratual</p>
+        <h1>Envie um contrato para triagem inicial</h1>
+        <p>Suba um PDF para revisar a sessao atual e a triagem inicial do contrato.</p>
       </header>
 
       <UploadForm onSubmit={handleSubmit} isSubmitting={isSubmitting} />
 
+      <section aria-live="polite">
+        <h2>Estado da sessao</h2>
+        <p>{statusMessage}</p>
+      </section>
+
       {error ? <p role="alert">{error}</p> : null}
 
       {result ? (
-        <section>
-          <RiskScoreCard
-            score={riskScore}
-            summary={`OCR utilizado: ${result.usedOcr ? "sim" : "nao"}.`}
-          />
-          <FindingsTable items={findings} />
-          <pre>{result.text}</pre>
-        </section>
+        <>
+          <section>
+            <h2>Resumo da triagem</h2>
+            <p>Tipo enviado: {result.source}</p>
+            <p>Status geral: {findings.some((item) => item.status === "critical") ? "Atencao" : "Conforme"}</p>
+            <p>Score de risco: {riskScore}</p>
+            <p>OCR utilizado: {result.usedOcr ? "sim" : "nao"}.</p>
+          </section>
+
+          <section>
+            <h2>Findings principais</h2>
+            <ul>
+              {findings.map((item) => (
+                <li key={`${item.clauseName}-${item.status}`}>
+                  <strong>{item.clauseName}</strong>: {item.status} - {item.riskExplanation}
+                </li>
+              ))}
+            </ul>
+          </section>
+          <section>
+            <h2>Texto extraido</h2>
+            <pre>{result.text}</pre>
+          </section>
+        </>
       ) : (
-        <p>Nenhum contrato enviado nesta sessao.</p>
+        <p>Envie um PDF para liberar o resumo da triagem, os findings e o texto extraido.</p>
       )}
     </main>
   );
