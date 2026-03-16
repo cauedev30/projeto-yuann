@@ -4,11 +4,17 @@ import React from "react";
 import { useId, useState } from "react";
 
 import type { ContractSource, ContractUploadInput } from "@/entities/contracts/model";
+import styles from "./upload-form.module.css";
 
 type UploadFormProps = {
   onSubmit: (payload: ContractUploadInput) => Promise<void> | void;
   isSubmitting: boolean;
 };
+
+const contractTypeOptions: ReadonlyArray<{ value: ContractSource; label: string }> = [
+  { value: "third_party_draft", label: "Minuta de terceiro" },
+  { value: "signed_contract", label: "Contrato assinado" },
+];
 
 export function UploadForm({ onSubmit, isSubmitting }: UploadFormProps) {
   const titleId = useId();
@@ -35,37 +41,85 @@ export function UploadForm({ onSubmit, isSubmitting }: UploadFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <label htmlFor={titleId}>Titulo do contrato</label>
-      <input id={titleId} value={title} onChange={(event) => setTitle(event.target.value)} />
+    <form className={styles.form} onSubmit={handleSubmit}>
+      <div className={styles.fieldsGrid}>
+        <div className={styles.field}>
+          <label className={styles.label} htmlFor={titleId}>
+            Titulo do contrato
+          </label>
+          <input
+            className={styles.input}
+            disabled={isSubmitting}
+            id={titleId}
+            onChange={(event) => setTitle(event.target.value)}
+            placeholder="Ex.: Loja Centro"
+            value={title}
+          />
+        </div>
 
-      <label htmlFor={referenceId}>Referencia externa</label>
-      <input
-        id={referenceId}
-        value={externalReference}
-        onChange={(event) => setExternalReference(event.target.value)}
-      />
+        <div className={styles.field}>
+          <label className={styles.label} htmlFor={referenceId}>
+            Referencia externa
+          </label>
+          <input
+            className={styles.input}
+            disabled={isSubmitting}
+            id={referenceId}
+            onChange={(event) => setExternalReference(event.target.value)}
+            placeholder="Ex.: LOC-001"
+            value={externalReference}
+          />
+        </div>
 
-      <label htmlFor={sourceId}>Tipo de contrato</label>
-      <select
-        id={sourceId}
-        value={source}
-        onChange={(event) => setSource(event.target.value as ContractSource)}
-      >
-        <option value="third_party_draft">third_party_draft</option>
-        <option value="signed_contract">signed_contract</option>
-      </select>
+        <div className={`${styles.field} ${styles.fieldFull}`}>
+          <label className={styles.label} htmlFor={sourceId}>
+            Tipo de contrato
+          </label>
+          <select
+            className={styles.select}
+            disabled={isSubmitting}
+            id={sourceId}
+            value={source}
+            onChange={(event) => setSource(event.target.value as ContractSource)}
+          >
+            {contractTypeOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
 
-      <label htmlFor={fileId}>Contrato PDF</label>
-      <input
-        id={fileId}
-        type="file"
-        accept="application/pdf"
-        onChange={(event) => setFile(event.target.files?.[0] ?? null)}
-      />
+      <div className={styles.fileBlock}>
+        <div className={styles.fileHeader}>
+          <label className={styles.label} htmlFor={fileId}>
+            Contrato PDF
+          </label>
+          <span className={styles.fileBadge}>{file ? "Arquivo pronto" : "Obrigatorio"}</span>
+        </div>
 
-      <button disabled={isSubmitting || !file} type="submit">
-        {isSubmitting ? "Enviando..." : "Enviar contrato"}
+        <input
+          accept="application/pdf"
+          className={styles.fileInput}
+          disabled={isSubmitting}
+          id={fileId}
+          type="file"
+          onChange={(event) => setFile(event.target.files?.[0] ?? null)}
+        />
+
+        <div className={styles.fileSurface}>
+          <strong className={styles.fileName}>
+            {file ? file.name : "Selecione um PDF para iniciar a triagem."}
+          </strong>
+          <p className={styles.helper}>
+            Aceita apenas PDF. O arquivo enviado alimenta o resumo da sessao, os findings e o texto extraido.
+          </p>
+        </div>
+      </div>
+
+      <button className={styles.submitButton} disabled={isSubmitting || !file} type="submit">
+        {isSubmitting ? "Processando..." : "Enviar contrato"}
       </button>
     </form>
   );
