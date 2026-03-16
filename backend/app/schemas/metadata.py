@@ -14,6 +14,8 @@ class ContractMetadataResult(BaseModel):
     financial_terms: dict[str, object] = Field(default_factory=dict)
     critical_events: list[dict[str, object]] = Field(default_factory=list)
     field_confidence: dict[str, float] = Field(default_factory=dict)
+    match_labels: dict[str, str] = Field(default_factory=dict)
+    ready_for_event_generation: bool = False
 
 
 class ScheduledEvent(BaseModel):

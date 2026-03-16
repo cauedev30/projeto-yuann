@@ -28,8 +28,15 @@ def _assemble_pdf(objects: list[bytes]) -> bytes:
 
 
 def build_pdf_with_text(text: str) -> bytes:
-    escaped_text = text.replace("\\", "\\\\").replace("(", "\\(").replace(")", "\\)")
-    stream = f"BT\n/F1 12 Tf\n72 720 Td\n({escaped_text}) Tj\nET".encode("latin-1")
+    lines = text.splitlines() or [text]
+    commands = ["BT", "/F1 12 Tf", "72 720 Td"]
+    for index, line in enumerate(lines):
+        escaped_line = line.replace("\\", "\\\\").replace("(", "\\(").replace(")", "\\)")
+        if index > 0:
+            commands.append("0 -18 Td")
+        commands.append(f"({escaped_line}) Tj")
+    commands.append("ET")
+    stream = "\n".join(commands).encode("latin-1")
 
     objects = [
         b"<< /Type /Catalog /Pages 2 0 R >>",

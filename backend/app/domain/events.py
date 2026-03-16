@@ -33,6 +33,7 @@ def build_contract_events(
                 event_type="renewal",
                 event_date=metadata.end_date,
                 lead_time_days=defaults["renewal"],
+                metadata={"derived_from": ["end_date"]},
             )
         )
         events.append(
@@ -40,6 +41,7 @@ def build_contract_events(
                 event_type="expiration",
                 event_date=metadata.end_date,
                 lead_time_days=defaults["expiration"],
+                metadata={"derived_from": ["end_date"]},
             )
         )
 
@@ -49,6 +51,7 @@ def build_contract_events(
                 event_type="readjustment",
                 event_date=_add_months(metadata.start_date, 12),
                 lead_time_days=defaults["readjustment"],
+                metadata={"derived_from": ["start_date", "financial_terms.readjustment_type"]},
             )
         )
 
@@ -59,6 +62,7 @@ def build_contract_events(
                 event_type="grace_period_end",
                 event_date=_add_months(metadata.start_date, grace_months),
                 lead_time_days=defaults["grace_period_end"],
+                metadata={"derived_from": ["start_date", "financial_terms.grace_period_months"]},
             )
         )
 

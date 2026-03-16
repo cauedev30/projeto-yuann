@@ -1,6 +1,7 @@
 import pytest
 
 from app.db.models.contract import Contract, ContractSource, ContractVersion
+from app.db.models.event import ContractEvent
 from app.services.storage import LocalStorageService
 from tests.support.pdf_factory import build_pdf_with_text
 
@@ -48,3 +49,169 @@ def test_upload_contract_file_rolls_back_state_when_pdf_is_invalid(
     assert session.query(Contract).all() == []
     assert session.query(ContractVersion).all() == []
     assert list(storage_service.root.iterdir()) == []
+
+
+def test_upload_signed_contract_persists_snapshot_and_rebuilds_events(
+    session,
+    workspace_tmp_path,
+) -> None:
+    storage_service = LocalStorageService(workspace_tmp_path / "uploads")
+
+    result = upload_contract_file(
+        session=session,
+        title="Loja Centro",
+        external_reference="LOC-001",
+        source=ContractSource.signed_contract,
+        filename="signed-contract.pdf",
+        content=build_pdf_with_text(
+            "Data de assinatura: 01/03/2026\n"
+            "Inicio de vigencia: 01/04/2026\n"
+            "Prazo de vigencia: 60 meses\n"
+            "Locataria: Franquia XPTO LTDA\n"
+            "Carencia de 3 meses\n"
+            "Reajuste anual"
+        ),
+        storage_service=storage_service,
+    )
+
+    session.expire_all()
+    contract = session.query(Contract).filter_by(external_reference="LOC-001").one()
+    version = session.query(ContractVersion).filter_by(contract_id=contract.id).one()
+    events = session.query(ContractEvent).filter_by(contract_id=contract.id).all()
+
+    assert contract.signature_date.isoformat() == "2026-03-01"
+    assert contract.start_date.isoformat() == "2026-04-01"
+    assert contract.end_date.isoformat() == "2031-03-31"
+    assert contract.term_months == 60
+    assert contract.parties == {"entities": ["Franquia XPTO LTDA"]}
+    assert contract.financial_terms == {
+        "grace_period_months": 3,
+        "readjustment_type": "annual",
+    }
+    assert version.extraction_metadata == {
+        "embedded_text_length": len(result.extraction.text),
+        "ocr_attempted": False,
+        "signed_contract_snapshot": {
+            "fields": {
+                "signature_date": "2026-03-01",
+                "start_date": "2026-04-01",
+                "end_date": "2031-03-31",
+                "term_months": 60,
+                "parties": ["Franquia XPTO LTDA"],
+                "financial_terms": {
+                    "grace_period_months": 3,
+                    "readjustment_type": "annual",
+                },
+            },
+            "field_confidence": {
+                "signature_date": 1.0,
+                "start_date": 1.0,
+                "term_months": 1.0,
+                "end_date": 1.0,
+                "parties": 1.0,
+                "grace_period_months": 1.0,
+                "readjustment_type": 1.0,
+            },
+            "match_labels": {
+                "signature_date": "data de assinatura",
+                "start_date": "inicio de vigencia",
+                "term_months": "prazo de vigencia",
+                "parties": "locataria",
+                "grace_period_months": "carencia de",
+                "readjustment_type": "reajuste anual",
+            },
+            "ready_for_event_generation": True,
+        },
+    }
+    assert sorted(event.event_type.value for event in events) == [
+        "expiration",
+        "grace_period_end",
+        "readjustment",
+        "renewal",
+    ]
+    assert {
+        event.event_type.value: event.metadata_json
+        for event in events
+    } == {
+        "renewal": {
+            "derived_from": ["end_date"],
+            "source_contract_version_id": version.id,
+        },
+        "expiration": {
+            "derived_from": ["end_date"],
+            "source_contract_version_id": version.id,
+        },
+        "readjustment": {
+            "derived_from": ["start_date", "financial_terms.readjustment_type"],
+            "source_contract_version_id": version.id,
+        },
+        "grace_period_end": {
+            "derived_from": ["start_date", "financial_terms.grace_period_months"],
+            "source_contract_version_id": version.id,
+        },
+    }
+
+
+def test_upload_signed_contract_replaces_existing_schedule_with_latest_version(
+    session,
+    workspace_tmp_path,
+) -> None:
+    storage_service = LocalStorageService(workspace_tmp_path / "uploads")
+
+    first_result = upload_contract_file(
+        session=session,
+        title="Loja Centro",
+        external_reference="LOC-001",
+        source=ContractSource.signed_contract,
+        filename="signed-contract-v1.pdf",
+        content=build_pdf_with_text(
+            "Data de assinatura: 01/03/2026\n"
+            "Inicio de vigencia: 01/04/2026\n"
+            "Prazo de vigencia: 60 meses"
+        ),
+        storage_service=storage_service,
+    )
+    second_result = upload_contract_file(
+        session=session,
+        title="Loja Centro",
+        external_reference="LOC-001",
+        source=ContractSource.signed_contract,
+        filename="signed-contract-v2.pdf",
+        content=build_pdf_with_text(
+            "Data de assinatura: 01/03/2027\n"
+            "Inicio de vigencia: 01/05/2027\n"
+            "Prazo de vigencia: 24 meses"
+        ),
+        storage_service=storage_service,
+    )
+
+    session.expire_all()
+    contract = session.query(Contract).filter_by(external_reference="LOC-001").one()
+    events = session.query(ContractEvent).filter_by(contract_id=contract.id).all()
+    versions = (
+        session.query(ContractVersion)
+        .filter_by(contract_id=contract.id)
+        .order_by(ContractVersion.created_at.asc(), ContractVersion.id.asc())
+        .all()
+    )
+
+    assert {version.id for version in versions} == {
+        first_result.contract_version.id,
+        second_result.contract_version.id,
+    }
+    assert contract.signature_date.isoformat() == "2027-03-01"
+    assert contract.start_date.isoformat() == "2027-05-01"
+    assert contract.end_date.isoformat() == "2029-04-30"
+    assert contract.term_months == 24
+    assert sorted(event.event_type.value for event in events) == ["expiration", "renewal"]
+    assert {event.event_type.value: event.event_date.isoformat() for event in events} == {
+        "renewal": "2029-04-30",
+        "expiration": "2029-04-30",
+    }
+    assert {
+        event.event_type.value: event.metadata_json["source_contract_version_id"]
+        for event in events
+    } == {
+        "renewal": second_result.contract_version.id,
+        "expiration": second_result.contract_version.id,
+    }
