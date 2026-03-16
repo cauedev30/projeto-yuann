@@ -7,6 +7,15 @@ type NotificationHistoryProps = {
 };
 
 export function NotificationHistory({ items }: NotificationHistoryProps) {
+  if (items.length === 0) {
+    return (
+      <section>
+        <h2>Historico de notificacoes</h2>
+        <p>Nenhuma notificacao registrada.</p>
+      </section>
+    );
+  }
+
   return (
     <section>
       <h2>Historico de notificacoes</h2>

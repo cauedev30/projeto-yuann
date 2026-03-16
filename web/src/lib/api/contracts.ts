@@ -1,10 +1,10 @@
-import { getClientEnv } from "@/lib/env";
+import { getClientEnv } from "../env";
 import {
   type ContractUploadInput,
   type ContractUploadResponsePayload,
   type ContractUploadResult,
   mapUploadResponseToContractUploadResult,
-} from "@/entities/contracts/model";
+} from "../../entities/contracts/model";
 
 export async function uploadContract(
   input: ContractUploadInput,

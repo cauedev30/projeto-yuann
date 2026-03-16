@@ -1,9 +1,8 @@
 import { expect, test } from "@playwright/test";
 
-test("operator reviews the dashboard timeline and notification history", async ({ page }) => {
+test("operator sees an honest unavailable dashboard state before runtime data is integrated", async ({ page }) => {
   await page.goto("/dashboard");
 
-  await expect(page.getByText("Timeline de eventos")).toBeVisible();
-  await expect(page.getByText("renewal")).toBeVisible();
-  await expect(page.getByText("alerts@example.com")).toBeVisible();
+  await expect(page.getByText("Dashboard de renovacoes")).toBeVisible();
+  await expect(page.getByText("Dashboard indisponivel no momento.")).toBeVisible();
 });
