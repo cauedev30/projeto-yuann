@@ -24,6 +24,10 @@ def process_signed_contract_archive(
     contract.term_months = metadata.term_months
     contract.parties = {"entities": metadata.parties}
     contract.financial_terms = metadata.financial_terms
+    contract_version.extraction_metadata = {
+        **(contract_version.extraction_metadata or {}),
+        "field_confidence": metadata.field_confidence,
+    }
 
     contract.events.clear()
     for scheduled_event in build_contract_events(metadata):
