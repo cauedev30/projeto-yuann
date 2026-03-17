@@ -8,6 +8,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from app.api.routes.contracts import router as contracts_router
+from app.api.routes.dashboard import router as dashboard_router
 from app.api.routes.notifications import router as notifications_router
 from app.api.routes.policies import router as policies_router
 from app.api.routes.uploads import router as uploads_router
@@ -46,6 +47,7 @@ def create_app(
     app.include_router(contracts_router)
     app.include_router(uploads_router)
     app.include_router(notifications_router)
+    app.include_router(dashboard_router)
     app.state.storage_service = LocalStorageService(
         storage_directory or Path(__file__).resolve().parents[2] / "uploads",
     )

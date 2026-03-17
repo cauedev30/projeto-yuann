@@ -12,16 +12,21 @@ describe("NotificationHistory", () => {
         items={[
           {
             id: "n1",
+            contractEventId: "evt-1",
             channel: "email",
             recipient: "alerts@example.com",
             status: "success",
             sentAt: "2026-04-01T10:00:00Z",
+            eventType: "expiration",
+            contractTitle: "Loja Centro",
+            externalReference: "LOC-001",
           },
         ]}
       />,
     );
 
-    expect(within(container).getByText("alerts@example.com")).toBeInTheDocument();
-    expect(within(container).getByText("success")).toBeInTheDocument();
+    expect(within(container).getByText(/alerts@example\.com/)).toBeInTheDocument();
+    expect(within(container).getByText("Enviado")).toBeInTheDocument();
+    expect(within(container).getByText("Loja Centro")).toBeInTheDocument();
   });
 });
