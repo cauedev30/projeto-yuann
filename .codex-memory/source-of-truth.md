@@ -1,0 +1,58 @@
+# Source of Truth
+
+## Objetivo
+- Registrar onde estao as fontes principais do projeto para evitar confusao.
+
+## Fontes principais
+- `AGENTS.md`
+  - proposito: definir o fluxo operacional obrigatorio para uso da memoria local e atualizacao das notas do projeto.
+  - quando consultar: no inicio e no fim de cada tarefa.
+  - observacoes: deve permanecer coerente com `docs/squad/` e com os arquivos em `./.codex-memory`.
+- `docs/squad/README.md`, `docs/squad/routing-matrix.md` e `docs/squad/blocking-rules.md`
+  - proposito: definir o sistema operacional oficial do squad, o roteamento minimo por tarefa e as regras de bloqueio.
+  - quando consultar: antes de classificar trabalho, decidir quais papeis entram ou avaliar se um bloqueio e valido.
+  - observacoes: qualquer mudanca no processo do squad deve manter esses tres arquivos coerentes entre si e com `AGENTS.md`.
+- `README.md`
+  - proposito: visao geral do MVP, stack de alto nivel, setup local e comandos de verificacao.
+  - quando consultar: ao retomar o projeto, validar boot local ou revisar o escopo implementado.
+  - observacoes: bom ponto de partida; nao substitui leitura do codigo.
+- `docs/superpowers/plans/2026-03-15-legaltech-mvp.md`
+  - proposito: plano de implementacao, ordem dos chunks e escopo alvo do MVP.
+  - quando consultar: ao comparar o planejado com o implementado ou decidir a proxima entrega.
+  - observacoes: trata intencao e roadmap; confirmar contra o codigo atual.
+- `backend/app/main.py` e `backend/app/core/app_factory.py`
+  - proposito: composition root do backend e wiring do runtime local.
+  - quando consultar: ao entender bootstrap, middlewares, storage, OCR e session factory.
+  - observacoes: `main.py` deve permanecer fino; o detalhe do runtime mora em `core/app_factory.py`.
+- `backend/app/api/routes/`
+  - proposito: superficie atual das rotas de politicas, contratos, uploads, notificacoes e dashboard.
+  - quando consultar: antes de alterar API, contratos de entrada ou resposta.
+  - observacoes: usar junto com `backend/app/schemas/` e `backend/tests/api/`.
+- `backend/app/application/dashboard.py`, `backend/app/api/routes/dashboard.py` e `backend/app/schemas/dashboard.py`
+  - proposito: definir e montar o snapshot agregado do dashboard operacional.
+  - quando consultar: ao alterar KPIs, timeline, historico de alertas ou o contrato do `GET /api/dashboard`.
+  - observacoes: manter alinhado com `web/src/entities/dashboard/model.ts` e `web/src/lib/api/dashboard.ts`.
+- `backend/app/application/`, `backend/app/domain/` e `backend/app/infrastructure/`
+  - proposito: fronteiras arquiteturais principais do backend entre orquestracao, regras puras e adapters concretos.
+  - quando consultar: ao alterar fluxos do MVP, regras de negocio ou integracoes tecnicas.
+  - observacoes: `services/` e `tasks/` agora servem principalmente como compatibilidade e delegacao.
+- `backend/app/db/` e `backend/alembic/versions/`
+  - proposito: modelo de dados e historico de migracoes.
+  - quando consultar: antes de mudar persistencia, campos ou relacionamento entre entidades.
+  - observacoes: verificar coerencia com o runtime atual do app.
+- `web/src/app/(app)/contracts/page.tsx` e `web/src/app/(app)/dashboard/page.tsx`
+  - proposito: composition roots da UI, sem regra de negocio local.
+  - quando consultar: ao revisar quais screens sao expostas por rota.
+  - observacoes: a logica principal do frontend deve ficar em `features/`, nao nas pages.
+- `web/src/features/` e `web/src/entities/`
+  - proposito: fluxos de tela, componentes, fixtures de teste e modelos UI-facing.
+  - quando consultar: ao evoluir UX, estado de tela ou contratos internos do frontend.
+  - observacoes: `entities/` concentra mapeamentos de transporte; `features/` concentra screens e componentes.
+- `web/src/lib/api/`
+  - proposito: clientes de transporte e carregamento de dados de runtime.
+  - quando consultar: ao integrar a UI com backend ou trocar a origem de dados.
+  - observacoes: manter esta pasta sem tipos de tela acoplados; o dashboard agora consome `GET /api/dashboard` por aqui.
+- `backend/tests/` e `web/tests/`
+  - proposito: comportamento atualmente coberto por testes.
+  - quando consultar: antes de alterar comportamento ou afirmar que algo segue funcionando.
+  - observacoes: usar como referencia do que ja foi verificado.

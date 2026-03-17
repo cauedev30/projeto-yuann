@@ -1,0 +1,77 @@
+# Session Log
+
+- Data: 2026-03-16 14:19:17 -03:00
+  - tarefa: executar a `F1-G` para fechar a fase 1 no repositorio e na memoria operacional.
+  - resultado: gate operacional da fase 1 consolidado com evidencias de `F1-A`, `F1-B` e da ultima revalidacao de `main`.
+  - arquivos alterados: `docs/squad/artifacts/2026-03-16-f1-g-phase-closeout.md`, `current-state.md`, `session-log.md`
+  - proximos passos: iniciar a proxima fase funcional do roadmap; nome exato do card seguinte no Trello permaneceu `a confirmar`.
+- Data: 2026-03-16 18:27:25 -03:00
+  - tarefa: fechar o gap final da `F2-B`, revalidar a entrega e sincronizar o board remoto.
+  - resultado: o detalhe passou a oferecer retry no erro generico, o E2E foi estabilizado e a verificacao fresca fechou com `24` testes web, build Next.js verde e `1` cenario Playwright verde.
+  - arquivos alterados: `web/src/features/contracts/screens/contract-detail-screen.tsx`, `web/src/features/contracts/screens/contract-detail-screen.test.tsx`, `web/tests/e2e/contracts-list-detail.spec.ts`, `docs/squad/artifacts/2026-03-16-f2-b-contracts-real-api.md`, `current-state.md`, `session-log.md`
+  - proximos passos: executar `F2-G Gate da fase 2: analise + QA + docs`.
+- Data: 2026-03-16 20:11:13 -03:00
+  - tarefa: executar a `F2-G` para fechar a fase 2 no repositorio e na memoria operacional.
+  - resultado: gate operacional da fase 2 consolidado com evidencias de `F2-A`, `F2-B` e baseline fresco da worktree (`26` testes backend e `43` testes frontend).
+  - arquivos alterados: `docs/squad/artifacts/2026-03-16-f2-g-phase-closeout.md`, `current-state.md`, `session-log.md`
+  - proximos passos: iniciar a fase 3 do roadmap, priorizando extracao de contratos assinados e agendamento de eventos criticos.
+- Data: 2026-03-16 20:35:42 -03:00
+  - tarefa: implementar a `F3-A Ajustar extracao de contrato assinado e motor de eventos` em worktree isolada.
+  - resultado: a branch `feature/f3-a-signed-contract-events` endureceu o parser de `signed_contract`, passou a persistir `signed_contract_snapshot` por versao, adicionou metadados de derivacao nos eventos e passou a substituir a agenda canonica com base na ultima versao assinada; verificacoes verdes com `8` testes focados e `30` testes backend totais.
+  - arquivos alterados: `backend/app/domain/contract_metadata.py`, `backend/app/domain/events.py`, `backend/app/schemas/metadata.py`, `backend/app/tasks/archive.py`, `backend/tests/application/test_contract_upload.py`, `backend/tests/services/test_contract_metadata.py`, `backend/tests/services/test_event_scheduler.py`, `backend/tests/support/pdf_factory.py`, `backend/README.md`, `docs/squad/artifacts/2026-03-16-f3-a-signed-contract-events.md`, `decisions.md`, `patterns.md`, `current-state.md`, `session-log.md`
+  - proximos passos: escolher a estrategia de integracao da branch `feature/f3-a-signed-contract-events`; depois disso, retomar o proximo card funcional da fase 3, cujo nome exato no Trello permanece `a confirmar`.
+- Data: 2026-03-16 20:49:03 -03:00
+  - tarefa: integrar localmente a `F3-A Ajustar extracao de contrato assinado e motor de eventos` em `main` e concluir o cleanup da branch de trabalho.
+  - resultado: `main` recebeu fast-forward para `b3d242e`, a verificacao fresca fechou com `30` testes backend verdes, o worktree `feature/f3-a-signed-contract-events` foi removido e a branch local da feature foi apagada; `origin/main` permaneceu atras de `main` por falta de push nesta sessao.
+  - arquivos alterados: `current-state.md`, `session-log.md`
+  - proximos passos: publicar `main` em `origin/main`; depois disso, retomar o proximo card funcional da fase 3, cujo nome exato no Trello permanece `a confirmar`.
+- Data: 2026-03-16 20:56:08 -03:00
+  - tarefa: revalidar o estado local da `F3-A Ajustar extracao de contrato assinado e motor de eventos` apos reconstruir o vault `.codex-memory`.
+  - resultado: o vault local permaneceu coerente apos a recriacao resumida, `main` seguiu `ahead 1` de `origin/main` e a verificacao fresca do backend fechou com `30` testes verdes via `py -3.13 -m pytest -q`.
+  - arquivos alterados: `patterns.md`, `current-state.md`, `session-log.md`
+  - proximos passos: publicar `main` em `origin/main`; depois disso, retomar o proximo card funcional da fase 3, cujo nome exato no Trello permanece `a confirmar`.
+- Data: 2026-03-16 20:59:03 -03:00
+  - tarefa: publicar a `F3-A Ajustar extracao de contrato assinado e motor de eventos` no remoto e fechar a sincronizacao do `main`.
+  - resultado: `git push origin main` publicou o commit `b3d242e`, `main` ficou alinhado com `origin/main` e a memoria local passou a refletir o fechamento completo da task.
+  - arquivos alterados: `current-state.md`, `session-log.md`
+  - proximos passos: retomar o proximo card funcional da fase 3, cujo nome exato no Trello permanece `a confirmar`.
+- Data: 2026-03-16 21:02:40 -03:00
+  - tarefa: registrar o nome exato do card da `F3-A` informado pelo Trello.
+  - resultado: a memoria operacional e o artefato do squad passaram a usar `F3-A Ajustar extracao de contrato assinado e motor de eventos` como nome oficial da task.
+  - arquivos alterados: `docs/squad/artifacts/2026-03-16-f3-a-signed-contract-events.md`, `current-state.md`, `session-log.md`
+  - proximos passos: retomar o proximo card funcional da fase 3, cujo nome exato no Trello permanece `a confirmar`.
+- Data: 2026-03-16 21:04:25 -03:00
+  - tarefa: commitar a correcao documental do artefato da `F3-A`.
+  - resultado: o commit local `29afd05` registrou o ajuste do titulo e do request do artefato para refletir o nome oficial do Trello; `main` ficou `ahead 1` de `origin/main`.
+  - arquivos alterados: `docs/squad/artifacts/2026-03-16-f3-a-signed-contract-events.md`, `current-state.md`, `session-log.md`
+  - proximos passos: publicar `main` em `origin/main`; depois disso, retomar o proximo card funcional da fase 3, cujo nome exato no Trello permanece `a confirmar`.
+- Data: 2026-03-16 21:06:51 -03:00
+  - tarefa: publicar em `origin/main` o commit documental da `F3-A`.
+  - resultado: `git push origin main` publicou `29afd05`, deixando `main` alinhado com `origin/main` e encerrando a correcao documental do artefato.
+  - arquivos alterados: `current-state.md`, `session-log.md`
+  - proximos passos: retomar o proximo card funcional da fase 3, cujo nome exato no Trello permanece `a confirmar`.
+- Data: 2026-03-16 21:18:34 -03:00
+  - tarefa: atualizar o card do Trello da `F3-A` para refletir a entrega publicada.
+  - resultado: a checklist do card foi marcada como concluida e um comentario final registrou os commits `b3d242e` e `29afd05`, as evidencias frescas de teste e dois follow-ups nao bloqueantes para cards posteriores.
+  - arquivos alterados: `current-state.md`, `session-log.md`
+  - proximos passos: retomar o proximo card funcional da fase 3, cujo nome exato no Trello permanece `a confirmar`.
+- Data: 2026-03-16 21:20:04 -03:00
+  - tarefa: sincronizar a memoria final da sessao antes do encerramento.
+  - resultado: `current-state.md` e `session-log.md` foram revalidados e atualizados para refletir o fechamento da `F3-A` no repositorio e no Trello, sem novas mudancas de codigo.
+  - arquivos alterados: `current-state.md`, `session-log.md`
+  - proximos passos: retomar o proximo card funcional da fase 3, cujo nome exato no Trello permanece `a confirmar`.
+- Data: 2026-03-16 21:56:55 -03:00
+  - tarefa: disponibilizar um preview local do projeto para inspecao manual.
+  - resultado: a API ficou acessivel em `http://127.0.0.1:8000/docs` e a web em `http://127.0.0.1:3000` apos subir os servicos fora do sandbox.
+  - arquivos alterados: `current-state.md`, `session-log.md`
+  - proximos passos: usar o preview local para inspecao manual; depois disso, retomar o proximo card funcional da fase 3, cujo nome exato no Trello permanece `a confirmar`.
+- Data: 2026-03-17 11:13:13 -03:00
+  - tarefa: implementar a `F4-B Finalizar dashboard e timeline operacional` em worktree isolada.
+  - resultado: a branch `feature/f4-b-dashboard-ops` ganhou `GET /api/dashboard`, dashboard real com loading/erro/vazio/refresh, timeline com filtros operacionais, historico visual de alertas e bootstrap Playwright compatível com Windows; verificacoes frescas fecharam com `34` testes backend, `49` testes frontend, `npm run build` e `1` spec Playwright do dashboard verdes.
+  - arquivos alterados: `backend/app/api/routes/dashboard.py`, `backend/app/application/dashboard.py`, `backend/app/core/app_factory.py`, `backend/app/schemas/dashboard.py`, `backend/tests/api/test_dashboard_api.py`, `backend/tests/application/test_dashboard_snapshot.py`, `web/playwright.config.ts`, `web/src/app/(app)/dashboard/page.tsx`, `web/src/entities/dashboard/model.ts`, `web/src/entities/dashboard/model.test.ts`, `web/src/features/dashboard/components/events-timeline.tsx`, `web/src/features/dashboard/components/events-timeline.module.css`, `web/src/features/dashboard/components/events-timeline.test.tsx`, `web/src/features/dashboard/fixtures/dashboard-snapshot.ts`, `web/src/features/dashboard/screens/dashboard-screen.tsx`, `web/src/features/dashboard/screens/dashboard-screen.module.css`, `web/src/features/dashboard/screens/dashboard-screen.test.tsx`, `web/src/features/notifications/components/notification-history.tsx`, `web/src/features/notifications/components/notification-history.module.css`, `web/src/features/notifications/components/notification-history.test.tsx`, `web/src/lib/api/dashboard.ts`, `web/src/lib/api/dashboard.test.ts`, `docs/squad/artifacts/2026-03-17-f4-b-dashboard-timeline-operational.md`, `current-state.md`, `session-log.md`, `decisions.md`, `source-of-truth.md`
+  - proximos passos: escolher a estrategia de integracao da branch `feature/f4-b-dashboard-ops`; depois disso, sincronizar o Trello e retomar o proximo card funcional, cujo nome exato permanece `a confirmar`.
+- Data: 2026-03-17 14:12:48 -03:00
+  - tarefa: publicar a `F4-B Finalizar dashboard e timeline operacional`, sincronizar o Trello e atualizar a memoria final.
+  - resultado: `main` recebeu o merge `29bd91b`, `origin/main` ficou alinhado, o card da `F4-B` foi movido para `Concluido` com checklist completa e a verificacao final fechou com `55` testes backend, `75` testes frontend, `npm run build` e `2` cenarios Playwright verdes.
+  - arquivos alterados: `current-state.md`, `session-log.md`
+  - proximos passos: executar `F4-G Gate da fase 4: dashboard/alertas + QA + docs`.
