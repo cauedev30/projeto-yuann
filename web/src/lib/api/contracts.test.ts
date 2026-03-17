@@ -88,6 +88,7 @@ describe("uploadContract", () => {
             term_months: 36,
             parties: { tenant: "Loja Centro" },
             financial_terms: { monthly_rent: 12000 },
+            field_confidence: {},
           },
           latest_version: {
             contract_version_id: "ver-1",
@@ -115,6 +116,7 @@ describe("uploadContract", () => {
               },
             ],
           },
+          events: [],
         }),
         {
           status: 200,

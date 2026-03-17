@@ -57,9 +57,11 @@ describe("contracts entity mapping", () => {
         term_months: 36,
         parties: null,
         financial_terms: null,
+        field_confidence: {},
       },
       latest_version: null,
       latest_analysis: null,
+      events: [],
     });
 
     expect(result.contract.externalReference).toBe("LOC-001");
