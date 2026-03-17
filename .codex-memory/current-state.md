@@ -38,6 +38,7 @@
 - A integracao local em `main` foi revalidada com `55` testes backend verdes, `80` testes frontend verdes, `npx tsc --noEmit` verde, `npm run lint` verde, `npm run build` verde e `5` cenarios Playwright verdes.
 - A `main` foi publicada em `origin/main`, e a branch local `feature/f5-a-release-tecnico` deixou de ser necessaria para a continuidade do roadmap.
 - Uma auditoria local apos a publicacao da `F5-A` nao encontrou branch, plano ou artifact local para um proximo card alem do que ja foi entregue; a confirmacao do roadmap segue dependente do board externo.
+- A checagem final de encerramento confirmou que a `F5-A` esta concluida no repositorio publicado, com `main` alinhada a `origin/main`; o unico ponto ainda fora do repo e a sincronizacao do card/board externo, que segue `a confirmar` neste harness.
 
 ## Arquivos alterados nesta tarefa
 - `Makefile`
@@ -79,4 +80,4 @@
 - Sincronizar board/artefatos externos com acesso adequado e confirmar o proximo card do roadmap (`a confirmar` no repositorio).
 
 ## Ultima atualizacao
-- 2026-03-17 16:23:12 -03:00
+- 2026-03-17 16:31:34 -03:00

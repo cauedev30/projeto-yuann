@@ -110,3 +110,8 @@
   - resultado: a memoria operacional local foi alinhada ao estado publicado de `main`/`origin/main`; a auditoria no repo nao encontrou branch, plano ou artifact local para um proximo card alem da `F5-A`, entao a sincronizacao do board externo e a confirmacao do proximo card seguem `a confirmar` neste harness.
   - arquivos alterados: `./.codex-memory/current-state.md`, `./.codex-memory/session-log.md`
   - proximos passos: sincronizar board/artefatos externos com acesso adequado e confirmar o proximo card do roadmap.
+- Data: 2026-03-17 16:31:34 -03:00
+  - tarefa: registrar a checagem final de encerramento da `F5-A` na memoria operacional.
+  - resultado: a verificacao final confirmou a `F5-A` como concluida no repositorio publicado (`main` alinhada com `origin/main`), mas o fechamento 100% do card continua dependente da sincronizacao do board/artefatos externos fora deste harness.
+  - arquivos alterados: `./.codex-memory/current-state.md`, `./.codex-memory/session-log.md`
+  - proximos passos: sincronizar board/artefatos externos com acesso adequado e confirmar o proximo card do roadmap.
