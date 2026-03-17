@@ -37,7 +37,7 @@
   - `web/tests/release-candidate-assets.test.ts` trava a presenca do fixture PDF, dos targets de seed e da documentacao de demo
   - `web/tests/e2e/contract-analysis.spec.ts` e `web/tests/e2e/contracts-list-detail.spec.ts` agora usam a fixture PDF versionada
   - `README.md` passa a explicitar `Python 3.13`, a ordem oficial de verificacao e o escopo do `F5-A`
-  - `docs/release-candidate-runbook.md` concentra checklist, precondicoes, smoke manual, fixture paths e comandos concretos de seed
+  - `docs/release-candidate-runbook.md` concentra checklist, precondicoes, comandos concretos de boot local, smoke manual, fixture paths e comandos concretos de seed
 - Result: `pass`
 - Constraints or required changes:
   - nenhuma mudanca de API HTTP, schema ou persistencia foi introduzida
@@ -109,9 +109,17 @@ Running 5 tests using 1 worker
   5 passed
 ```
 
+  - documented local boot smoke:
+    - `cd backend && py -3.13 -m uvicorn app.main:app --host 127.0.0.1 --port 8000`
+    - `cd web && $env:NEXT_PUBLIC_API_URL="http://127.0.0.1:8000"; npm run dev -- --hostname 127.0.0.1 --port 3000`
+
+```text
+Manual smoke passed: /contracts render, valid upload, unreadable upload, dashboard clear, dashboard seeded.
+```
+
 - Non-blocking notes:
   - o warning conhecido do autoprefixer em `web/src/app/globals.css` continua aparecendo no bootstrap do build, sem bloquear a verificacao
-  - o shell Windows do harness nao expoe `make`; por isso o fluxo de demo ficou documentado com os comandos Python diretos, mantendo os targets do `Makefile` apenas como conveniencia quando o utilitario estiver disponivel
+  - o shell Windows do harness nao expoe `make`; por isso o fluxo de demo ficou documentado com os comandos Python diretos e com `NEXT_PUBLIC_API_URL` explicito no boot do frontend, mantendo os targets do `Makefile` apenas como conveniencia quando o utilitario estiver disponivel
 
 ## Documentation Update Note
 

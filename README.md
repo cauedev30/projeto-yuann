@@ -35,8 +35,8 @@ Monorepo for the first sellable version of the contract governance platform for 
 1. Install backend dependencies with `cd backend && py -3.13 -m pip install -e ".[dev]"`.
 2. Install web dependencies with `cd web && npm install`.
 3. Copy `.env.example` to `.env` only if you need optional local infrastructure variables.
-4. Start the API with `cd backend && C:/Users/win/AppData/Local/Programs/Python/Python313/python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8000`.
-5. Start the frontend with `cd web && npm run dev -- --hostname 127.0.0.1 --port 3000`.
+4. Start the API with `cd backend && py -3.13 -m uvicorn app.main:app --host 127.0.0.1 --port 8000`.
+5. Start the frontend with `cd web && $env:NEXT_PUBLIC_API_URL="http://127.0.0.1:8000"; npm run dev -- --hostname 127.0.0.1 --port 3000`.
 
 ## Verification
 - Backend: `cd backend && py -3.13 -m pytest -q`

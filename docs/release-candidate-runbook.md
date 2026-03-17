@@ -13,6 +13,9 @@ Close `F5-A Preparar release tecnico` with one reproducible local verification f
 - `main` or the release branch is clean before verification starts.
 - Backend and web dependencies are installed.
 - Optional infrastructure from `docker-compose.yml` is not required for the release baseline.
+- Local manual smoke commands:
+  - `cd backend && py -3.13 -m uvicorn app.main:app --host 127.0.0.1 --port 8000`
+  - `cd web && $env:NEXT_PUBLIC_API_URL="http://127.0.0.1:8000"; npm run dev -- --hostname 127.0.0.1 --port 3000`
 - Demo assets available in the repo:
   - `web/tests/fixtures/third-party-draft.pdf`
   - `web/tests/fixtures/unreadable-upload.pdf`
@@ -37,13 +40,13 @@ Close `F5-A Preparar release tecnico` with one reproducible local verification f
 - Playwright suite completes green under the serialized config.
 
 ## Manual smoke
-1. Start the backend locally.
-2. Start the frontend locally.
-3. Open `/contracts` and verify the upload form renders.
+1. Start the backend with `cd backend && py -3.13 -m uvicorn app.main:app --host 127.0.0.1 --port 8000`.
+2. Start the frontend with `cd web && $env:NEXT_PUBLIC_API_URL="http://127.0.0.1:8000"; npm run dev -- --hostname 127.0.0.1 --port 3000`.
+3. Open `http://127.0.0.1:3000/contracts` and verify the upload form renders.
 4. Upload `web/tests/fixtures/third-party-draft.pdf` and confirm the triage result renders.
 5. Upload `web/tests/fixtures/unreadable-upload.pdf` and confirm the friendly error copy renders.
-6. Run `cd backend && py -3.13 -m tests.support.seed_dashboard_runtime clear`, then open `/dashboard` and confirm the unavailable state.
-7. Run `cd backend && py -3.13 -m tests.support.seed_dashboard_runtime seed`, then refresh `/dashboard` and confirm the populated dashboard renders.
+6. Run `cd backend && py -3.13 -m tests.support.seed_dashboard_runtime clear`, then open `http://127.0.0.1:3000/dashboard` and confirm the unavailable state.
+7. Run `cd backend && py -3.13 -m tests.support.seed_dashboard_runtime seed`, then refresh `http://127.0.0.1:3000/dashboard` and confirm the populated dashboard renders.
 
 ## Known non-blocking risks
 - `web/src/app/globals.css` still emits the known autoprefixer warning for `end`.

@@ -19,7 +19,7 @@
 - A `F3-A Ajustar extracao de contrato assinado e motor de eventos` agora esta integrada em `main` no commit `b3d242e`, endurecendo a extracao de `signed_contract`, persistindo snapshot estruturado por versao e recalculando a agenda canonica de eventos.
 - `origin/main` ja recebeu a `F3-A Ajustar extracao de contrato assinado e motor de eventos`, o commit documental `29afd05`, o merge `29bd91b` da `F4-B`, o gate documental da fase 4 no commit `0eac567` e a sincronizacao versionada da memoria no commit `0abfe91`; o branch local `main` esta alinhado com o remoto.
 - A fase 4 esta fechada no repositorio: `F4-B` foi publicada, `F4-G Gate da fase 4: dashboard/alertas + QA + docs` ja tem artefato em `docs/squad/artifacts/2026-03-17-f4-g-gate-fase-4.md`, e o roadmap pode seguir para a fase 5.
-- A `F5-A Preparar release tecnico` esta pronta na branch `feature/f5-a-release-tecnico`, com verificacao fresca verde e artefato em `docs/squad/artifacts/2026-03-17-f5-a-release-tecnico.md`; a entrega ainda nao foi integrada em `main` nem publicada em `origin/main`.
+- A `F5-A Preparar release tecnico` esta pronta na branch `feature/f5-a-release-tecnico`, com verificacao fresca verde, smoke manual validado a partir dos comandos documentados e artefato em `docs/squad/artifacts/2026-03-17-f5-a-release-tecnico.md`; a entrega ainda nao foi integrada em `main` nem publicada em `origin/main`.
 
 ## Ultimas mudancas relevantes
 - O backend ganhou `GET /api/dashboard`, com agregacao de KPIs, timeline operacional e historico de alertas em `backend/app/application/dashboard.py`.
@@ -33,7 +33,8 @@
 - O `README.md` agora concentra o baseline oficial do release candidate, e `docs/release-candidate-runbook.md` descreve precondicoes, ordem de verificacao, smoke manual e riscos conhecidos.
 - O frontend ganhou `web/tests/playwright-config.test.ts`, travando via Vitest que o config versionado do Playwright roda a suite E2E em `1` worker.
 - O release candidate agora tambem versiona `web/tests/fixtures/third-party-draft.pdf`, documenta o seed do dashboard com comandos Python diretos e trava esses assets em `web/tests/release-candidate-assets.test.ts`.
-- A verificacao fresca da branch `feature/f5-a-release-tecnico` fechou com `55` testes backend verdes, `80` testes frontend verdes, `npx tsc --noEmit` verde, `npm run lint` verde, `npm run build` verde, os comandos diretos de `clear/seed` do dashboard verdes e `5` cenarios Playwright verdes.
+- A revisao final da branch `feature/f5-a-release-tecnico` corrigiu a documentacao de boot local para usar `py -3.13 -m uvicorn ...` e `NEXT_PUBLIC_API_URL="http://127.0.0.1:8000"` no frontend, travando esse contrato em `web/tests/release-candidate-assets.test.ts`.
+- A verificacao fresca da branch `feature/f5-a-release-tecnico` fechou com `55` testes backend verdes, `80` testes frontend verdes, `npx tsc --noEmit` verde, `npm run lint` verde, `npm run build` verde, os comandos diretos de `clear/seed` do dashboard verdes, `5` cenarios Playwright verdes e smoke manual verde em `http://127.0.0.1:8000` + `http://127.0.0.1:3000`.
 
 ## Arquivos alterados nesta tarefa
 - `Makefile`
@@ -74,4 +75,4 @@
 - Escolher a estrategia de integracao da branch `feature/f5-a-release-tecnico`; depois disso, sincronizar remoto/board e confirmar o proximo card do roadmap (`a confirmar`).
 
 ## Ultima atualizacao
-- 2026-03-17 15:00:03 -03:00
+- 2026-03-17 15:47:46 -03:00
