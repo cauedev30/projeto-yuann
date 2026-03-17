@@ -80,3 +80,8 @@
   - resultado: `.gitignore` deixou de ignorar `./.codex-memory/`, o vault operacional passou a ser rastreado em `main` e o estado foi corrigido para refletir a fase 4 encerrada no topo atual de `origin/main`.
   - arquivos alterados: `.gitignore`, `./.codex-memory/current-state.md`, `./.codex-memory/decisions.md`, `./.codex-memory/patterns.md`, `./.codex-memory/session-log.md`, `./.codex-memory/source-of-truth.md`
   - proximos passos: iniciar `F5-A Preparar release tecnico`.
+- Data: 2026-03-17 14:21:31 -03:00
+  - tarefa: sincronizar a memoria final antes do encerramento.
+  - resultado: `current-state.md` e `session-log.md` foram atualizados para refletir a memoria versionada na `main` e manter `F5-A Preparar release tecnico` como proximo passo do roadmap.
+  - arquivos alterados: `./.codex-memory/current-state.md`, `./.codex-memory/session-log.md`
+  - proximos passos: iniciar `F5-A Preparar release tecnico`.

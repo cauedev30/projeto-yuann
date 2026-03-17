@@ -16,7 +16,7 @@
 - A fase 1 esta fechada no repositorio: `F1-A` e `F1-B` seguem validadas em `main`, e a `F1-G` consolidou o gate operacional.
 - A fase 2 esta fechada no repositorio: `F2-A` e `F2-B` seguem validadas em `main`, e a `F2-G` consolidou o gate operacional.
 - A `F3-A Ajustar extracao de contrato assinado e motor de eventos` agora esta integrada em `main` no commit `b3d242e`, endurecendo a extracao de `signed_contract`, persistindo snapshot estruturado por versao e recalculando a agenda canonica de eventos.
-- `origin/main` ja recebeu a `F3-A Ajustar extracao de contrato assinado e motor de eventos`, o commit documental `29afd05`, o merge `29bd91b` da `F4-B` e o gate documental da fase 4 no commit `0eac567`; o branch local `main` esta alinhado com o remoto.
+- `origin/main` ja recebeu a `F3-A Ajustar extracao de contrato assinado e motor de eventos`, o commit documental `29afd05`, o merge `29bd91b` da `F4-B`, o gate documental da fase 4 no commit `0eac567` e a sincronizacao versionada da memoria no commit `0abfe91`; o branch local `main` esta alinhado com o remoto.
 - A fase 4 esta fechada no repositorio: `F4-B` foi publicada, `F4-G Gate da fase 4: dashboard/alertas + QA + docs` ja tem artefato em `docs/squad/artifacts/2026-03-17-f4-g-gate-fase-4.md`, e o roadmap pode seguir para a fase 5.
 
 ## Ultimas mudancas relevantes
@@ -27,6 +27,7 @@
 - O bootstrap Playwright no Windows deixou de depender de `./.venv/bin/python` e agora faz fallback para o Python local do sistema quando necessario.
 - A verificacao fresca da `main` apos o merge `29bd91b` fechou com `55` testes backend verdes, `75` testes frontend verdes, `npm run build` verde e `2` cenarios Playwright do dashboard verdes.
 - O gate `F4-G` foi formalizado em `docs/squad/artifacts/2026-03-17-f4-g-gate-fase-4.md`, liberando a transicao da fase 4 para a fase 5.
+- A memoria operacional (`current-state`, `session-log`, `decisions`, `patterns`, `source-of-truth`) agora segue versionada e publicada na propria `main`.
 
 ## Arquivos alterados nesta tarefa
 - `backend/app/api/routes/dashboard.py`
@@ -86,4 +87,4 @@
 - Iniciar a fase 5 do roadmap, comecando por `F5-A Preparar release tecnico`.
 
 ## Ultima atualizacao
-- 2026-03-17 14:18:56 -03:00
+- 2026-03-17 14:21:31 -03:00
