@@ -1,6 +1,7 @@
 from app.application.analysis import persist_contract_analysis
-from app.db.models.contract import Contract
+from app.db.models.contract import Contract, ContractSource, ContractVersion
 from app.schemas.analysis import AnalysisItem, ContractAnalysisResult
+from app.tasks.archive import process_signed_contract_archive
 from tests.support.pdf_factory import build_pdf_with_text
 
 
@@ -118,6 +119,7 @@ def test_get_contract_detail_returns_contract_version_and_analysis(client) -> No
             "term_months": 36,
             "parties": {"tenant": "Loja Centro"},
             "financial_terms": {"monthly_rent": 12000},
+            "field_confidence": {},
         },
         "latest_version": {
             "contract_version_id": upload_payload["contract_version_id"],
@@ -145,6 +147,7 @@ def test_get_contract_detail_returns_contract_version_and_analysis(client) -> No
                 }
             ],
         },
+        "events": [],
     }
 
 
@@ -171,3 +174,95 @@ def test_get_contract_detail_returns_404_when_contract_does_not_exist(client) ->
 
     assert response.status_code == 404
     assert response.json() == {"detail": "Contract not found"}
+
+
+def test_get_contract_detail_returns_empty_events_when_none_exist(client) -> None:
+    upload_payload = upload_contract(client, external_reference="LOC-010")
+
+    response = client.get(f"/api/contracts/{upload_payload['contract_id']}")
+
+    assert response.status_code == 200
+    assert response.json()["events"] == []
+
+
+def test_get_contract_detail_returns_events_when_populated(client) -> None:
+    session = client.app.state.session_factory()
+    try:
+        contract = Contract(
+            title="Contrato Eventos",
+            external_reference="LOC-020",
+            status="active",
+        )
+        text = (
+            "assinatura: 01/01/2025\n"
+            "inicio de vigencia: 01/02/2025\n"
+            "prazo de vigencia: 12 meses\n"
+            "locataria: Empresa XYZ Ltda."
+        )
+        version = ContractVersion(
+            source=ContractSource.signed_contract,
+            original_filename="contrato.pdf",
+            storage_key="uploads/contrato.pdf",
+            text_content=text,
+        )
+        contract.versions.append(version)
+        session.add(contract)
+        session.commit()
+        session.refresh(version)
+        contract_id = contract.id
+
+        process_signed_contract_archive(session=session, contract_version=version)
+        session.commit()
+    finally:
+        session.close()
+
+    response = client.get(f"/api/contracts/{contract_id}")
+
+    assert response.status_code == 200
+    events = response.json()["events"]
+    assert isinstance(events, list)
+    assert len(events) > 0
+    first = events[0]
+    assert "id" in first
+    assert "event_type" in first
+    assert "lead_time_days" in first
+    assert "metadata" in first
+
+
+def test_get_contract_detail_returns_field_confidence(client) -> None:
+    session = client.app.state.session_factory()
+    try:
+        contract = Contract(
+            title="Contrato Confidence",
+            external_reference="LOC-030",
+            status="active",
+        )
+        text = (
+            "assinatura: 01/01/2025\n"
+            "inicio de vigencia: 01/02/2025\n"
+            "prazo de vigencia: 12 meses\n"
+            "locataria: Empresa XYZ Ltda."
+        )
+        version = ContractVersion(
+            source=ContractSource.signed_contract,
+            original_filename="contrato.pdf",
+            storage_key="uploads/contrato.pdf",
+            text_content=text,
+        )
+        contract.versions.append(version)
+        session.add(contract)
+        session.commit()
+        session.refresh(version)
+        contract_id = contract.id
+
+        process_signed_contract_archive(session=session, contract_version=version)
+        session.commit()
+    finally:
+        session.close()
+
+    response = client.get(f"/api/contracts/{contract_id}")
+
+    assert response.status_code == 200
+    field_confidence = response.json()["contract"]["field_confidence"]
+    assert isinstance(field_confidence, dict)
+    assert len(field_confidence) > 0

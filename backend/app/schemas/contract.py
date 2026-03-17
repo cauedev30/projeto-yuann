@@ -24,6 +24,14 @@ class ContractListResponse(BaseModel):
     items: list[ContractListItem]
 
 
+class ContractEventSummary(BaseModel):
+    id: str
+    event_type: str
+    event_date: date | None = None
+    lead_time_days: int
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
 class ContractDetailSummary(BaseModel):
     id: str
     title: str
@@ -35,6 +43,7 @@ class ContractDetailSummary(BaseModel):
     term_months: int | None = None
     parties: dict[str, Any] | None = None
     financial_terms: dict[str, Any] | None = None
+    field_confidence: dict[str, float] = Field(default_factory=dict)
 
 
 class ContractVersionSummary(BaseModel):
@@ -71,3 +80,4 @@ class ContractDetailResponse(BaseModel):
     contract: ContractDetailSummary
     latest_version: ContractVersionSummary | None = None
     latest_analysis: ContractLatestAnalysisSummary | None = None
+    events: list[ContractEventSummary] = Field(default_factory=list)

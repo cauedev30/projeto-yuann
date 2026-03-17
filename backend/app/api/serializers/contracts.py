@@ -2,10 +2,12 @@ from __future__ import annotations
 
 from app.db.models.analysis import ContractAnalysis, ContractAnalysisFinding
 from app.db.models.contract import Contract, ContractVersion
+from app.db.models.event import ContractEvent
 from app.schemas.contract import (
     ContractAnalysisFindingSummary,
     ContractDetailResponse,
     ContractDetailSummary,
+    ContractEventSummary,
     ContractLatestAnalysisSummary,
     ContractListItem,
     ContractVersionSummary,
@@ -22,6 +24,24 @@ def _latest_analysis(contract: Contract) -> ContractAnalysis | None:
     if not contract.analyses:
         return None
     return max(contract.analyses, key=lambda analysis: (analysis.created_at, analysis.id))
+
+
+def _serialize_event(event: ContractEvent) -> ContractEventSummary:
+    return ContractEventSummary(
+        id=event.id,
+        event_type=event.event_type if isinstance(event.event_type, str) else event.event_type.value,
+        event_date=event.event_date,
+        lead_time_days=event.lead_time_days,
+        metadata=event.metadata_json or {},
+    )
+
+
+def _extract_field_confidence(contract: Contract) -> dict[str, float]:
+    version = _latest_version(contract)
+    if version is None:
+        return {}
+    metadata = version.extraction_metadata or {}
+    return metadata.get("field_confidence") or {}
 
 
 def _normalize_used_ocr(version: ContractVersion) -> bool:
@@ -105,7 +125,9 @@ def serialize_contract_detail(contract: Contract) -> ContractDetailResponse:
             term_months=contract.term_months,
             parties=contract.parties,
             financial_terms=contract.financial_terms,
+            field_confidence=_extract_field_confidence(contract),
         ),
         latest_version=_serialize_version(_latest_version(contract)),
         latest_analysis=_serialize_analysis(_latest_analysis(contract)),
+        events=[_serialize_event(event) for event in contract.events],
     )

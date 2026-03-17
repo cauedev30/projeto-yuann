@@ -15,6 +15,7 @@ def _contract_query():
     return select(Contract).options(
         selectinload(Contract.versions),
         selectinload(Contract.analyses).selectinload(ContractAnalysis.findings),
+        selectinload(Contract.events),
     )
 
 
