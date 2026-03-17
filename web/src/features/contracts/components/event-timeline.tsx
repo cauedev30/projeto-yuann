@@ -6,7 +6,7 @@ import type { ContractEventSummary, ContractEventType } from "../../../entities/
 import styles from "./event-timeline.module.css";
 
 type EventTimelineProps = {
-  events: ContractEventSummary[];
+  events?: ContractEventSummary[];
 };
 
 export type Urgency = "critical" | "attention" | "conforme";
@@ -79,7 +79,7 @@ function EventNode({ event }: EventNodeProps) {
   );
 }
 
-export function EventTimeline({ events }: EventTimelineProps) {
+export function EventTimeline({ events = [] }: EventTimelineProps) {
   return (
     <SurfaceCard title="Eventos críticos">
       {events.length === 0 ? (

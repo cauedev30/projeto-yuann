@@ -6,7 +6,7 @@ import styles from "./metadata-section.module.css";
 type MetadataSectionProps = {
   parties: Record<string, unknown> | null;
   financialTerms: Record<string, unknown> | null;
-  fieldConfidence: Record<string, number>;
+  fieldConfidence?: Record<string, number> | null;
   signatureDate: string | null;
   startDate: string | null;
   endDate: string | null;
@@ -26,9 +26,9 @@ function formatDate(iso: string | null): string {
 
 function confidencePill(
   key: string,
-  fieldConfidence: Record<string, number>,
+  fieldConfidence: Record<string, number> | null | undefined,
 ): React.ReactElement | null {
-  if (!(key in fieldConfidence)) return null;
+  if (!fieldConfidence || !(key in fieldConfidence)) return null;
   const value = fieldConfidence[key];
   if (value >= 0.8) {
     return (
