@@ -1,0 +1,78 @@
+.section {
+  display: grid;
+  gap: 1rem;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+.filterButton,
+.filterButtonActive {
+  min-height: 2.4rem;
+  padding: 0.55rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  color: var(--ink-soft);
+  background: rgba(16, 27, 43, 0.72);
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    background 180ms ease;
+}
+
+.filterButton:hover,
+.filterButtonActive:hover {
+  transform: translateY(-1px);
+}
+
+.filterButtonActive {
+  border-color: var(--line-strong);
+  color: #08111a;
+  background: linear-gradient(135deg, var(--brand-gold), #efe2c7);
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.8rem;
+}
+
+.item {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.95rem 1rem;
+  border: 1px solid rgba(196, 173, 129, 0.12);
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(17, 29, 45, 0.92), rgba(11, 21, 35, 0.96));
+}
+
+.itemTop {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.itemTop strong {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.itemTop span,
+.contractText span,
+.metaText,
+.emptyState {
+  color: var(--ink-muted);
+}
+
+.contractText,
+.metaText,
+.emptyState {
+  margin: 0;
+  line-height: 1.6;
+}

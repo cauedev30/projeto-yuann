@@ -1,0 +1,45 @@
+.section {
+  display: grid;
+  gap: 1rem;
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.8rem;
+}
+
+.item {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.95rem 1rem;
+  border: 1px solid rgba(196, 173, 129, 0.12);
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(17, 29, 45, 0.92), rgba(11, 21, 35, 0.96));
+}
+
+.itemTop {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.itemTop strong {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.status,
+.metaText,
+.emptyState {
+  color: var(--ink-muted);
+}
+
+.metaText,
+.emptyState {
+  margin: 0;
+  line-height: 1.6;
+}

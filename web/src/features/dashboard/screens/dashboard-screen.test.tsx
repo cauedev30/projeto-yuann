@@ -6,20 +6,38 @@ import { buildDashboardSnapshotFixture } from "../fixtures/dashboard-snapshot";
 import { DashboardScreen } from "./dashboard-screen";
 
 describe("DashboardScreen", () => {
-  it("frames the unavailable state with an executive header", () => {
-    render(<DashboardScreen snapshot={null} />);
+  it("shows a loading state before rendering the dashboard result", () => {
+    render(<DashboardScreen loadDashboardSnapshot={() => new Promise(() => undefined)} />);
 
     expect(screen.getByText("Mesa juridica")).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { name: "Governanca contratual em andamento" }),
     ).toBeInTheDocument();
-    expect(screen.getByText("Dashboard indisponivel no momento.")).toBeInTheDocument();
+    expect(screen.getByText("Carregando dashboard operacional...")).toBeInTheDocument();
   });
 
-  it("renders summary, timeline and notification blocks when a snapshot exists", () => {
-    render(<DashboardScreen snapshot={buildDashboardSnapshotFixture()} />);
+  it("frames the unavailable state with an executive header", async () => {
+    render(<DashboardScreen loadDashboardSnapshot={async () => null} />);
 
-    expect(screen.getByText("Resumo do portifolio")).toBeInTheDocument();
+    expect(await screen.findByText("Dashboard indisponivel no momento.")).toBeInTheDocument();
+  });
+
+  it("renders an error state when the dashboard request fails", async () => {
+    render(
+      <DashboardScreen
+        loadDashboardSnapshot={async () => {
+          throw new Error("Falha de integracao.");
+        }}
+      />,
+    );
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("Falha de integracao.");
+  });
+
+  it("renders summary, timeline and notification blocks when a snapshot exists", async () => {
+    render(<DashboardScreen loadDashboardSnapshot={async () => buildDashboardSnapshotFixture()} />);
+
+    expect(await screen.findByText("Resumo do portifolio")).toBeInTheDocument();
     expect(screen.getByText("Timeline de eventos")).toBeInTheDocument();
     expect(screen.getByText("Historico de notificacoes")).toBeInTheDocument();
   });

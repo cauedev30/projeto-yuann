@@ -1,4 +1,22 @@
 import { defineConfig } from "@playwright/test";
+import { existsSync } from "node:fs";
+
+const windowsVenvPython = "../backend/.venv/Scripts/python.exe";
+const windowsSystemPython = process.env.LOCALAPPDATA
+  ? `${process.env.LOCALAPPDATA.replace(/\\/g, "/")}/Programs/Python/Python313/python.exe`
+  : "";
+const unixVenvPython = "./.venv/bin/python";
+
+const backendPythonCommand =
+  process.platform === "win32"
+    ? existsSync(windowsVenvPython)
+      ? ".\\.venv\\Scripts\\python.exe"
+      : existsSync(windowsSystemPython)
+        ? windowsSystemPython
+        : "python"
+    : existsSync(unixVenvPython)
+      ? unixVenvPython
+      : "python3";
 
 export default defineConfig({
   testDir: "./tests/e2e",
@@ -8,7 +26,7 @@ export default defineConfig({
   },
   webServer: [
     {
-      command: './.venv/bin/python -m uvicorn app.main:app --host 127.0.0.1 --port 8100',
+      command: `${backendPythonCommand} -m uvicorn app.main:app --host 127.0.0.1 --port 8100`,
       cwd: "../backend",
       url: "http://127.0.0.1:8100/health",
       reuseExistingServer: !process.env.CI,
