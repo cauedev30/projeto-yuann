@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 
 from app.db.models.event import ContractEvent, Notification, NotificationChannel
 
@@ -26,3 +26,8 @@ def build_email_notification(event: ContractEvent, *, today: date) -> Notificati
         status="pending",
         idempotency_key=f"{event.id}:email:{today.isoformat()}",
     )
+
+
+def dismiss_notification(notification: Notification, *, now: datetime) -> None:
+    if notification.dismissed_at is None:
+        notification.dismissed_at = now

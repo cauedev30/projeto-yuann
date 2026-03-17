@@ -60,5 +60,6 @@ class Notification(TimestampMixin, Base):
     status: Mapped[str] = mapped_column(String(50), nullable=False, default="pending")
     idempotency_key: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
     sent_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    dismissed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     event: Mapped["ContractEvent"] = relationship(back_populates="notifications")
