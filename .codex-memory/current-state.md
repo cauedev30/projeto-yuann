@@ -11,6 +11,7 @@
 - O repositorio ja contem testes de backend, frontend e E2E.
 - O runtime local verificado continua usando SQLite e filesystem; `docker-compose.yml` segue como opcional para evolucoes de infraestrutura.
 - A `F4-B Finalizar dashboard e timeline operacional` agora esta integrada em `main` e `origin/main` no merge `29bd91b`, adicionando `GET /api/dashboard`, consumo real do snapshot no frontend e leitura operacional do dashboard.
+- A `F5-A Preparar release tecnico` foi implementada na worktree `feature/f5-a-release-tecnico`, oficializando `Python 3.13` como baseline documental do release candidate, adicionando `docs/release-candidate-runbook.md` e serializando a suite Playwright no config versionado.
 
 ## Em andamento
 - A fase 1 esta fechada no repositorio: `F1-A` e `F1-B` seguem validadas em `main`, e a `F1-G` consolidou o gate operacional.
@@ -18,6 +19,7 @@
 - A `F3-A Ajustar extracao de contrato assinado e motor de eventos` agora esta integrada em `main` no commit `b3d242e`, endurecendo a extracao de `signed_contract`, persistindo snapshot estruturado por versao e recalculando a agenda canonica de eventos.
 - `origin/main` ja recebeu a `F3-A Ajustar extracao de contrato assinado e motor de eventos`, o commit documental `29afd05`, o merge `29bd91b` da `F4-B`, o gate documental da fase 4 no commit `0eac567` e a sincronizacao versionada da memoria no commit `0abfe91`; o branch local `main` esta alinhado com o remoto.
 - A fase 4 esta fechada no repositorio: `F4-B` foi publicada, `F4-G Gate da fase 4: dashboard/alertas + QA + docs` ja tem artefato em `docs/squad/artifacts/2026-03-17-f4-g-gate-fase-4.md`, e o roadmap pode seguir para a fase 5.
+- A `F5-A Preparar release tecnico` esta pronta na branch `feature/f5-a-release-tecnico`, com verificacao fresca verde e artefato em `docs/squad/artifacts/2026-03-17-f5-a-release-tecnico.md`; a entrega ainda nao foi integrada em `main` nem publicada em `origin/main`.
 
 ## Ultimas mudancas relevantes
 - O backend ganhou `GET /api/dashboard`, com agregacao de KPIs, timeline operacional e historico de alertas em `backend/app/application/dashboard.py`.
@@ -28,63 +30,48 @@
 - A verificacao fresca da `main` apos o merge `29bd91b` fechou com `55` testes backend verdes, `75` testes frontend verdes, `npm run build` verde e `2` cenarios Playwright do dashboard verdes.
 - O gate `F4-G` foi formalizado em `docs/squad/artifacts/2026-03-17-f4-g-gate-fase-4.md`, liberando a transicao da fase 4 para a fase 5.
 - A memoria operacional (`current-state`, `session-log`, `decisions`, `patterns`, `source-of-truth`) agora segue versionada e publicada na propria `main`.
+- O `README.md` agora concentra o baseline oficial do release candidate, e `docs/release-candidate-runbook.md` descreve precondicoes, ordem de verificacao, smoke manual e riscos conhecidos.
+- O frontend ganhou `web/tests/playwright-config.test.ts`, travando via Vitest que o config versionado do Playwright roda a suite E2E em `1` worker.
+- O release candidate agora tambem versiona `web/tests/fixtures/third-party-draft.pdf`, documenta o seed do dashboard com comandos Python diretos e trava esses assets em `web/tests/release-candidate-assets.test.ts`.
+- A verificacao fresca da branch `feature/f5-a-release-tecnico` fechou com `55` testes backend verdes, `80` testes frontend verdes, `npx tsc --noEmit` verde, `npm run lint` verde, `npm run build` verde, os comandos diretos de `clear/seed` do dashboard verdes e `5` cenarios Playwright verdes.
 
 ## Arquivos alterados nesta tarefa
-- `backend/app/api/routes/dashboard.py`
-- `backend/app/application/dashboard.py`
-- `backend/app/core/app_factory.py`
-- `backend/app/schemas/dashboard.py`
-- `backend/tests/api/test_dashboard_api.py`
-- `backend/tests/application/test_dashboard_snapshot.py`
-- `backend/tests/support/dashboard_seed.py`
-- `backend/tests/support/seed_dashboard_runtime.py`
+- `Makefile`
+- `README.md`
+- `docs/release-candidate-runbook.md`
+- `docs/squad/artifacts/2026-03-17-f5-a-release-tecnico.md`
 - `web/playwright.config.ts`
-- `web/src/app/(app)/dashboard/page.tsx`
-- `web/src/entities/dashboard/model.ts`
-- `web/src/entities/dashboard/model.test.ts`
-- `web/src/features/dashboard/components/events-timeline.tsx`
-- `web/src/features/dashboard/components/events-timeline.module.css`
-- `web/src/features/dashboard/components/events-timeline.test.tsx`
-- `web/src/features/dashboard/fixtures/dashboard-snapshot.ts`
-- `web/src/features/dashboard/screens/dashboard-screen.tsx`
-- `web/src/features/dashboard/screens/dashboard-screen.module.css`
-- `web/src/features/dashboard/screens/dashboard-screen.test.tsx`
-- `web/src/features/notifications/components/notification-history.tsx`
-- `web/src/features/notifications/components/notification-history.module.css`
-- `web/src/features/notifications/components/notification-history.test.tsx`
-- `web/src/lib/api/dashboard.ts`
-- `web/src/lib/api/dashboard.test.ts`
-- `web/tests/e2e/dashboard-alerts.spec.ts`
-- `docs/squad/artifacts/2026-03-17-f4-b-dashboard-timeline-operational.md`
-- `.gitignore`
-- `./.codex-memory/source-of-truth.md`
-- `./.codex-memory/decisions.md`
-- `./.codex-memory/patterns.md`
+- `web/tests/e2e/contract-analysis.spec.ts`
+- `web/tests/e2e/contracts-list-detail.spec.ts`
+- `web/tests/fixtures/third-party-draft.pdf`
+- `web/tests/release-candidate-assets.test.ts`
+- `web/tests/playwright-config.test.ts`
 - `./.codex-memory/current-state.md`
 - `./.codex-memory/session-log.md`
 
 ## Arquivos importantes
+- `Makefile`
 - `README.md`
+- `docs/release-candidate-runbook.md`
 - `docs/squad/README.md`
 - `docs/squad/routing-matrix.md`
 - `docs/squad/blocking-rules.md`
-- `backend/app/main.py`
-- `backend/app/core/app_factory.py`
-- `backend/app/application/dashboard.py`
-- `backend/app/api/routes/dashboard.py`
-- `backend/app/schemas/dashboard.py`
-- `web/src/app/(app)/dashboard/page.tsx`
-- `web/src/features/dashboard/screens/dashboard-screen.tsx`
-- `web/src/lib/api/dashboard.ts`
+- `web/playwright.config.ts`
+- `backend/tests/support/seed_dashboard_runtime.py`
+- `web/tests/fixtures/third-party-draft.pdf`
+- `web/tests/release-candidate-assets.test.ts`
+- `web/tests/playwright-config.test.ts`
+- `backend/pyproject.toml`
 
 ## Problemas / riscos / pendencias
 - Fonte padrao de banco entre `docker-compose` e runtime atual do backend: ainda precisa de alinhamento se o projeto sair do SQLite local.
-- O KPI `active_contracts` do dashboard trata contratos com status diferente de `draft` como ativos enquanto o projeto ainda nao formalizou uma taxonomia mais rica de status operacionais.
-- O dashboard continua exibindo o estado honesto de indisponibilidade quando nao ha snapshot operacional util no runtime; isso e intencional, nao regressao.
-- O build frontend segue emitindo um warning de autoprefixer em `web/src/app/globals.css` por uso de `end`; nao bloqueou a entrega da `F4-B`.
+- A suite Playwright oficial do release candidate agora e deliberadamente serializada; paralelismo por worker continua fora do baseline ate existir isolamento real de runtime.
+- O build frontend segue emitindo um warning de autoprefixer em `web/src/app/globals.css` por uso de `end`; nao bloqueou a entrega da `F5-A`.
+- O shell Windows do harness nao expoe `make`; a documentacao do fluxo de demo usa comandos Python diretos e deixa os targets do `Makefile` como conveniencia opcional.
+- `.worktrees/`, `tmp/`, `backend/uploads/` e `backend/legaltech.db` seguem presentes no diretório de trabalho; cleanup ficou fora desta tarefa por ser operacional e potencialmente destrutivo.
 
 ## Proximo passo
-- Iniciar a fase 5 do roadmap, comecando por `F5-A Preparar release tecnico`.
+- Escolher a estrategia de integracao da branch `feature/f5-a-release-tecnico`; depois disso, sincronizar remoto/board e confirmar o proximo card do roadmap (`a confirmar`).
 
 ## Ultima atualizacao
-- 2026-03-17 14:21:31 -03:00
+- 2026-03-17 15:00:03 -03:00

@@ -1,53 +1,5 @@
 import { expect, test } from "@playwright/test";
 
-function buildPdfWithText(text: string): Buffer {
-  function assemblePdf(objects: Buffer[]): Buffer {
-    const chunks: Buffer[] = [Buffer.from("%PDF-1.4\n", "ascii")];
-    const offsets: number[] = [0];
-
-    for (const [index, body] of objects.entries()) {
-      offsets.push(Buffer.concat(chunks).length);
-      chunks.push(Buffer.from(`${index + 1} 0 obj\n`, "ascii"));
-      chunks.push(body);
-      chunks.push(Buffer.from("\nendobj\n", "ascii"));
-    }
-
-    const body = Buffer.concat(chunks);
-    const xrefOffset = body.length;
-    const xref: Buffer[] = [Buffer.from(`xref\n0 ${objects.length + 1}\n`, "ascii")];
-    xref.push(Buffer.from("0000000000 65535 f \n", "ascii"));
-    for (const offset of offsets.slice(1)) {
-      xref.push(Buffer.from(`${offset.toString().padStart(10, "0")} 00000 n \n`, "ascii"));
-    }
-    xref.push(
-      Buffer.from(
-        `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF`,
-        "ascii",
-      ),
-    );
-
-    return Buffer.concat([body, ...xref]);
-  }
-
-  const escapedText = text.replace(/\\/g, "\\\\").replace(/\(/g, "\\(").replace(/\)/g, "\\)");
-  const stream = Buffer.from(`BT\n/F1 12 Tf\n72 720 Td\n(${escapedText}) Tj\nET`, "latin1");
-
-  return assemblePdf([
-    Buffer.from("<< /Type /Catalog /Pages 2 0 R >>", "ascii"),
-    Buffer.from("<< /Type /Pages /Kids [3 0 R] /Count 1 >>", "ascii"),
-    Buffer.from(
-      "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 5 0 R >> >> /Contents 4 0 R >>",
-      "ascii",
-    ),
-    Buffer.concat([
-      Buffer.from(`<< /Length ${stream.length} >>\nstream\n`, "ascii"),
-      stream,
-      Buffer.from("\nendstream", "ascii"),
-    ]),
-    Buffer.from("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>", "ascii"),
-  ]);
-}
-
 test("operator opens a persisted contract from the real list and reaches the real detail route", async ({
   page,
 }) => {
@@ -58,18 +10,16 @@ test("operator opens a persisted contract from the real list and reaches the rea
   await page.goto("/contracts");
   await page.getByLabel("Titulo do contrato").fill(contractTitle);
   await page.getByLabel("Referencia externa").fill(externalReference);
-  await page.getByLabel("Contrato PDF").setInputFiles({
-    name: "third-party-draft.pdf",
-    mimeType: "application/pdf",
-    buffer: buildPdfWithText("Prazo de vigencia 36 meses"),
-  });
+  await page.getByLabel("Contrato PDF").setInputFiles("tests/fixtures/third-party-draft.pdf");
   await page.getByRole("button", { name: "Enviar contrato" }).click();
 
   const contractLink = page.getByRole("link", { name: new RegExp(externalReference) });
   await expect(contractLink).toBeVisible();
-  await contractLink.click();
+  await Promise.all([
+    page.waitForURL(/\/contracts\/.+/, { timeout: 15000 }),
+    contractLink.click(),
+  ]);
 
-  await expect(page).toHaveURL(/\/contracts\/.+/);
   await expect(page.getByRole("heading", { name: contractTitle })).toBeVisible();
   await expect(page.getByText("third-party-draft.pdf")).toBeVisible();
   await expect(page.getByText("Analise ainda nao disponivel.")).toBeVisible();

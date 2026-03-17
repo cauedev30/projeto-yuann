@@ -85,3 +85,8 @@
   - resultado: `current-state.md` e `session-log.md` foram atualizados para refletir a memoria versionada na `main` e manter `F5-A Preparar release tecnico` como proximo passo do roadmap.
   - arquivos alterados: `./.codex-memory/current-state.md`, `./.codex-memory/session-log.md`
   - proximos passos: iniciar `F5-A Preparar release tecnico`.
+- Data: 2026-03-17 15:00:03 -03:00
+  - tarefa: implementar a `F5-A Preparar release tecnico` em worktree isolada.
+  - resultado: a branch `feature/f5-a-release-tecnico` oficializou `Python 3.13` no baseline documental, adicionou `docs/release-candidate-runbook.md`, criou a fixture `web/tests/fixtures/third-party-draft.pdf`, expôs comandos de seed/clear do dashboard, serializou a suite Playwright no config versionado, travou os assets de release em `web/tests/release-candidate-assets.test.ts` e fechou a verificacao fresca com `55` testes backend, `80` testes frontend, `npx tsc --noEmit`, `npm run lint`, `npm run build`, os comandos diretos de seed/clear e `5` cenarios Playwright verdes.
+  - arquivos alterados: `Makefile`, `README.md`, `docs/release-candidate-runbook.md`, `docs/squad/artifacts/2026-03-17-f5-a-release-tecnico.md`, `web/playwright.config.ts`, `web/tests/e2e/contract-analysis.spec.ts`, `web/tests/e2e/contracts-list-detail.spec.ts`, `web/tests/fixtures/third-party-draft.pdf`, `web/tests/release-candidate-assets.test.ts`, `web/tests/playwright-config.test.ts`, `./.codex-memory/current-state.md`, `./.codex-memory/session-log.md`
+  - proximos passos: escolher a estrategia de integracao da branch `feature/f5-a-release-tecnico`; depois disso, sincronizar remoto/board e confirmar o proximo card do roadmap (`a confirmar`).

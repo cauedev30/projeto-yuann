@@ -20,6 +20,8 @@ const backendPythonCommand =
 
 export default defineConfig({
   testDir: "./tests/e2e",
+  // The local backend runtime uses shared SQLite state, so release verification stays serial.
+  workers: 1,
   use: {
     baseURL: "http://127.0.0.1:3100",
     trace: "on-first-retry",
