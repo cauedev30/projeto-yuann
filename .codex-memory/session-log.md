@@ -100,3 +100,13 @@
   - resultado: `main` recebeu fast-forward para `c248a0a`, a verificacao fresca na propria `main` fechou com `55` testes backend, `80` testes frontend, `npx tsc --noEmit`, `npm run lint`, `npm run build` e `5` cenarios Playwright verdes; `origin/main` ainda aguarda push.
   - arquivos alterados: `./.codex-memory/current-state.md`, `./.codex-memory/session-log.md`
   - proximos passos: publicar `main` em `origin/main`, sincronizar board/artefatos externos e confirmar o proximo card do roadmap (`a confirmar`).
+- Data: 2026-03-17 16:08:04 -03:00
+  - tarefa: publicar a `main` com a `F5-A`, sincronizar a memoria final e limpar a sobra operacional da worktree da feature.
+  - resultado: `git push origin main` publicou `cf96588`, deixando `main` alinhada com `origin/main`; a memoria operacional foi atualizada para refletir a `F5-A` encerrada no remoto e a branch local `feature/f5-a-release-tecnico` deixou de ser necessaria.
+  - arquivos alterados: `./.codex-memory/current-state.md`, `./.codex-memory/session-log.md`
+  - proximos passos: sincronizar board/artefatos externos e confirmar o proximo card do roadmap (`a confirmar`).
+- Data: 2026-03-17 16:23:12 -03:00
+  - tarefa: auditar o repositorio apos a publicacao da `F5-A` para confirmar o proximo card do roadmap e reconciliar a memoria pendente.
+  - resultado: a memoria operacional local foi alinhada ao estado publicado de `main`/`origin/main`; a auditoria no repo nao encontrou branch, plano ou artifact local para um proximo card alem da `F5-A`, entao a sincronizacao do board externo e a confirmacao do proximo card seguem `a confirmar` neste harness.
+  - arquivos alterados: `./.codex-memory/current-state.md`, `./.codex-memory/session-log.md`
+  - proximos passos: sincronizar board/artefatos externos com acesso adequado e confirmar o proximo card do roadmap.

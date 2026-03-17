@@ -17,9 +17,9 @@
 - A fase 1 esta fechada no repositorio: `F1-A` e `F1-B` seguem validadas em `main`, e a `F1-G` consolidou o gate operacional.
 - A fase 2 esta fechada no repositorio: `F2-A` e `F2-B` seguem validadas em `main`, e a `F2-G` consolidou o gate operacional.
 - A `F3-A Ajustar extracao de contrato assinado e motor de eventos` agora esta integrada em `main` no commit `b3d242e`, endurecendo a extracao de `signed_contract`, persistindo snapshot estruturado por versao e recalculando a agenda canonica de eventos.
-- `origin/main` ja recebeu a `F3-A Ajustar extracao de contrato assinado e motor de eventos`, o commit documental `29afd05`, o merge `29bd91b` da `F4-B`, o gate documental da fase 4 no commit `0eac567` e a sincronizacao versionada da memoria no commit `0abfe91`; o branch local `main` agora esta adiante do remoto por causa da integracao local da `F5-A` e da sincronizacao final da memoria.
+- `origin/main` ja recebeu a `F3-A Ajustar extracao de contrato assinado e motor de eventos`, o commit documental `29afd05`, o merge `29bd91b` da `F4-B`, o gate documental da fase 4 no commit `0eac567`, a integracao da `F5-A` e a sincronizacao versionada da memoria; o branch local `main` voltou a ficar alinhado com o remoto apos o push final.
 - A fase 4 esta fechada no repositorio: `F4-B` foi publicada, `F4-G Gate da fase 4: dashboard/alertas + QA + docs` ja tem artefato em `docs/squad/artifacts/2026-03-17-f4-g-gate-fase-4.md`, e o roadmap pode seguir para a fase 5.
-- A fase 5 avancou com a `F5-A Preparar release tecnico` ja integrada em `main`, com verificacao fresca verde na propria `main` e artefato em `docs/squad/artifacts/2026-03-17-f5-a-release-tecnico.md`; a publicacao em `origin/main` ainda depende de push.
+- A fase 5 avancou com a `F5-A Preparar release tecnico` ja integrada em `main` e `origin/main`, com verificacao fresca verde na propria `main` e artefato em `docs/squad/artifacts/2026-03-17-f5-a-release-tecnico.md`.
 
 ## Ultimas mudancas relevantes
 - O backend ganhou `GET /api/dashboard`, com agregacao de KPIs, timeline operacional e historico de alertas em `backend/app/application/dashboard.py`.
@@ -36,6 +36,8 @@
 - A revisao final da branch `feature/f5-a-release-tecnico` corrigiu a documentacao de boot local para usar `py -3.13 -m uvicorn ...` e `NEXT_PUBLIC_API_URL="http://127.0.0.1:8000"` no frontend, travando esse contrato em `web/tests/release-candidate-assets.test.ts`.
 - A verificacao fresca da branch `feature/f5-a-release-tecnico` fechou com `55` testes backend verdes, `80` testes frontend verdes, `npx tsc --noEmit` verde, `npm run lint` verde, `npm run build` verde, os comandos diretos de `clear/seed` do dashboard verdes, `5` cenarios Playwright verdes e smoke manual verde em `http://127.0.0.1:8000` + `http://127.0.0.1:3000`.
 - A integracao local em `main` foi revalidada com `55` testes backend verdes, `80` testes frontend verdes, `npx tsc --noEmit` verde, `npm run lint` verde, `npm run build` verde e `5` cenarios Playwright verdes.
+- A `main` foi publicada em `origin/main`, e a branch local `feature/f5-a-release-tecnico` deixou de ser necessaria para a continuidade do roadmap.
+- Uma auditoria local apos a publicacao da `F5-A` nao encontrou branch, plano ou artifact local para um proximo card alem do que ja foi entregue; a confirmacao do roadmap segue dependente do board externo.
 
 ## Arquivos alterados nesta tarefa
 - `Makefile`
@@ -71,9 +73,10 @@
 - O build frontend segue emitindo um warning de autoprefixer em `web/src/app/globals.css` por uso de `end`; nao bloqueou a entrega da `F5-A`.
 - O shell Windows do harness nao expoe `make`; a documentacao do fluxo de demo usa comandos Python diretos e deixa os targets do `Makefile` como conveniencia opcional.
 - `.worktrees/`, `tmp/`, `backend/uploads/` e `backend/legaltech.db` seguem presentes no diretório de trabalho; cleanup ficou fora desta tarefa por ser operacional e potencialmente destrutivo.
+- O proximo card do roadmap permanece `a confirmar`: a auditoria local em 2026-03-17 nao encontrou referencia repo-local equivalente a `F5-B`, entao a confirmacao depende de board/artefatos externos ainda indisponiveis neste harness.
 
 ## Proximo passo
-- Publicar `main` em `origin/main`, sincronizar board/artefatos externos e confirmar o proximo card do roadmap (`a confirmar`).
+- Sincronizar board/artefatos externos com acesso adequado e confirmar o proximo card do roadmap (`a confirmar` no repositorio).
 
 ## Ultima atualizacao
-- 2026-03-17 16:00:06 -03:00
+- 2026-03-17 16:23:12 -03:00
