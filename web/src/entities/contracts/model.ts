@@ -1,5 +1,23 @@
 export type ContractSource = "third_party_draft" | "signed_contract";
 
+export type ContractEventType = "renewal" | "expiration" | "readjustment" | "grace_period_end";
+
+export type ContractEventSummary = {
+  id: string;
+  eventType: ContractEventType;
+  eventDate: string | null;
+  leadTimeDays: number;
+  metadata: Record<string, unknown>;
+};
+
+export type ContractEventSummaryPayload = {
+  id: string;
+  event_type: string;
+  event_date: string | null;
+  lead_time_days: number;
+  metadata: Record<string, unknown>;
+};
+
 export type ContractListItemSummary = {
   id: string;
   title: string;
@@ -82,6 +100,7 @@ export type ContractDetailSummary = {
   termMonths: number | null;
   parties: Record<string, unknown> | null;
   financialTerms: Record<string, unknown> | null;
+  fieldConfidence: Record<string, number>;
 };
 
 export type ContractVersionSummary = {
@@ -104,6 +123,7 @@ export type ContractDetail = {
   contract: ContractDetailSummary;
   latestVersion: ContractVersionSummary | null;
   latestAnalysis: ContractLatestAnalysisSummary | null;
+  events: ContractEventSummary[];
 };
 
 export type ContractDetailSummaryPayload = {
@@ -117,6 +137,7 @@ export type ContractDetailSummaryPayload = {
   term_months: number | null;
   parties: Record<string, unknown> | null;
   financial_terms: Record<string, unknown> | null;
+  field_confidence: Record<string, number>;
 };
 
 export type ContractVersionSummaryPayload = {
@@ -151,7 +172,18 @@ export type ContractDetailResponsePayload = {
   contract: ContractDetailSummaryPayload;
   latest_version: ContractVersionSummaryPayload | null;
   latest_analysis: ContractLatestAnalysisSummaryPayload | null;
+  events: ContractEventSummaryPayload[];
 };
+
+function mapContractEvent(payload: ContractEventSummaryPayload): ContractEventSummary {
+  return {
+    id: payload.id,
+    eventType: payload.event_type as ContractEventType,
+    eventDate: payload.event_date,
+    leadTimeDays: payload.lead_time_days,
+    metadata: payload.metadata,
+  };
+}
 
 function mapContractFinding(
   payload: ContractAnalysisFindingSummaryPayload,
@@ -204,6 +236,7 @@ export function mapContractDetailResponse(
       termMonths: payload.contract.term_months,
       parties: payload.contract.parties,
       financialTerms: payload.contract.financial_terms,
+      fieldConfidence: payload.contract.field_confidence,
     },
     latestVersion: payload.latest_version
       ? {
@@ -223,6 +256,7 @@ export function mapContractDetailResponse(
           findings: payload.latest_analysis.findings.map(mapContractFinding),
         }
       : null,
+    events: payload.events.map(mapContractEvent),
   };
 }
 

@@ -1,0 +1,105 @@
+.timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: relative;
+}
+
+.timeline::before {
+  content: "";
+  position: absolute;
+  left: 7px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background-color: var(--line, rgba(255, 255, 255, 0.12));
+}
+
+.node {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 0;
+  position: relative;
+}
+
+.node:last-child {
+  padding-bottom: 0;
+}
+
+.circle {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  margin-top: 3px;
+  position: relative;
+  z-index: 1;
+}
+
+.circle.critical {
+  background-color: var(--contracts-danger, #ef4444);
+}
+
+.circle.attention {
+  background-color: var(--contracts-attention, #eab308);
+}
+
+.circle.conforme {
+  background-color: var(--contracts-success, #22c55e);
+}
+
+.nodeContent {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.nodeHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.nodeTitle {
+  font-weight: 600;
+  color: var(--ink, #fff);
+  font-size: 0.875rem;
+}
+
+.nodeDate {
+  font-size: 0.8125rem;
+  color: var(--ink-muted, rgba(255, 255, 255, 0.6));
+}
+
+.nodeDays {
+  font-size: 0.8125rem;
+  color: var(--ink-muted, rgba(255, 255, 255, 0.6));
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 8px;
+  border-radius: var(--radius-md, 6px);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.pill_critical {
+  background-color: color-mix(in srgb, var(--contracts-danger, #ef4444) 20%, transparent);
+  color: var(--contracts-danger, #ef4444);
+}
+
+.pill_attention {
+  background-color: color-mix(in srgb, var(--contracts-attention, #eab308) 20%, transparent);
+  color: var(--contracts-attention, #eab308);
+}
+
+.pill_conforme {
+  background-color: color-mix(in srgb, var(--contracts-success, #22c55e) 20%, transparent);
+  color: var(--contracts-success, #22c55e);
+}

@@ -17,8 +17,9 @@ function buildContractDetail() {
       startDate: null,
       endDate: null,
       termMonths: 36,
-      parties: { tenant: "Loja Centro" },
+      parties: { entities: ["Loja Centro"] },
       financialTerms: { monthlyRent: 12000 },
+      fieldConfidence: { signature_date: 0.95, parties: 0.87 },
     },
     latestVersion: {
       contractVersionId: "ver-1",
@@ -46,6 +47,15 @@ function buildContractDetail() {
         },
       ],
     },
+    events: [
+      {
+        id: "evt-1",
+        eventType: "renewal" as const,
+        eventDate: "2026-09-15",
+        leadTimeDays: 30,
+        metadata: {},
+      },
+    ],
   };
 }
 
@@ -177,5 +187,43 @@ describe("ContractDetailScreen", () => {
 
     expect(await screen.findByRole("heading", { name: "Loja Centro" })).toBeInTheDocument();
     expect(loadContractDetail).toHaveBeenCalledTimes(3);
+  });
+
+  it("renderiza metadados formatados ao invés de JSON bruto", async () => {
+    const loadContractDetail = vi.fn().mockResolvedValue(buildContractDetail());
+
+    const { queryByText } = render(
+      <ContractDetailScreen contractId="ctr-1" loadContractDetail={loadContractDetail} />,
+    );
+
+    await screen.findByRole("heading", { name: "Loja Centro" });
+
+    expect(screen.getAllByText("Loja Centro").length).toBeGreaterThan(0);
+    expect(queryByText('{"tenant":"Loja Centro"}')).not.toBeInTheDocument();
+  });
+
+  it("renderiza a timeline de eventos quando disponível", async () => {
+    const loadContractDetail = vi.fn().mockResolvedValue(buildContractDetail());
+
+    render(
+      <ContractDetailScreen contractId="ctr-1" loadContractDetail={loadContractDetail} />,
+    );
+
+    await screen.findByRole("heading", { name: "Loja Centro" });
+
+    expect(screen.getByText("Renovação")).toBeInTheDocument();
+  });
+
+  it("exibe estado vazio quando não há eventos", async () => {
+    const loadContractDetail = vi.fn().mockResolvedValue({
+      ...buildContractDetail(),
+      events: [],
+    });
+
+    render(
+      <ContractDetailScreen contractId="ctr-1" loadContractDetail={loadContractDetail} />,
+    );
+
+    expect(await screen.findByText("Nenhum evento identificado")).toBeInTheDocument();
   });
 });

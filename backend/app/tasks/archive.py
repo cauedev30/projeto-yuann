@@ -42,6 +42,7 @@ def process_signed_contract_archive(
     contract.financial_terms = metadata.financial_terms
     extraction_metadata = dict(contract_version.extraction_metadata or {})
     extraction_metadata["signed_contract_snapshot"] = _build_signed_contract_snapshot(metadata)
+    extraction_metadata["field_confidence"] = metadata.field_confidence
     contract_version.extraction_metadata = extraction_metadata
     session.add(contract_version)
 

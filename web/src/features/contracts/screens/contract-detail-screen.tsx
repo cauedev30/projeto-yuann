@@ -9,8 +9,10 @@ import { StatCard } from "../../../components/ui/stat-card";
 import { SurfaceCard } from "../../../components/ui/surface-card";
 import type { ContractDetail } from "../../../entities/contracts/model";
 import { ContractsApiError, getContractDetail } from "../../../lib/api/contracts";
+import { EventTimeline } from "../components/event-timeline";
 import { ExtractedTextPanel } from "../components/extracted-text-panel";
 import { FindingsSection } from "../components/findings-section";
+import { MetadataSection } from "../components/metadata-section";
 import styles from "./contract-detail-screen.module.css";
 
 type ContractDetailScreenProps = {
@@ -202,30 +204,14 @@ export function ContractDetailScreen({
         </div>
 
         <div className={styles.detailGrid}>
-          <SurfaceCard title="Resumo do contrato">
-            <dl className={styles.summaryList}>
-              <div className={styles.summaryRow}>
-                <dt>Referencia externa</dt>
-                <dd>{detail.contract.externalReference}</dd>
-              </div>
-              <div className={styles.summaryRow}>
-                <dt>Partes</dt>
-                <dd>
-                  {detail.contract.parties
-                    ? JSON.stringify(detail.contract.parties)
-                    : "a confirmar"}
-                </dd>
-              </div>
-              <div className={styles.summaryRow}>
-                <dt>Termos financeiros</dt>
-                <dd>
-                  {detail.contract.financialTerms
-                    ? JSON.stringify(detail.contract.financialTerms)
-                    : "a confirmar"}
-                </dd>
-              </div>
-            </dl>
-          </SurfaceCard>
+          <MetadataSection
+            parties={detail.contract.parties}
+            financialTerms={detail.contract.financialTerms}
+            fieldConfidence={detail.contract.fieldConfidence}
+            signatureDate={detail.contract.signatureDate}
+            startDate={detail.contract.startDate}
+            endDate={detail.contract.endDate}
+          />
 
           <SurfaceCard title="Ultima versao">
             {detail.latestVersion ? (
@@ -248,6 +234,8 @@ export function ContractDetailScreen({
             )}
           </SurfaceCard>
         </div>
+
+        <EventTimeline events={detail.events} />
 
         <SurfaceCard title="Ultima analise">
           {detail.latestAnalysis ? (

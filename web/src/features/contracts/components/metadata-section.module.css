@@ -1,0 +1,93 @@
+.list {
+  margin: 0;
+  display: grid;
+  gap: 0.85rem;
+}
+
+.row {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.rowHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.label {
+  color: var(--ink-muted);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.value {
+  margin: 0;
+  color: var(--ink);
+  line-height: 1.6;
+}
+
+.partiesList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.25rem;
+}
+
+.partiesItem {
+  color: var(--ink);
+  line-height: 1.6;
+}
+
+.emptyText {
+  margin: 0;
+  color: var(--ink-muted);
+  font-style: italic;
+}
+
+.pill {
+  display: inline-block;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  line-height: 1.6;
+}
+
+.pillHigh {
+  background: rgba(34, 197, 94, 0.15);
+  color: #22c55e;
+}
+
+.pillMedium {
+  background: rgba(234, 179, 8, 0.15);
+  color: #eab308;
+}
+
+.pillLow {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+.section {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.sectionTitle {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-weight: 600;
+}
+
+.divider {
+  border: none;
+  border-top: 1px solid var(--line, rgba(255, 255, 255, 0.08));
+  margin: 0.25rem 0;
+}
