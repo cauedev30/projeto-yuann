@@ -122,6 +122,15 @@ def test_upload_signed_contract_persists_snapshot_and_rebuilds_events(
             },
             "ready_for_event_generation": True,
         },
+        "field_confidence": {
+            "signature_date": 1.0,
+            "start_date": 1.0,
+            "term_months": 1.0,
+            "end_date": 1.0,
+            "parties": 1.0,
+            "grace_period_months": 1.0,
+            "readjustment_type": 1.0,
+        },
     }
     assert sorted(event.event_type.value for event in events) == [
         "expiration",
