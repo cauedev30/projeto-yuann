@@ -11,15 +11,15 @@
 - O repositorio ja contem testes de backend, frontend e E2E.
 - O runtime local verificado continua usando SQLite e filesystem; `docker-compose.yml` segue como opcional para evolucoes de infraestrutura.
 - A `F4-B Finalizar dashboard e timeline operacional` agora esta integrada em `main` e `origin/main` no merge `29bd91b`, adicionando `GET /api/dashboard`, consumo real do snapshot no frontend e leitura operacional do dashboard.
-- A `F5-A Preparar release tecnico` foi implementada na worktree `feature/f5-a-release-tecnico`, oficializando `Python 3.13` como baseline documental do release candidate, adicionando `docs/release-candidate-runbook.md` e serializando a suite Playwright no config versionado.
+- A `F5-A Preparar release tecnico` agora esta integrada em `main` no commit `c248a0a`, oficializando `Python 3.13` como baseline documental do release candidate, adicionando `docs/release-candidate-runbook.md` e serializando a suite Playwright no config versionado.
 
 ## Em andamento
 - A fase 1 esta fechada no repositorio: `F1-A` e `F1-B` seguem validadas em `main`, e a `F1-G` consolidou o gate operacional.
 - A fase 2 esta fechada no repositorio: `F2-A` e `F2-B` seguem validadas em `main`, e a `F2-G` consolidou o gate operacional.
 - A `F3-A Ajustar extracao de contrato assinado e motor de eventos` agora esta integrada em `main` no commit `b3d242e`, endurecendo a extracao de `signed_contract`, persistindo snapshot estruturado por versao e recalculando a agenda canonica de eventos.
-- `origin/main` ja recebeu a `F3-A Ajustar extracao de contrato assinado e motor de eventos`, o commit documental `29afd05`, o merge `29bd91b` da `F4-B`, o gate documental da fase 4 no commit `0eac567` e a sincronizacao versionada da memoria no commit `0abfe91`; o branch local `main` esta alinhado com o remoto.
+- `origin/main` ja recebeu a `F3-A Ajustar extracao de contrato assinado e motor de eventos`, o commit documental `29afd05`, o merge `29bd91b` da `F4-B`, o gate documental da fase 4 no commit `0eac567` e a sincronizacao versionada da memoria no commit `0abfe91`; o branch local `main` agora esta adiante do remoto por causa da integracao local da `F5-A` e da sincronizacao final da memoria.
 - A fase 4 esta fechada no repositorio: `F4-B` foi publicada, `F4-G Gate da fase 4: dashboard/alertas + QA + docs` ja tem artefato em `docs/squad/artifacts/2026-03-17-f4-g-gate-fase-4.md`, e o roadmap pode seguir para a fase 5.
-- A `F5-A Preparar release tecnico` esta pronta na branch `feature/f5-a-release-tecnico`, com verificacao fresca verde, smoke manual validado a partir dos comandos documentados e artefato em `docs/squad/artifacts/2026-03-17-f5-a-release-tecnico.md`; a entrega ainda nao foi integrada em `main` nem publicada em `origin/main`.
+- A fase 5 avancou com a `F5-A Preparar release tecnico` ja integrada em `main`, com verificacao fresca verde na propria `main` e artefato em `docs/squad/artifacts/2026-03-17-f5-a-release-tecnico.md`; a publicacao em `origin/main` ainda depende de push.
 
 ## Ultimas mudancas relevantes
 - O backend ganhou `GET /api/dashboard`, com agregacao de KPIs, timeline operacional e historico de alertas em `backend/app/application/dashboard.py`.
@@ -35,6 +35,7 @@
 - O release candidate agora tambem versiona `web/tests/fixtures/third-party-draft.pdf`, documenta o seed do dashboard com comandos Python diretos e trava esses assets em `web/tests/release-candidate-assets.test.ts`.
 - A revisao final da branch `feature/f5-a-release-tecnico` corrigiu a documentacao de boot local para usar `py -3.13 -m uvicorn ...` e `NEXT_PUBLIC_API_URL="http://127.0.0.1:8000"` no frontend, travando esse contrato em `web/tests/release-candidate-assets.test.ts`.
 - A verificacao fresca da branch `feature/f5-a-release-tecnico` fechou com `55` testes backend verdes, `80` testes frontend verdes, `npx tsc --noEmit` verde, `npm run lint` verde, `npm run build` verde, os comandos diretos de `clear/seed` do dashboard verdes, `5` cenarios Playwright verdes e smoke manual verde em `http://127.0.0.1:8000` + `http://127.0.0.1:3000`.
+- A integracao local em `main` foi revalidada com `55` testes backend verdes, `80` testes frontend verdes, `npx tsc --noEmit` verde, `npm run lint` verde, `npm run build` verde e `5` cenarios Playwright verdes.
 
 ## Arquivos alterados nesta tarefa
 - `Makefile`
@@ -72,7 +73,7 @@
 - `.worktrees/`, `tmp/`, `backend/uploads/` e `backend/legaltech.db` seguem presentes no diretório de trabalho; cleanup ficou fora desta tarefa por ser operacional e potencialmente destrutivo.
 
 ## Proximo passo
-- Escolher a estrategia de integracao da branch `feature/f5-a-release-tecnico`; depois disso, sincronizar remoto/board e confirmar o proximo card do roadmap (`a confirmar`).
+- Publicar `main` em `origin/main`, sincronizar board/artefatos externos e confirmar o proximo card do roadmap (`a confirmar`).
 
 ## Ultima atualizacao
-- 2026-03-17 15:47:46 -03:00
+- 2026-03-17 16:00:06 -03:00

@@ -95,3 +95,8 @@
   - resultado: `README.md` e `docs/release-candidate-runbook.md` passaram a declarar os comandos reais de boot (`py -3.13 -m uvicorn ...` e `NEXT_PUBLIC_API_URL="http://127.0.0.1:8000"` no frontend), `web/tests/release-candidate-assets.test.ts` travou esse contrato documental e a revalidacao final fechou com `55` testes backend, `80` testes frontend, `npx tsc --noEmit`, `npm run lint`, `npm run build`, `5` cenarios Playwright e smoke manual verde em `8000/3000`.
   - arquivos alterados: `README.md`, `docs/release-candidate-runbook.md`, `docs/squad/artifacts/2026-03-17-f5-a-release-tecnico.md`, `web/tests/release-candidate-assets.test.ts`, `./.codex-memory/current-state.md`, `./.codex-memory/session-log.md`
   - proximos passos: escolher a estrategia de integracao da branch `feature/f5-a-release-tecnico`; depois disso, sincronizar remoto/board e confirmar o proximo card do roadmap (`a confirmar`).
+- Data: 2026-03-17 16:00:06 -03:00
+  - tarefa: integrar localmente a `F5-A Preparar release tecnico` em `main` e revalidar o estado final do repositorio.
+  - resultado: `main` recebeu fast-forward para `c248a0a`, a verificacao fresca na propria `main` fechou com `55` testes backend, `80` testes frontend, `npx tsc --noEmit`, `npm run lint`, `npm run build` e `5` cenarios Playwright verdes; `origin/main` ainda aguarda push.
+  - arquivos alterados: `./.codex-memory/current-state.md`, `./.codex-memory/session-log.md`
+  - proximos passos: publicar `main` em `origin/main`, sincronizar board/artefatos externos e confirmar o proximo card do roadmap (`a confirmar`).
