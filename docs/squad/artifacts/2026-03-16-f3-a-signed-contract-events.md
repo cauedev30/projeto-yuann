@@ -1,8 +1,8 @@
-# F3-A Signed Contract Extraction and Events
+# F3-A Ajustar extracao de contrato assinado e motor de eventos
 
 ## Task Brief
 
-- Request: ajustar a extracao de contrato assinado e o motor de eventos para persistir snapshot por versao, recalcular a agenda canonica e endurecer a cobertura backend sem expandir a API publica.
+- Request: executar o card `F3-A Ajustar extracao de contrato assinado e motor de eventos` para persistir snapshot por versao, recalcular a agenda canonica e endurecer a cobertura backend sem expandir a API publica.
 - Risk level: `medium-risk feature`
 - Affected areas: `backend`, `docs`, `memory`
 - Required roles: `implementation-manager`, `tech-lead`, `backend-engineer`, `qa-backend`, `documentation-engineer`
