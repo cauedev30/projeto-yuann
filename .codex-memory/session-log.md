@@ -75,3 +75,8 @@
   - resultado: `main` recebeu o merge `29bd91b`, `origin/main` ficou alinhado, o card da `F4-B` foi movido para `Concluido` com checklist completa e a verificacao final fechou com `55` testes backend, `75` testes frontend, `npm run build` e `2` cenarios Playwright verdes.
   - arquivos alterados: `current-state.md`, `session-log.md`
   - proximos passos: executar `F4-G Gate da fase 4: dashboard/alertas + QA + docs`.
+- Data: 2026-03-17 14:18:56 -03:00
+  - tarefa: versionar `./.codex-memory/` em `main` e alinhar a memoria ao novo topo do repositorio.
+  - resultado: `.gitignore` deixou de ignorar `./.codex-memory/`, o vault operacional passou a ser rastreado em `main` e o estado foi corrigido para refletir a fase 4 encerrada no topo atual de `origin/main`.
+  - arquivos alterados: `.gitignore`, `./.codex-memory/current-state.md`, `./.codex-memory/decisions.md`, `./.codex-memory/patterns.md`, `./.codex-memory/session-log.md`, `./.codex-memory/source-of-truth.md`
+  - proximos passos: iniciar `F5-A Preparar release tecnico`.
