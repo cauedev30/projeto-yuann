@@ -1,7 +1,7 @@
 # Release Candidate Runbook
 
 ## Goal
-Close `F5-A Preparar release tecnico` with one reproducible local verification flow for the current `main` checkout.
+Verify the LegalTech MVP release with one reproducible local verification flow for the current `main` checkout.
 
 ## Baseline
 - Python: `3.13`

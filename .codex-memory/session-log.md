@@ -1,5 +1,11 @@
 # Session Log
 
+- Data: 2026-03-17 23:18:07 -0300
+  - tarefa: executar o `F5-G Gate final` usando o estado publicado do GitHub como unica fonte de verdade e reconciliar a memoria local.
+  - resultado: o topo publicado do GitHub (`19dab0b feat: prepare f5-b product release [F5-B]`) foi revalidado com `55` testes backend, `81` testes frontend, `tsc`, `lint`, `build` e `9` cenarios Playwright verdes; `README.md`, `docs/release-candidate-runbook.md`, `docs/squad/artifacts/2026-03-17-f5-g-final-gate.md` e `./.codex-memory/current-state.md` foram atualizados para refletir o MVP completo e corrigir a memoria que ainda tratava a `F5-B` como nao integrada.
+  - arquivos alterados: `README.md`, `docs/release-candidate-runbook.md`, `docs/squad/artifacts/2026-03-17-f5-g-final-gate.md`, `./.codex-memory/current-state.md`, `./.codex-memory/session-log.md`
+  - proximos passos: MVP fechado. Trabalhos futuros passam a ser pos-MVP.
+
 - Data: 2026-03-17 22:38:51 -0300
   - tarefa: implementar e verificar a `F5-B Preparar release de produto` em worktree isolada.
   - resultado: a branch `feature/f5-b-release-produto` fechou acessibilidade critica, responsividade mobile, polish visual de contracts/dashboard, roteiro de demo, seed enriquecido, quatro novos specs E2E e o conserto do `Makefile` para reabilitar `make release-verify`; a verificacao fresca fechou com `55` testes backend, `81` testes frontend, `tsc`, `lint`, `build` e `9` cenarios Playwright verdes.

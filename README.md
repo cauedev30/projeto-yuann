@@ -1,5 +1,7 @@
 # LegalTech MVP
 
+> **Status**: MVP complete. Todas as features entregues e verificadas (F1-F5).
+
 Monorepo for the first sellable version of the contract governance platform for franchise expansion teams.
 
 ## Product scope
@@ -53,12 +55,12 @@ Monorepo for the first sellable version of the contract governance platform for 
 - Build: `cd web && npm run build`
 - End to end: `cd web && npm run e2e`
 
-## Release candidate
-- Use the verification order above as the official `F5-A` baseline.
+## Release verification
+- Use the verification order above as the official local MVP verification baseline.
 - The Playwright suite is intentionally serialized in the checked-in config because the local backend runtime shares one SQLite database during E2E verification.
 - Seed the dashboard demo state with `cd backend && python -m tests.support.seed_dashboard_runtime seed`.
 - Clear the dashboard demo state with `cd backend && python -m tests.support.seed_dashboard_runtime clear`.
 - The root `Makefile` exposes the same demo helpers as `release-seed-dashboard` and `release-clear-dashboard` when `make` is available in the shell.
 - The minimum demo fixtures are `web/tests/fixtures/third-party-draft.pdf` and `web/tests/fixtures/unreadable-upload.pdf`.
-- Cleanup of `.worktrees/`, `tmp/`, legacy uploads, and other ignored runtime artifacts is outside the `F5-A` release scope.
+- Cleanup of `.worktrees/`, `tmp/`, legacy uploads, and other ignored runtime artifacts is outside the MVP closeout scope.
 - See `docs/release-candidate-runbook.md` for the full checklist and known non-blocking risks.
