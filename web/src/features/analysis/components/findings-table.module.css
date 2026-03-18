@@ -20,7 +20,7 @@
   letter-spacing: 0.12em;
   text-transform: uppercase;
   border-bottom: 1px solid var(--line);
-  background: var(--surface-soft);
+  background: var(--bg-elevated);
 }
 
 .table td {
@@ -31,7 +31,7 @@
 }
 
 .table tbody tr:nth-child(even) {
-  background: rgba(196, 173, 129, 0.02);
+  background: rgba(0, 0, 0, 0.02);
 }
 
 .table tbody tr:last-child td {

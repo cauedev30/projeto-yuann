@@ -12,7 +12,7 @@
   top: 0;
   bottom: 0;
   width: 2px;
-  background-color: var(--line, rgba(255, 255, 255, 0.12));
+  background-color: var(--line, #e5e7eb);
 }
 
 .node {
@@ -65,25 +65,25 @@
 
 .nodeTitle {
   font-weight: 600;
-  color: var(--ink, #fff);
+  color: var(--ink, #111827);
   font-size: 0.875rem;
 }
 
 .nodeDate {
   font-size: 0.8125rem;
-  color: var(--ink-muted, rgba(255, 255, 255, 0.6));
+  color: var(--ink-muted, #6b7280);
 }
 
 .nodeDays {
   font-size: 0.8125rem;
-  color: var(--ink-muted, rgba(255, 255, 255, 0.6));
+  color: var(--ink-muted, #6b7280);
 }
 
 .pill {
   display: inline-flex;
   align-items: center;
   padding: 1px 8px;
-  border-radius: var(--radius-md, 6px);
+  border-radius: var(--radius-xs, 6px);
   font-size: 0.75rem;
   font-weight: 600;
   line-height: 1.5;

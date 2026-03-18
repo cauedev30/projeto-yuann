@@ -5,37 +5,22 @@
   gap: var(--space-3);
   padding: clamp(1.35rem, 2vw, 1.9rem);
   border: 1px solid var(--line);
-  border-radius: 28px;
-  background: linear-gradient(180deg, var(--surface-overlay-from), var(--surface-overlay-to));
-  box-shadow: var(--shadow-soft);
-  overflow: hidden;
-}
-
-.pageHeader::before,
-.surfaceCard::before,
-.statCard::before,
-.emptyState::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(135deg, rgba(196, 173, 129, 0.07), transparent 42%),
-    linear-gradient(180deg, rgba(134, 168, 216, 0.08), transparent 44%);
-  pointer-events: none;
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
 }
 
 .pageHeader h1 {
   margin: 0;
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-size: var(--text-display-md);
-  line-height: 0.98;
+  line-height: 1.15;
   letter-spacing: -0.04em;
 }
 
 .eyebrow {
   margin: 0;
-  color: var(--brand-gold);
-  letter-spacing: 0.16em;
+  color: var(--ink-muted);
+  letter-spacing: 0.05em;
   text-transform: uppercase;
   font-size: var(--text-xs);
   font-weight: 700;
@@ -54,16 +39,14 @@
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
-  background: linear-gradient(180deg, var(--surface-card-from), var(--surface-card-to));
-  box-shadow: var(--shadow-card);
-  backdrop-filter: blur(18px);
+  background: var(--bg);
   padding: var(--space-5);
   animation: cardFadeIn 0.3s ease-out;
 }
 
 .surfaceTitle {
   margin: 0 0 var(--space-4);
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-size: var(--text-2xl);
   font-weight: 600;
   line-height: 1.1;
@@ -72,13 +55,12 @@
 /* === Stat Card === */
 .statCard {
   position: relative;
-  overflow: hidden;
   display: grid;
   gap: var(--space-2);
   padding: var(--space-4);
   border: 1px solid var(--line-border);
   border-radius: var(--radius-sm);
-  background: linear-gradient(180deg, var(--surface-panel-from), var(--surface-panel-to));
+  background: var(--bg-elevated);
 }
 
 .statLabel {
@@ -89,7 +71,7 @@
 
 .statValue {
   margin: 0;
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-size: var(--text-display-sm);
   line-height: 0.95;
   font-weight: 600;
@@ -105,18 +87,17 @@
 /* === Empty State === */
 .emptyState {
   position: relative;
-  overflow: hidden;
   display: grid;
   gap: var(--space-3);
   padding: clamp(1.2rem, 2.5vw, 2rem);
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
-  background: linear-gradient(180deg, var(--surface-overlay-from), var(--surface-card-to));
+  background: var(--bg-elevated);
 }
 
 .emptyTitle {
   margin: 0;
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-size: var(--text-2xl);
   line-height: 1.1;
 }
@@ -132,7 +113,7 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-xs);
   padding: 0.2rem 0.6rem;
   font-size: var(--text-xs);
   font-weight: 700;
@@ -182,7 +163,7 @@
   padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-input);
   border: 1px solid var(--line-border);
-  background: var(--surface-strong);
+  background: var(--bg);
   color: var(--ink);
   font: inherit;
   transition: border-color var(--transition-fast);
@@ -198,7 +179,7 @@
 }
 
 .formInput:focus {
-  outline: 2px solid var(--brand-gold);
+  outline: 2px solid var(--brand-blue);
   outline-offset: 2px;
 }
 
@@ -210,24 +191,18 @@
   min-height: 44px;
   padding: var(--space-3) var(--space-5);
   border: 0;
-  border-radius: var(--radius-pill);
-  background: linear-gradient(135deg, var(--brand-gold), #efe2c7);
-  color: #07111b;
+  border-radius: var(--radius-input);
+  background: var(--brand-blue);
+  color: #ffffff;
   font: inherit;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 18px 35px rgba(196, 173, 129, 0.22);
   transition:
-    transform var(--transition-base),
-    box-shadow var(--transition-base);
-}
-
-.buttonPrimary:hover:not(:disabled) {
-  transform: translateY(-2px);
+    background var(--transition-base);
 }
 
 .buttonPrimary:focus-visible {
-  outline: 2px solid var(--brand-gold);
+  outline: 2px solid var(--brand-blue);
   outline-offset: 2px;
 }
 
@@ -238,7 +213,6 @@
 .buttonPrimary:disabled {
   opacity: 0.62;
   cursor: not-allowed;
-  box-shadow: none;
 }
 
 .buttonSecondary {
@@ -248,25 +222,23 @@
   min-height: 44px;
   padding: var(--space-3) var(--space-4);
   border: 1px solid var(--line);
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-input);
   background: var(--surface-soft);
   color: var(--ink-soft);
   font: inherit;
   font-weight: 700;
   cursor: pointer;
   transition:
-    transform var(--transition-base),
     border-color var(--transition-base),
     background var(--transition-base);
 }
 
 .buttonSecondary:hover:not(:disabled) {
-  transform: translateY(-1px);
   border-color: var(--line-strong);
 }
 
 .buttonSecondary:focus-visible {
-  outline: 2px solid var(--brand-gold);
+  outline: 2px solid var(--brand-blue);
   outline-offset: 2px;
 }
 
@@ -289,7 +261,7 @@
 .skeletonLine,
 .skeletonHeading {
   border-radius: var(--radius-xs);
-  background: linear-gradient(90deg, var(--surface-soft), var(--surface-strong), var(--surface-soft));
+  background: linear-gradient(90deg, #f3f4f6, #e5e7eb, #f3f4f6);
   background-size: 200% 100%;
   animation: skeletonPulse 1.8s ease-in-out infinite;
 }
@@ -313,7 +285,7 @@
 .skeletonStatCard {
   height: 5.5rem;
   border-radius: var(--radius-sm);
-  background: linear-gradient(90deg, var(--surface-soft), var(--surface-strong), var(--surface-soft));
+  background: linear-gradient(90deg, #f3f4f6, #e5e7eb, #f3f4f6);
   background-size: 200% 100%;
   animation: skeletonPulse 1.8s ease-in-out infinite;
 }
@@ -326,7 +298,7 @@
 .skeletonListItem {
   height: 3.5rem;
   border-radius: var(--radius-input);
-  background: linear-gradient(90deg, var(--surface-soft), var(--surface-strong), var(--surface-soft));
+  background: linear-gradient(90deg, #f3f4f6, #e5e7eb, #f3f4f6);
   background-size: 200% 100%;
   animation: skeletonPulse 1.8s ease-in-out infinite;
 }
@@ -339,7 +311,7 @@
 .skeletonTableRow {
   height: 2.5rem;
   border-radius: var(--radius-xs);
-  background: linear-gradient(90deg, var(--surface-soft), var(--surface-strong), var(--surface-soft));
+  background: linear-gradient(90deg, #f3f4f6, #e5e7eb, #f3f4f6);
   background-size: 200% 100%;
   animation: skeletonPulse 1.8s ease-in-out infinite;
 }

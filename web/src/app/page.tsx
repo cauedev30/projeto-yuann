@@ -12,15 +12,14 @@ export default function HomePage() {
         <div className="marketingHeroCopy">
           <p className="marketingEyebrow">Plataforma juridica operacional</p>
           <span className="marketingHeroBadge">Workspace pronto para uso</span>
-          <h1>A materia contratual em formato de decisao.</h1>
+          <h1>Gestao contratual simplificada para times juridicos.</h1>
           <p className="marketingLead">
-            Leitura juridica, trilha operacional e proximas acoes em uma mesma
-            cadencia visual.
+            Organize intake, triagem e acompanhamento de contratos em um
+            workspace unico e integrado.
           </p>
           <p className="marketingSublead">
-            LegalTech organiza intake, risco, aprovacao e acompanhamento em um
-            workspace escuro, sofisticado e construido para times que precisam decidir
-            sem perder contexto.
+            Leitura juridica automatizada, analise de risco e proximas acoes
+            claras para cada contrato do portfolio.
           </p>
           <div className="marketingHeroActions">
             <Link className="primaryCta" href="/dashboard">
@@ -108,39 +107,10 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="marketingEditorialBand" id="produto">
-        <div className="marketingEditorialQuote">
-          <p className="marketingPanelLabel">Direcao aprovada</p>
-          <h2>Um produto juridico premium, nao uma landing intercambiavel.</h2>
-          <p>
-            A mesma identidade percorre a home, o dashboard e a mesa de contracts:
-            tipografia com presenca, superficies escuras, textura discreta e hierarquia
-            precisa.
-          </p>
-        </div>
-        <div className="marketingProof">
-          <div className="marketingProofCard">
-            <p className="marketingProofLabel">Ritmo visual</p>
-            <strong>Editorial, controlado e juridico.</strong>
-            <span>Composicao assimetrica, mas ainda objetiva para leitura de produto.</span>
-          </div>
-          <div className="marketingProofCard">
-            <p className="marketingProofLabel">Camada operacional</p>
-            <strong>Dashboard e contracts no mesmo enquadramento.</strong>
-            <span>Uma linguagem unica para risco, revisao e proxima acao.</span>
-          </div>
-          <div className="marketingProofCard">
-            <p className="marketingProofLabel">Acabamento</p>
-            <strong>Tipografia forte e interacao discreta.</strong>
-            <span>Sem efeitos vazios e sem cara de template de IA.</span>
-          </div>
-        </div>
-      </section>
-
       <section className="marketingClosing">
         <div>
           <p className="marketingSectionKicker">LegalTech workspace</p>
-          <h2>Entre no produto e valide o fluxo na pratica.</h2>
+          <h2>Comece a organizar seu portfolio contratual.</h2>
         </div>
         <Link className="primaryCta" href="/contracts">
           Comece agora

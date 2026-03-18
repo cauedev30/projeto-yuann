@@ -17,7 +17,7 @@
 }
 
 .breadcrumbLink:hover {
-  color: var(--brand-gold);
+  color: var(--brand-blue);
 }
 
 .breadcrumbSeparator {
@@ -39,8 +39,8 @@
   min-height: 2.75rem;
   padding: 0.7rem 1rem;
   border: 1px solid var(--line-border-strong);
-  border-radius: 999px;
-  background: rgba(10, 18, 29, 0.8);
+  border-radius: var(--radius-input);
+  background: var(--bg);
   color: var(--ink);
   font: inherit;
   font-weight: 700;
@@ -48,12 +48,11 @@
 }
 
 .refreshButton:hover:not(:disabled) {
-  transform: translateY(-1px);
   border-color: var(--line-strong);
 }
 
 .refreshButton:focus-visible {
-  outline: 2px solid var(--brand-gold);
+  outline: 2px solid var(--brand-blue);
   outline-offset: 2px;
 }
 
@@ -96,7 +95,7 @@
   color: var(--ink-muted);
   font-size: 0.85rem;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.05em;
 }
 
 .summaryRow dd {
@@ -121,17 +120,16 @@
   margin: 0;
   padding: 1rem;
   border-radius: var(--radius-sm);
-  border: 1px solid rgba(242, 141, 141, 0.2);
-  background: rgba(60, 21, 29, 0.4);
-  color: #f5b1b1;
+  border: 1px solid #fecaca;
+  background: #fef2f2;
+  color: #dc2626;
   line-height: 1.6;
 }
 
 .collapsible {
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
-  background: linear-gradient(180deg, var(--surface-card-from), var(--surface-card-to));
-  box-shadow: var(--shadow-card);
+  background: var(--bg);
   overflow: hidden;
 }
 
@@ -152,11 +150,11 @@
 }
 
 .collapsibleSummary:hover {
-  background: rgba(196, 173, 129, 0.04);
+  background: var(--bg-elevated);
 }
 
 .collapsibleTitle {
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-size: var(--text-2xl);
   font-weight: 600;
   line-height: 1.1;

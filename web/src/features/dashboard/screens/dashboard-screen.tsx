@@ -87,9 +87,9 @@ export function DashboardScreen({
         {error?.message ?? ""}
       </div>
       <PageHeader
-        eyebrow="Mesa juridica"
-        title="Governanca contratual em andamento"
-        description="Portfolio, eventos e notificacoes sob a mesma leitura executiva, sem mascarar a ausencia de dados runtime."
+        eyebrow="Dashboard"
+        title="Resumo do portfolio"
+        description="Visao geral dos contratos, eventos e notificacoes."
       />
 
       {isLoading ? (

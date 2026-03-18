@@ -5,7 +5,7 @@
   --contracts-line-strong: var(--line-strong);
   --contracts-surface: var(--surface);
   --contracts-surface-strong: var(--surface-strong);
-  --contracts-accent: var(--brand-gold);
+  --contracts-accent: var(--brand-blue);
   --contracts-accent-soft: var(--line-border);
   --contracts-attention: var(--status-attention);
   --contracts-attention-soft: var(--status-attention-soft);
@@ -21,10 +21,10 @@
 
 .successBanner {
   padding: var(--space-4);
-  border: 1px solid rgba(196, 173, 129, 0.2);
+  border: 1px solid rgba(5, 150, 105, 0.2);
   border-radius: var(--radius-sm);
-  background: linear-gradient(135deg, rgba(196, 173, 129, 0.1), rgba(151, 210, 189, 0.08));
-  color: var(--brand-gold);
+  background: #ecfdf5;
+  color: var(--brand-green);
   font-weight: 700;
   font-size: var(--text-sm);
   animation: bannerSlideDown 280ms ease-out, bannerFadeOut 800ms ease 4200ms forwards;
@@ -53,22 +53,9 @@
 .hero,
 .panel {
   position: relative;
-  overflow: hidden;
   border: 1px solid var(--contracts-line);
-  border-radius: 1.9rem;
-  background: linear-gradient(180deg, var(--surface-card-from), var(--surface-card-to));
-  box-shadow: var(--shadow-soft);
-}
-
-.hero::before,
-.panel::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(135deg, rgba(196, 173, 129, 0.07), transparent 42%),
-    linear-gradient(180deg, rgba(134, 168, 216, 0.08), transparent 44%);
-  pointer-events: none;
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
 }
 
 .hero {
@@ -82,27 +69,27 @@
 .summaryLabel {
   margin: 0;
   text-transform: uppercase;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.05em;
   font-size: 0.74rem;
   font-weight: 700;
 }
 
 .eyebrow,
 .panelEyebrow {
-  color: var(--contracts-accent);
+  color: var(--ink-muted);
 }
 
 .heroTitle,
 .sectionTitle {
   margin: 0;
-  font-family: var(--font-display);
-  line-height: 0.98;
+  font-family: var(--font-body);
+  line-height: 1.2;
   letter-spacing: -0.04em;
 }
 
 .heroTitle {
-  font-size: clamp(2.5rem, 4vw, 4.6rem);
-  max-width: 12ch;
+  font-size: clamp(1.5rem, 2.5vw, 2rem);
+  max-width: 20ch;
 }
 
 .heroDescription {
@@ -139,7 +126,7 @@
 
 .sectionTitle {
   margin-top: 0.35rem;
-  font-size: clamp(1.6rem, 1.2rem + 1vw, 2.25rem);
+  font-size: clamp(1.25rem, 1rem + 0.8vw, 1.75rem);
 }
 
 .panelDescription,
@@ -166,9 +153,9 @@
   justify-content: center;
   min-height: 2rem;
   padding: 0.45rem 0.8rem;
-  border-radius: 999px;
+  border-radius: var(--radius-xs);
   border: 1px solid var(--line-border);
-  background: rgba(17, 29, 45, 0.8);
+  background: var(--bg-elevated);
   color: var(--contracts-ink);
   font-size: 0.82rem;
   font-weight: 700;
@@ -185,7 +172,7 @@
   height: 0.55rem;
   border-radius: 50%;
   background: var(--contracts-muted);
-  box-shadow: 0 0 0 6px rgba(147, 160, 179, 0.12);
+  box-shadow: 0 0 0 6px rgba(107, 114, 128, 0.12);
 }
 
 .summaryCallout,
@@ -199,47 +186,47 @@
 }
 
 .sessionToneEmpty {
-  background: linear-gradient(180deg, rgba(24, 20, 12, 0.92), rgba(10, 17, 28, 0.96));
+  background: #fffbeb;
 }
 
 .sessionToneLoading {
-  background: linear-gradient(180deg, rgba(12, 26, 33, 0.94), rgba(8, 15, 26, 0.96));
+  background: #eff6ff;
 }
 
 .sessionToneLoading .statusChip::before {
   background: var(--brand-blue);
-  box-shadow: 0 0 0 6px rgba(134, 168, 216, 0.14);
+  box-shadow: 0 0 0 6px rgba(37, 99, 235, 0.14);
 }
 
 .sessionToneError {
-  background: linear-gradient(180deg, rgba(35, 15, 21, 0.94), rgba(8, 15, 26, 0.96));
+  background: #fef2f2;
 }
 
 .sessionToneError .statusChip::before {
   background: var(--contracts-danger);
-  box-shadow: 0 0 0 6px rgba(242, 141, 141, 0.14);
+  box-shadow: 0 0 0 6px rgba(220, 38, 38, 0.14);
 }
 
 .sessionToneSuccess {
-  background: linear-gradient(180deg, rgba(13, 29, 25, 0.94), rgba(8, 15, 26, 0.96));
+  background: #ecfdf5;
 }
 
 .sessionToneSuccess .statusChip::before {
   background: var(--contracts-success);
-  box-shadow: 0 0 0 6px rgba(151, 210, 189, 0.14);
+  box-shadow: 0 0 0 6px rgba(5, 150, 105, 0.14);
 }
 
 .sessionToneEmpty .statusChip::before {
   background: var(--contracts-attention);
-  box-shadow: 0 0 0 6px rgba(231, 188, 107, 0.14);
+  box-shadow: 0 0 0 6px rgba(217, 119, 6, 0.14);
 }
 
 .sessionMessage {
   margin: 0;
   padding: 1rem;
-  border-radius: 1.1rem;
+  border-radius: var(--radius-input);
   border: 1px solid var(--line-border);
-  background: rgba(9, 18, 29, 0.68);
+  background: var(--bg);
   font-weight: 700;
 }
 
@@ -252,9 +239,9 @@
   display: grid;
   gap: 0.45rem;
   padding: 1rem;
-  border-radius: 1.15rem;
+  border-radius: var(--radius-input);
   border: 1px solid var(--line-border);
-  background: linear-gradient(180deg, rgba(18, 31, 49, 0.88), rgba(11, 21, 35, 0.92));
+  background: var(--bg-elevated);
 }
 
 .uploadHint strong {
@@ -276,9 +263,9 @@
 
 .summaryCard {
   padding: 1rem;
-  border-radius: 1.3rem;
+  border-radius: var(--radius-input);
   border: 1px solid var(--line-border);
-  background: linear-gradient(180deg, var(--surface-panel-from), var(--surface-panel-to));
+  background: var(--bg-elevated);
 }
 
 .summaryLabel {
@@ -288,7 +275,7 @@
 .summaryValue {
   display: block;
   margin-top: 0.45rem;
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-size: clamp(1.8rem, 1.2rem + 1vw, 2.5rem);
   line-height: 0.95;
 }
@@ -308,9 +295,9 @@
 
 .findingItem {
   padding: 1rem;
-  border-radius: 1.2rem;
+  border-radius: var(--radius-input);
   border: 1px solid var(--line-border);
-  background: linear-gradient(180deg, var(--surface-panel-from), var(--surface-panel-to));
+  background: var(--bg-elevated);
 }
 
 .findingHeader {
@@ -328,7 +315,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  border-radius: 999px;
+  border-radius: var(--radius-xs);
   padding: 0.35rem 0.7rem;
   font-size: 0.8rem;
   font-weight: 700;
@@ -378,9 +365,9 @@
 .extractedText {
   margin: 0;
   padding: 1rem;
-  border-radius: 1.2rem;
+  border-radius: var(--radius-input);
   border: 1px solid var(--line-border);
-  background: rgba(6, 13, 22, 0.82);
+  background: #f9fafb;
   color: var(--contracts-ink);
   white-space: pre-wrap;
   word-break: break-word;
@@ -406,24 +393,22 @@
   min-height: 2.75rem;
   padding: var(--space-3) var(--space-4);
   border: 1px solid var(--line-border-strong);
-  border-radius: var(--radius-pill);
-  background: var(--surface-soft);
+  border-radius: var(--radius-input);
+  background: var(--bg);
   color: var(--contracts-ink);
   font: inherit;
   font-weight: 700;
   cursor: pointer;
   transition:
-    transform var(--transition-base),
     border-color var(--transition-base);
 }
 
 .refreshButton:hover:not(:disabled) {
-  transform: translateY(-1px);
   border-color: var(--line-strong);
 }
 
 .refreshButton:focus-visible {
-  outline: 2px solid var(--brand-gold);
+  outline: 2px solid var(--brand-blue);
   outline-offset: 2px;
 }
 
@@ -441,9 +426,9 @@
 .listAlert {
   margin: 0;
   padding: 1rem;
-  border-radius: 1.15rem;
+  border-radius: var(--radius-input);
   border: 1px solid var(--line-border);
-  background: rgba(9, 18, 29, 0.68);
+  background: var(--bg-elevated);
   color: var(--contracts-muted);
   line-height: 1.6;
 }
@@ -461,9 +446,9 @@
 }
 
 .contractRow {
-  border-radius: 1.2rem;
+  border-radius: var(--radius-input);
   border: 1px solid var(--line-border);
-  background: linear-gradient(180deg, var(--surface-panel-from), var(--surface-panel-to));
+  background: var(--bg);
   transition:
     border-color var(--transition-fast),
     background var(--transition-fast);
@@ -471,7 +456,7 @@
 
 .contractRow:hover {
   border-color: var(--line-strong);
-  background: linear-gradient(180deg, rgba(21, 36, 55, 0.96), rgba(12, 23, 38, 0.96));
+  background: var(--bg-elevated);
 }
 
 .contractsList .contractRow + .contractRow {
@@ -484,11 +469,11 @@
   padding: var(--space-4);
   color: inherit;
   text-decoration: none;
-  border-radius: 1.2rem;
+  border-radius: var(--radius-input);
 }
 
 .contractLink:focus-visible {
-  outline: 2px solid var(--brand-gold);
+  outline: 2px solid var(--brand-blue);
   outline-offset: -2px;
 }
 
@@ -551,7 +536,7 @@
   .textPanel,
   .emptyPanel {
     padding: var(--space-4);
-    border-radius: 1.4rem;
+    border-radius: var(--radius-sm);
   }
 
   .sectionHeader,

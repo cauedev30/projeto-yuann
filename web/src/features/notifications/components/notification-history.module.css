@@ -17,8 +17,8 @@
   min-height: 44px;
   padding: var(--space-4);
   border: 1px solid var(--line-border);
-  border-radius: var(--radius-sm);
-  background: linear-gradient(180deg, var(--surface-panel-from), var(--surface-panel-to));
+  border-radius: var(--radius-input);
+  background: var(--bg-elevated);
 }
 
 .itemTop {

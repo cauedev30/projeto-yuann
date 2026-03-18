@@ -1,25 +1,25 @@
 :root {
-  --bg: #07111b;
-  --bg-elevated: #0d1726;
-  --surface: rgba(12, 22, 36, 0.86);
-  --surface-strong: #101b2b;
-  --surface-soft: rgba(18, 29, 45, 0.72);
-  --line: rgba(196, 173, 129, 0.16);
-  --line-strong: rgba(196, 173, 129, 0.3);
-  --ink: #efe6d6;
-  --ink-soft: #d8cfbf;
-  --ink-muted: #93a0b3;
-  --brand-blue: #86a8d8;
-  --brand-green: #4e8d83;
-  --brand-gold: #c4ad81;
-  --shadow-soft: 0 30px 80px rgba(0, 0, 0, 0.32);
-  --shadow-card: 0 18px 40px rgba(0, 0, 0, 0.22);
-  --radius-lg: 32px;
-  --radius-md: 24px;
-  --radius-sm: 18px;
+  --bg: #ffffff;
+  --bg-elevated: #f9fafb;
+  --surface: #ffffff;
+  --surface-strong: #f3f4f6;
+  --surface-soft: #f9fafb;
+  --line: #e5e7eb;
+  --line-strong: #d1d5db;
+  --ink: #111827;
+  --ink-soft: #374151;
+  --ink-muted: #6b7280;
+  --brand-blue: #2563eb;
+  --brand-green: #059669;
+  --brand-gold: #2563eb;
+  --shadow-soft: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --radius-lg: 16px;
+  --radius-md: 12px;
+  --radius-sm: 8px;
   --max-width: 1240px;
-  --font-body: "Avenir Next", "IBM Plex Sans", "Segoe UI", sans-serif;
-  --font-display: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
+  --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-display: var(--font-body);
 
   /* Spacing scale (base 4px) */
   --space-1: 0.25rem;
@@ -39,38 +39,38 @@
   --text-lg: 1.08rem;
   --text-xl: 1.3rem;
   --text-2xl: 1.45rem;
-  --text-display-sm: clamp(1.8rem, 3vw, 2.6rem);
-  --text-display-md: clamp(2.2rem, 4vw, 3.5rem);
-  --text-display-lg: clamp(3.7rem, 8vw, 7rem);
+  --text-display-sm: clamp(1.25rem, 2vw, 1.5rem);
+  --text-display-md: clamp(1.5rem, 2.5vw, 2rem);
+  --text-display-lg: clamp(2rem, 3vw, 2.75rem);
 
   /* Additional radius */
-  --radius-xs: 8px;
-  --radius-input: 12px;
-  --radius-pill: 999px;
+  --radius-xs: 6px;
+  --radius-input: 8px;
+  --radius-pill: 8px;
 
   /* Additional shadows */
-  --shadow-xs: 0 2px 8px rgba(0, 0, 0, 0.12);
-  --shadow-sm: 0 8px 20px rgba(0, 0, 0, 0.16);
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
 
   /* Unified status colors */
-  --status-danger: #f28d8d;
-  --status-danger-soft: rgba(242, 141, 141, 0.12);
-  --status-danger-bg: rgba(60, 21, 29, 0.4);
-  --status-attention: #e7bc6b;
-  --status-attention-soft: rgba(231, 188, 107, 0.12);
-  --status-success: #97d2bd;
-  --status-success-soft: rgba(151, 210, 189, 0.12);
+  --status-danger: #dc2626;
+  --status-danger-soft: #fef2f2;
+  --status-danger-bg: #fef2f2;
+  --status-attention: #d97706;
+  --status-attention-soft: #fffbeb;
+  --status-success: #059669;
+  --status-success-soft: #ecfdf5;
 
   /* Surface/gradient tokens */
-  --surface-card-from: rgba(12, 22, 36, 0.92);
-  --surface-card-to: rgba(8, 15, 26, 0.96);
-  --surface-panel-from: rgba(17, 29, 45, 0.92);
-  --surface-panel-to: rgba(11, 21, 35, 0.96);
-  --surface-overlay-from: rgba(13, 24, 39, 0.92);
-  --surface-overlay-to: rgba(8, 15, 26, 0.94);
-  --line-subtle: rgba(196, 173, 129, 0.08);
-  --line-border: rgba(196, 173, 129, 0.12);
-  --line-border-strong: rgba(196, 173, 129, 0.18);
+  --surface-card-from: #ffffff;
+  --surface-card-to: #ffffff;
+  --surface-panel-from: #f9fafb;
+  --surface-panel-to: #f9fafb;
+  --surface-overlay-from: #ffffff;
+  --surface-overlay-to: #ffffff;
+  --line-subtle: #f3f4f6;
+  --line-border: #e5e7eb;
+  --line-border-strong: #d1d5db;
 
   /* Transition tokens */
   --transition-fast: 160ms ease;
@@ -96,35 +96,8 @@ body.app-root {
   overflow-x: hidden;
   color: var(--ink);
   font-family: var(--font-body);
-  color-scheme: dark;
-  background: linear-gradient(180deg, #040a12 0%, #07111b 38%, #091423 100%);
-}
-
-body.app-root::before,
-body.app-root::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-}
-
-body.app-root::before {
-  z-index: -2;
-  background:
-    radial-gradient(circle at 12% 12%, rgba(134, 168, 216, 0.2), transparent 28%),
-    radial-gradient(circle at 82% 0%, rgba(196, 173, 129, 0.12), transparent 22%),
-    radial-gradient(circle at 50% 100%, rgba(78, 141, 131, 0.08), transparent 24%),
-    linear-gradient(180deg, #040a12 0%, #07111b 38%, #091423 100%);
-}
-
-body.app-root::after {
-  z-index: -1;
-  opacity: 0.45;
-  background:
-    linear-gradient(90deg, transparent 0, transparent calc(100% - 1px), rgba(196, 173, 129, 0.08) calc(100% - 1px)),
-    linear-gradient(180deg, transparent 0, transparent calc(100% - 1px), rgba(196, 173, 129, 0.04) calc(100% - 1px));
-  background-size: 120px 120px;
-  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.9), transparent 92%);
+  color-scheme: light;
+  background: var(--bg);
 }
 
 a {
@@ -140,12 +113,12 @@ textarea {
 }
 
 ::selection {
-  color: #0b1320;
-  background: rgba(196, 173, 129, 0.78);
+  color: #ffffff;
+  background: rgba(37, 99, 235, 0.32);
 }
 
 :focus-visible {
-  outline: 2px solid var(--brand-gold);
+  outline: 2px solid var(--brand-blue);
   outline-offset: 2px;
 }
 
@@ -181,10 +154,8 @@ textarea {
   gap: 1rem;
   padding: 0.9rem 1rem;
   border: 1px solid var(--line);
-  border-radius: 999px;
-  background: rgba(8, 15, 26, 0.78);
-  backdrop-filter: blur(20px);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+  border-radius: var(--radius-md);
+  background: #ffffff;
 }
 
 .marketingBrand {
@@ -202,11 +173,11 @@ textarea {
   height: 2.45rem;
   border: 1px solid var(--line-strong);
   border-radius: 50%;
-  color: var(--brand-gold);
-  font-family: var(--font-display);
+  color: var(--ink);
+  font-family: var(--font-body);
   font-size: 0.92rem;
   letter-spacing: 0.1em;
-  background: linear-gradient(180deg, rgba(196, 173, 129, 0.12), rgba(134, 168, 216, 0.08));
+  background: var(--bg-elevated);
 }
 
 .marketingBrandText {
@@ -230,24 +201,22 @@ textarea {
   justify-content: center;
   min-height: 2.65rem;
   padding: 0.75rem 1rem;
-  border-radius: 999px;
+  border-radius: var(--radius-input);
   border: 1px solid transparent;
   transition:
-    transform 180ms ease,
     border-color 180ms ease,
     color 180ms ease,
     background 180ms ease;
 }
 
 .marketingNav a:hover {
-  transform: translateY(-1px);
   border-color: var(--line);
   color: var(--ink);
 }
 
 .marketingNav a:last-child {
-  color: #08111a;
-  background: linear-gradient(135deg, var(--brand-gold), #efe2c7);
+  color: #ffffff;
+  background: var(--brand-blue);
 }
 
 .marketingHero {
@@ -261,36 +230,18 @@ textarea {
 .marketingHeroCopy,
 .marketingHeroPanel,
 .marketingSection,
-.marketingEditorialBand,
 .marketingClosing {
   position: relative;
   overflow: hidden;
   border: 1px solid var(--line);
-  background: linear-gradient(180deg, rgba(11, 21, 35, 0.92), rgba(8, 15, 26, 0.92));
-  box-shadow: var(--shadow-soft);
-  backdrop-filter: blur(18px);
-}
-
-.marketingHeroCopy::before,
-.marketingHeroPanel::before,
-.marketingSection::before,
-.marketingEditorialBand::before,
-.marketingClosing::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(135deg, rgba(196, 173, 129, 0.06), transparent 40%),
-    linear-gradient(180deg, rgba(134, 168, 216, 0.08), transparent 42%);
-  pointer-events: none;
+  background: var(--bg-elevated);
 }
 
 .marketingHeroCopy {
   display: grid;
   gap: var(--space-5);
-  border-radius: clamp(1.8rem, 4vw, 3.2rem);
+  border-radius: var(--radius-lg);
   padding: clamp(1.6rem, 3vw, 3.25rem);
-  min-height: 37rem;
   align-content: start;
 }
 
@@ -299,8 +250,8 @@ textarea {
 .marketingPanelLabel,
 .marketingProofLabel {
   margin: 0;
-  color: var(--brand-gold);
-  letter-spacing: 0.18em;
+  color: var(--ink-muted);
+  letter-spacing: 0.05em;
   text-transform: uppercase;
   font-size: 0.75rem;
   font-weight: 700;
@@ -308,21 +259,17 @@ textarea {
 
 .marketingHero h1,
 .marketingSection h2,
-.marketingEditorialBand h2,
 .marketingClosing h2 {
   margin: 0;
-  font-family: var(--font-display);
-  line-height: 0.96;
+  font-family: var(--font-body);
+  line-height: 1.15;
   letter-spacing: -0.045em;
 }
 
 .marketingHero h1 {
-  max-width: 10ch;
+  max-width: 20ch;
   font-size: var(--text-display-lg);
-  background: linear-gradient(135deg, var(--ink), var(--brand-gold));
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--ink);
 }
 
 .marketingLead,
@@ -330,7 +277,6 @@ textarea {
 .marketingPanelBody,
 .marketingSectionHeader p,
 .marketingFeature p,
-.marketingEditorialQuote p,
 .marketingProofCard span {
   color: var(--ink-muted);
   line-height: 1.7;
@@ -355,9 +301,9 @@ textarea {
   width: fit-content;
   min-height: 2.2rem;
   padding: 0.45rem 0.85rem;
-  border: 1px solid rgba(196, 173, 129, 0.18);
-  border-radius: 999px;
-  background: linear-gradient(135deg, rgba(196, 173, 129, 0.14), rgba(134, 168, 216, 0.08));
+  border: 1px solid var(--line);
+  border-radius: var(--radius-input);
+  background: var(--bg-elevated);
   color: var(--ink-soft);
   font-size: 0.84rem;
   font-weight: 700;
@@ -370,7 +316,7 @@ textarea {
   height: 0.55rem;
   border-radius: 50%;
   background: var(--brand-green);
-  box-shadow: 0 0 0 6px rgba(78, 141, 131, 0.16);
+  box-shadow: 0 0 0 6px rgba(5, 150, 105, 0.16);
 }
 
 .marketingHeroActions {
@@ -386,35 +332,25 @@ textarea {
   justify-content: center;
   min-height: 3rem;
   padding: 0.9rem 1.25rem;
-  border-radius: 999px;
+  border-radius: var(--radius-input);
   border: 1px solid transparent;
   transition:
-    transform 180ms ease,
     box-shadow 180ms ease,
     border-color 180ms ease,
     background 180ms ease;
 }
 
 .primaryCta {
-  color: #07111b;
+  color: #ffffff;
   font-weight: 700;
   font-size: var(--text-base);
-  background: linear-gradient(135deg, var(--brand-gold), #efe2c7);
-  box-shadow: 0 18px 35px rgba(196, 173, 129, 0.22);
+  background: var(--brand-blue);
 }
 
 .secondaryCta {
   border-color: var(--line);
   color: var(--ink-soft);
-  background: rgba(16, 27, 43, 0.72);
-}
-
-.primaryCta:hover,
-.secondaryCta:hover,
-.marketingFeature:hover,
-.marketingProofCard:hover,
-.marketingValueCard:hover {
-  transform: translateY(-2px);
+  background: transparent;
 }
 
 .marketingHeroNotes {
@@ -430,9 +366,9 @@ textarea {
   min-height: 2.2rem;
   padding: 0.55rem 0.8rem;
   border: 1px solid var(--line);
-  border-radius: 999px;
+  border-radius: var(--radius-input);
   color: var(--ink-soft);
-  background: rgba(16, 27, 43, 0.6);
+  background: var(--bg-elevated);
   font-size: 0.88rem;
 }
 
@@ -441,21 +377,20 @@ textarea {
   gap: 1rem;
   border-radius: var(--radius-lg);
   padding: 1.4rem;
-  animation: drift 8s ease-in-out infinite;
 }
 
 .marketingPanelFrame {
   display: grid;
   gap: 0.7rem;
   padding: 1.2rem;
-  border: 1px solid rgba(134, 168, 216, 0.12);
-  border-radius: 22px;
-  background: linear-gradient(180deg, rgba(15, 26, 42, 0.88), rgba(10, 18, 29, 0.9));
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--bg);
 }
 
 .marketingPanelTitle {
   margin: 0;
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-size: clamp(1.8rem, 2vw, 2.4rem);
   line-height: 1.02;
 }
@@ -475,14 +410,10 @@ textarea {
 .marketingFeature {
   position: relative;
   overflow: hidden;
-  border: 1px solid rgba(196, 173, 129, 0.12);
-  border-radius: 22px;
-  background: linear-gradient(180deg, rgba(17, 29, 45, 0.92), rgba(11, 21, 35, 0.94));
-  box-shadow: var(--shadow-card);
-  transition:
-    transform 180ms ease,
-    border-color 180ms ease,
-    box-shadow 180ms ease;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--bg);
+  transition: border-color 180ms ease;
 }
 
 .marketingValueCard {
@@ -492,7 +423,7 @@ textarea {
 }
 
 .marketingValueCard strong {
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-size: clamp(1.9rem, 2vw, 2.4rem);
   line-height: 1;
 }
@@ -515,7 +446,7 @@ textarea {
   justify-content: space-between;
   gap: 1rem;
   padding: 0.9rem 0;
-  border-top: 1px solid rgba(196, 173, 129, 0.12);
+  border-top: 1px solid var(--line);
   color: var(--ink-soft);
 }
 
@@ -524,22 +455,22 @@ textarea {
 }
 
 .marketingLedgerRow strong {
-  color: var(--brand-gold);
-  font-family: var(--font-display);
+  color: var(--ink);
+  font-family: var(--font-body);
   font-size: 1.05rem;
   font-weight: 600;
 }
 
 .marketingSection {
   margin-top: var(--space-8);
-  border-radius: clamp(1.6rem, 3vw, 2.4rem);
+  border-radius: var(--radius-lg);
   padding: clamp(1.4rem, 2vw, 2.2rem);
   scroll-margin-top: var(--space-8);
 }
 
 .marketingSectionHeader {
   display: flex;
-  align-items: end;
+  align-items: flex-end;
   justify-content: space-between;
   gap: 1rem;
   margin-bottom: 1.25rem;
@@ -572,38 +503,6 @@ textarea {
   margin: 0;
 }
 
-.marketingEditorialBand {
-  display: grid;
-  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
-  gap: 1rem;
-  margin-top: var(--space-8);
-  padding: clamp(1.4rem, 2vw, 2.2rem);
-  border-radius: clamp(1.6rem, 3vw, 2.6rem);
-  scroll-margin-top: var(--space-8);
-}
-
-.marketingEditorialQuote {
-  display: grid;
-  gap: 0.8rem;
-  align-content: start;
-}
-
-.marketingEditorialQuote h2 {
-  font-size: clamp(2.3rem, 4vw, 3.6rem);
-  max-width: 10ch;
-}
-
-.marketingEditorialQuote p {
-  margin: 0;
-  max-width: 30rem;
-}
-
-.marketingProof {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.9rem;
-}
-
 .marketingProofCard {
   display: grid;
   gap: 0.5rem;
@@ -622,7 +521,7 @@ textarea {
   gap: 1rem;
   margin-top: var(--space-8);
   padding: clamp(1.3rem, 2vw, 2rem);
-  border-radius: clamp(1.5rem, 3vw, 2.4rem);
+  border-radius: var(--radius-lg);
   scroll-margin-top: var(--space-8);
 }
 
@@ -635,22 +534,9 @@ textarea {
   flex-shrink: 0;
 }
 
-@keyframes drift {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-
-  50% {
-    transform: translateY(-6px);
-  }
-}
-
 @media (max-width: 1100px) {
   .marketingHero,
-  .marketingEditorialBand,
   .marketingFeatures,
-  .marketingProof,
   .marketingValueList {
     grid-template-columns: 1fr;
   }
@@ -659,7 +545,6 @@ textarea {
     min-height: auto;
   }
 
-  .marketingEditorialQuote h2,
   .marketingClosing h2 {
     max-width: none;
   }
@@ -683,22 +568,21 @@ textarea {
   }
 
   .marketingHero h1 {
-    font-size: clamp(3rem, 12vw, 5.4rem);
+    font-size: clamp(2rem, 8vw, 2.75rem);
   }
 }
 
 @media (max-width: 640px) {
   .marketingTopbar {
     position: static;
-    border-radius: 28px;
+    border-radius: var(--radius-md);
   }
 
   .marketingHeroCopy,
   .marketingHeroPanel,
   .marketingSection,
-  .marketingEditorialBand,
   .marketingClosing {
-    border-radius: 24px;
+    border-radius: var(--radius-md);
     padding: var(--space-5);
   }
 
@@ -732,7 +616,6 @@ textarea {
   .marketingProofCard,
   .marketingValueCard,
   .marketingNav a {
-    animation: none;
     transition: none;
   }
 }
