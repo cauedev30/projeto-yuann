@@ -1,6 +1,10 @@
 import React from "react";
 import { render, screen, within } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+
+vi.mock("next/navigation", () => ({
+  usePathname: () => "/dashboard",
+}));
 
 import { AppShell } from "./app-shell";
 
@@ -31,9 +35,7 @@ describe("AppShell", () => {
       "href",
       "/contracts",
     );
-    expect(
-      screen.getByText("Workspace juridico para contratos, risco e decisoes em andamento."),
-    ).toBeInTheDocument();
+    expect(screen.getAllByText("Governanca contratual").length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText("Conteudo interno")).toBeInTheDocument();
   });
 });

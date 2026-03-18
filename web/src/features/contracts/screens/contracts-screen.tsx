@@ -71,6 +71,8 @@ export function ContractsScreen({
   const [isRefreshingContracts, setIsRefreshingContracts] = useState(false);
   const [contractsError, setContractsError] = useState<string | null>(null);
 
+  const [showSuccessBanner, setShowSuccessBanner] = useState(false);
+
   const findings = result ? buildPreviewFindings(result.text) : [];
   const riskScore = findings.some((item) => item.status === "critical") ? 80 : 10;
   const statusState = error
@@ -91,6 +93,12 @@ export function ContractsScreen({
   } else if (statusState === "success") {
     statusMessage = "Triagem inicial concluida";
   }
+
+  useEffect(() => {
+    if (!showSuccessBanner) return;
+    const timer = setTimeout(() => setShowSuccessBanner(false), 5000);
+    return () => clearTimeout(timer);
+  }, [showSuccessBanner]);
 
   useEffect(() => {
     let isActive = true;
@@ -155,6 +163,7 @@ export function ContractsScreen({
     try {
       const response = await submitContract(payload);
       setResult(response);
+      setShowSuccessBanner(true);
       await refreshPersistedContracts();
     } catch (submissionError) {
       setError(
@@ -174,6 +183,12 @@ export function ContractsScreen({
         {isLoadingContracts ? "Carregando contratos..." : ""}
         {error ?? contractsError ?? ""}
       </div>
+
+      {showSuccessBanner && (
+        <div className={styles.successBanner} role="status">
+          Triagem concluida com sucesso — contrato adicionado ao portfolio.
+        </div>
+      )}
 
       <ContractsHero />
 

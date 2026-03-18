@@ -1,11 +1,12 @@
+/* === Page Header === */
 .pageHeader {
   position: relative;
   display: grid;
-  gap: 0.7rem;
+  gap: var(--space-3);
   padding: clamp(1.35rem, 2vw, 1.9rem);
   border: 1px solid var(--line);
   border-radius: 28px;
-  background: linear-gradient(180deg, rgba(13, 24, 39, 0.92), rgba(8, 15, 26, 0.94));
+  background: linear-gradient(180deg, var(--surface-overlay-from), var(--surface-overlay-to));
   box-shadow: var(--shadow-soft);
   overflow: hidden;
 }
@@ -26,7 +27,7 @@
 .pageHeader h1 {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(2.2rem, 4vw, 3.5rem);
+  font-size: var(--text-display-md);
   line-height: 0.98;
   letter-spacing: -0.04em;
 }
@@ -36,7 +37,7 @@
   color: var(--brand-gold);
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  font-size: 0.76rem;
+  font-size: var(--text-xs);
   font-weight: 700;
 }
 
@@ -47,47 +48,49 @@
   line-height: 1.7;
 }
 
+/* === Surface Card === */
 .surfaceCard {
   position: relative;
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
-  background: linear-gradient(180deg, rgba(12, 22, 36, 0.92), rgba(8, 15, 26, 0.96));
+  background: linear-gradient(180deg, var(--surface-card-from), var(--surface-card-to));
   box-shadow: var(--shadow-card);
   backdrop-filter: blur(18px);
-  padding: 1.25rem;
+  padding: var(--space-5);
   animation: cardFadeIn 0.3s ease-out;
 }
 
 .surfaceTitle {
-  margin: 0 0 1rem;
+  margin: 0 0 var(--space-4);
   font-family: var(--font-display);
-  font-size: 1.45rem;
+  font-size: var(--text-2xl);
   font-weight: 600;
   line-height: 1.1;
 }
 
+/* === Stat Card === */
 .statCard {
   position: relative;
   overflow: hidden;
   display: grid;
-  gap: 0.45rem;
-  padding: 1rem;
-  border: 1px solid rgba(196, 173, 129, 0.12);
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: 1px solid var(--line-border);
   border-radius: var(--radius-sm);
-  background: linear-gradient(180deg, rgba(17, 29, 45, 0.92), rgba(11, 21, 35, 0.96));
+  background: linear-gradient(180deg, var(--surface-panel-from), var(--surface-panel-to));
 }
 
 .statLabel {
   margin: 0;
   color: var(--ink-muted);
-  font-size: 0.88rem;
+  font-size: var(--text-sm);
 }
 
 .statValue {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  font-size: var(--text-display-sm);
   line-height: 0.95;
   font-weight: 600;
 }
@@ -95,25 +98,26 @@
 .statHint {
   margin: 0;
   color: var(--ink-muted);
-  font-size: 0.92rem;
+  font-size: var(--text-sm);
   line-height: 1.55;
 }
 
+/* === Empty State === */
 .emptyState {
   position: relative;
   overflow: hidden;
   display: grid;
-  gap: 0.6rem;
+  gap: var(--space-3);
   padding: clamp(1.2rem, 2.5vw, 2rem);
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
-  background: linear-gradient(180deg, rgba(13, 24, 39, 0.92), rgba(8, 15, 26, 0.96));
+  background: linear-gradient(180deg, var(--surface-overlay-from), var(--surface-card-to));
 }
 
 .emptyTitle {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 1.45rem;
+  font-size: var(--text-2xl);
   line-height: 1.1;
 }
 
@@ -123,15 +127,168 @@
   line-height: 1.65;
 }
 
+/* === Status Badge === */
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  border-radius: var(--radius-pill);
+  padding: 0.2rem 0.6rem;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.statusBadgeMd {
+  padding: 0.35rem 0.7rem;
+  font-size: var(--text-sm);
+}
+
+.statusBadgeCritical {
+  background: var(--status-danger-soft);
+  color: var(--status-danger);
+}
+
+.statusBadgeAttention {
+  background: var(--status-attention-soft);
+  color: var(--status-attention);
+}
+
+.statusBadgeConforme {
+  background: var(--status-success-soft);
+  color: var(--status-success);
+}
+
+.statusBadgeNeutral {
+  background: var(--line-border);
+  color: var(--ink-muted);
+}
+
+/* === Form Input === */
+.formField {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.formLabel {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.formInput {
+  width: 100%;
+  min-height: 3rem;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-input);
+  border: 1px solid var(--line-border);
+  background: var(--surface-strong);
+  color: var(--ink);
+  font: inherit;
+  transition: border-color var(--transition-fast);
+}
+
+.formInput::placeholder {
+  color: var(--ink-muted);
+  opacity: 0.7;
+}
+
+.formInput:hover {
+  border-color: var(--line-strong);
+}
+
+.formInput:focus {
+  outline: 2px solid var(--brand-gold);
+  outline-offset: 2px;
+}
+
+/* === Buttons === */
+.buttonPrimary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: var(--space-3) var(--space-5);
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(135deg, var(--brand-gold), #efe2c7);
+  color: #07111b;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 18px 35px rgba(196, 173, 129, 0.22);
+  transition:
+    transform var(--transition-base),
+    box-shadow var(--transition-base);
+}
+
+.buttonPrimary:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+.buttonPrimary:focus-visible {
+  outline: 2px solid var(--brand-gold);
+  outline-offset: 2px;
+}
+
+.buttonPrimary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.buttonPrimary:disabled {
+  opacity: 0.62;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.buttonSecondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  background: var(--surface-soft);
+  color: var(--ink-soft);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    transform var(--transition-base),
+    border-color var(--transition-base),
+    background var(--transition-base);
+}
+
+.buttonSecondary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: var(--line-strong);
+}
+
+.buttonSecondary:focus-visible {
+  outline: 2px solid var(--brand-gold);
+  outline-offset: 2px;
+}
+
+.buttonSecondary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.buttonSecondary:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
+/* === Skeleton === */
 .skeleton {
   display: grid;
-  gap: 0.75rem;
-  padding: 1rem 0;
+  gap: var(--space-3);
+  padding: var(--space-4) 0;
 }
 
 .skeletonLine,
 .skeletonHeading {
-  border-radius: 8px;
+  border-radius: var(--radius-xs);
   background: linear-gradient(90deg, var(--surface-soft), var(--surface-strong), var(--surface-soft));
   background-size: 200% 100%;
   animation: skeletonPulse 1.8s ease-in-out infinite;
@@ -144,6 +301,52 @@
 .skeletonHeading {
   height: 2rem;
   width: 60%;
+}
+
+/* Skeleton variants */
+.skeletonStat {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.skeletonStatCard {
+  height: 5.5rem;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(90deg, var(--surface-soft), var(--surface-strong), var(--surface-soft));
+  background-size: 200% 100%;
+  animation: skeletonPulse 1.8s ease-in-out infinite;
+}
+
+.skeletonList {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.skeletonListItem {
+  height: 3.5rem;
+  border-radius: var(--radius-input);
+  background: linear-gradient(90deg, var(--surface-soft), var(--surface-strong), var(--surface-soft));
+  background-size: 200% 100%;
+  animation: skeletonPulse 1.8s ease-in-out infinite;
+}
+
+.skeletonTable {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.skeletonTableRow {
+  height: 2.5rem;
+  border-radius: var(--radius-xs);
+  background: linear-gradient(90deg, var(--surface-soft), var(--surface-strong), var(--surface-soft));
+  background-size: 200% 100%;
+  animation: skeletonPulse 1.8s ease-in-out infinite;
+}
+
+.skeletonTableRow:first-child {
+  height: 2rem;
+  opacity: 0.6;
 }
 
 @keyframes skeletonPulse {
@@ -169,10 +372,19 @@
   }
 }
 
+@media (max-width: 900px) {
+  .skeletonStat {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .surfaceCard,
   .skeletonLine,
-  .skeletonHeading {
+  .skeletonHeading,
+  .skeletonStatCard,
+  .skeletonListItem,
+  .skeletonTableRow {
     animation: none;
   }
 }

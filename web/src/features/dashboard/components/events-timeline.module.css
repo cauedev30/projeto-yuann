@@ -1,26 +1,29 @@
 .section {
   display: grid;
-  gap: 1rem;
+  gap: var(--space-4);
 }
 
 .filters {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.55rem;
+  gap: var(--space-2);
 }
 
 .filterButton,
 .filterButtonActive {
-  min-height: 2.4rem;
-  padding: 0.55rem 0.9rem;
-  border-radius: 999px;
+  min-height: 2.75rem;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-pill);
   border: 1px solid var(--line);
   color: var(--ink-soft);
-  background: rgba(16, 27, 43, 0.72);
+  background: var(--surface-soft);
+  font: inherit;
+  font-size: var(--text-sm);
+  cursor: pointer;
   transition:
-    transform 180ms ease,
-    border-color 180ms ease,
-    background 180ms ease;
+    transform var(--transition-base),
+    border-color var(--transition-base),
+    background var(--transition-base);
   touch-action: manipulation;
 }
 
@@ -29,8 +32,14 @@
   transform: translateY(-1px);
 }
 
+.filterButton:focus-visible,
+.filterButtonActive:focus-visible {
+  outline: 2px solid var(--brand-gold);
+  outline-offset: 2px;
+}
+
 .filterButtonActive {
-  border-color: var(--line-strong);
+  border-color: var(--brand-gold);
   color: #08111a;
   background: linear-gradient(135deg, var(--brand-gold), #efe2c7);
 }
@@ -40,31 +49,36 @@
   padding: 0;
   list-style: none;
   display: grid;
-  gap: 0.8rem;
+  gap: var(--space-3);
 }
 
 .item {
   display: grid;
   gap: 0.35rem;
-  padding: 0.95rem 1rem;
-  border: 1px solid rgba(196, 173, 129, 0.12);
-  border-radius: 18px;
-  background: linear-gradient(180deg, rgba(17, 29, 45, 0.92), rgba(11, 21, 35, 0.96));
+  padding: var(--space-4);
+  border: 1px solid var(--line-border);
+  border-radius: var(--radius-sm);
+  background: linear-gradient(180deg, var(--surface-panel-from), var(--surface-panel-to));
+  transition: border-color var(--transition-fast);
+}
+
+.item:hover {
+  border-color: var(--line-strong);
 }
 
 .overdueItem {
-  border-left: 3px solid rgba(242, 141, 141, 0.55);
+  border-left: 3px solid var(--status-danger);
 }
 
 .itemTop {
   display: flex;
   justify-content: space-between;
-  gap: 0.75rem;
+  gap: var(--space-3);
   align-items: center;
 }
 
 .itemTop strong {
-  font-size: 1rem;
+  font-size: var(--text-base);
   font-weight: 700;
 }
 

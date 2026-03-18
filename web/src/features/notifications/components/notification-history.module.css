@@ -1,6 +1,6 @@
 .section {
   display: grid;
-  gap: 1rem;
+  gap: var(--space-4);
 }
 
 .list {
@@ -8,28 +8,28 @@
   padding: 0;
   list-style: none;
   display: grid;
-  gap: 0.8rem;
+  gap: var(--space-3);
 }
 
 .item {
   display: grid;
   gap: 0.35rem;
   min-height: 44px;
-  padding: 0.95rem 1rem;
-  border: 1px solid rgba(196, 173, 129, 0.12);
-  border-radius: 18px;
-  background: linear-gradient(180deg, rgba(17, 29, 45, 0.92), rgba(11, 21, 35, 0.96));
+  padding: var(--space-4);
+  border: 1px solid var(--line-border);
+  border-radius: var(--radius-sm);
+  background: linear-gradient(180deg, var(--surface-panel-from), var(--surface-panel-to));
 }
 
 .itemTop {
   display: flex;
   justify-content: space-between;
-  gap: 0.75rem;
+  gap: var(--space-3);
   align-items: center;
 }
 
 .itemTop strong {
-  font-size: 1rem;
+  font-size: var(--text-base);
   font-weight: 700;
 }
 

@@ -3,6 +3,33 @@
   gap: 1rem;
 }
 
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+}
+
+.breadcrumbLink {
+  color: var(--ink-muted);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.breadcrumbLink:hover {
+  color: var(--brand-gold);
+}
+
+.breadcrumbSeparator {
+  color: var(--ink-muted);
+  opacity: 0.5;
+}
+
+.breadcrumbCurrent {
+  color: var(--ink-soft);
+  font-weight: 600;
+}
+
 .refreshRow {
   display: flex;
   justify-content: flex-end;
@@ -11,13 +38,23 @@
 .refreshButton {
   min-height: 2.75rem;
   padding: 0.7rem 1rem;
-  border: 1px solid rgba(196, 173, 129, 0.18);
+  border: 1px solid var(--line-border-strong);
   border-radius: 999px;
   background: rgba(10, 18, 29, 0.8);
   color: var(--ink);
   font: inherit;
   font-weight: 700;
   cursor: pointer;
+}
+
+.refreshButton:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: var(--line-strong);
+}
+
+.refreshButton:focus-visible {
+  outline: 2px solid var(--brand-gold);
+  outline-offset: 2px;
 }
 
 .refreshButton:disabled {
@@ -90,9 +127,72 @@
   line-height: 1.6;
 }
 
+.collapsible {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: linear-gradient(180deg, var(--surface-card-from), var(--surface-card-to));
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+.collapsibleSummary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  cursor: pointer;
+  list-style: none;
+  min-height: 48px;
+  transition: background var(--transition-fast);
+}
+
+.collapsibleSummary::-webkit-details-marker {
+  display: none;
+}
+
+.collapsibleSummary:hover {
+  background: rgba(196, 173, 129, 0.04);
+}
+
+.collapsibleTitle {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+.collapsibleChevron {
+  display: inline-block;
+  width: 0.6rem;
+  height: 0.6rem;
+  border-right: 2px solid var(--ink-muted);
+  border-bottom: 2px solid var(--ink-muted);
+  transform: rotate(45deg);
+  transition: transform var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.collapsible[open] .collapsibleChevron {
+  transform: rotate(-135deg);
+}
+
+.collapsibleContent {
+  padding: 0 var(--space-5) var(--space-5);
+}
+
 @media (max-width: 900px) {
   .statGrid,
   .detailGrid {
     grid-template-columns: 1fr;
+  }
+
+  .collapsibleSummary {
+    min-height: 48px;
+    padding: var(--space-4);
+  }
+
+  .collapsibleContent {
+    padding: 0 var(--space-4) var(--space-4);
   }
 }

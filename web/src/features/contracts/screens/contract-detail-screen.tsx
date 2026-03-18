@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import React from "react";
 import { useEffect, useState } from "react";
 
@@ -187,6 +188,11 @@ export function ContractDetailScreen({
       <div aria-atomic="true" aria-live="polite" className="sr-only">
         {liveMessage}
       </div>
+      <nav aria-label="Breadcrumb" className={styles.breadcrumb}>
+        <Link href="/contracts" className={styles.breadcrumbLink}>Contracts</Link>
+        <span aria-hidden="true" className={styles.breadcrumbSeparator}>/</span>
+        <span className={styles.breadcrumbCurrent}>{detail.contract.title}</span>
+      </nav>
       <PageHeader
         eyebrow="Contracts"
         title={detail.contract.title}
@@ -253,24 +259,46 @@ export function ContractDetailScreen({
           </SurfaceCard>
         </div>
 
-        <EventTimeline events={detail.events} />
+        <details className={styles.collapsible} open>
+          <summary className={styles.collapsibleSummary}>
+            <span className={styles.collapsibleTitle}>Timeline de eventos</span>
+            <span className={styles.collapsibleChevron} aria-hidden="true" />
+          </summary>
+          <div className={styles.collapsibleContent}>
+            <EventTimeline events={detail.events} />
+          </div>
+        </details>
 
-        <SurfaceCard title="Ultima analise">
-          {detail.latestAnalysis ? (
-            <div className={styles.stack}>
-              <p className={styles.inlineText}>
-                Politica {detail.latestAnalysis.policyVersion} com status{" "}
-                {detail.latestAnalysis.analysisStatus}.
-              </p>
-              <FindingsSection items={detail.latestAnalysis.findings} />
-            </div>
-          ) : (
-            <p className={styles.inlineText}>Analise ainda nao disponivel.</p>
-          )}
-        </SurfaceCard>
+        <details className={styles.collapsible} open>
+          <summary className={styles.collapsibleSummary}>
+            <span className={styles.collapsibleTitle}>Ultima analise</span>
+            <span className={styles.collapsibleChevron} aria-hidden="true" />
+          </summary>
+          <div className={styles.collapsibleContent}>
+            {detail.latestAnalysis ? (
+              <div className={styles.stack}>
+                <p className={styles.inlineText}>
+                  Politica {detail.latestAnalysis.policyVersion} com status{" "}
+                  {detail.latestAnalysis.analysisStatus}.
+                </p>
+                <FindingsSection items={detail.latestAnalysis.findings} />
+              </div>
+            ) : (
+              <p className={styles.inlineText}>Analise ainda nao disponivel.</p>
+            )}
+          </div>
+        </details>
 
         {detail.latestVersion?.text ? (
-          <ExtractedTextPanel text={detail.latestVersion.text} />
+          <details className={styles.collapsible} open>
+            <summary className={styles.collapsibleSummary}>
+              <span className={styles.collapsibleTitle}>Texto extraido</span>
+              <span className={styles.collapsibleChevron} aria-hidden="true" />
+            </summary>
+            <div className={styles.collapsibleContent}>
+              <ExtractedTextPanel text={detail.latestVersion.text} />
+            </div>
+          </details>
         ) : null}
       </div>
     </section>

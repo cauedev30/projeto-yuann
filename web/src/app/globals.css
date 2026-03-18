@@ -20,6 +20,62 @@
   --max-width: 1240px;
   --font-body: "Avenir Next", "IBM Plex Sans", "Segoe UI", sans-serif;
   --font-display: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
+
+  /* Spacing scale (base 4px) */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+
+  /* Typographic scale */
+  --text-xs: 0.75rem;
+  --text-sm: 0.85rem;
+  --text-base: 1rem;
+  --text-lg: 1.08rem;
+  --text-xl: 1.3rem;
+  --text-2xl: 1.45rem;
+  --text-display-sm: clamp(1.8rem, 3vw, 2.6rem);
+  --text-display-md: clamp(2.2rem, 4vw, 3.5rem);
+  --text-display-lg: clamp(3.7rem, 8vw, 7rem);
+
+  /* Additional radius */
+  --radius-xs: 8px;
+  --radius-input: 12px;
+  --radius-pill: 999px;
+
+  /* Additional shadows */
+  --shadow-xs: 0 2px 8px rgba(0, 0, 0, 0.12);
+  --shadow-sm: 0 8px 20px rgba(0, 0, 0, 0.16);
+
+  /* Unified status colors */
+  --status-danger: #f28d8d;
+  --status-danger-soft: rgba(242, 141, 141, 0.12);
+  --status-danger-bg: rgba(60, 21, 29, 0.4);
+  --status-attention: #e7bc6b;
+  --status-attention-soft: rgba(231, 188, 107, 0.12);
+  --status-success: #97d2bd;
+  --status-success-soft: rgba(151, 210, 189, 0.12);
+
+  /* Surface/gradient tokens */
+  --surface-card-from: rgba(12, 22, 36, 0.92);
+  --surface-card-to: rgba(8, 15, 26, 0.96);
+  --surface-panel-from: rgba(17, 29, 45, 0.92);
+  --surface-panel-to: rgba(11, 21, 35, 0.96);
+  --surface-overlay-from: rgba(13, 24, 39, 0.92);
+  --surface-overlay-to: rgba(8, 15, 26, 0.94);
+  --line-subtle: rgba(196, 173, 129, 0.08);
+  --line-border: rgba(196, 173, 129, 0.12);
+  --line-border-strong: rgba(196, 173, 129, 0.18);
+
+  /* Transition tokens */
+  --transition-fast: 160ms ease;
+  --transition-base: 180ms ease;
+  --transition-slow: 280ms ease;
 }
 
 * {
@@ -231,7 +287,7 @@ textarea {
 
 .marketingHeroCopy {
   display: grid;
-  gap: 1.2rem;
+  gap: var(--space-5);
   border-radius: clamp(1.8rem, 4vw, 3.2rem);
   padding: clamp(1.6rem, 3vw, 3.25rem);
   min-height: 37rem;
@@ -262,7 +318,11 @@ textarea {
 
 .marketingHero h1 {
   max-width: 10ch;
-  font-size: clamp(3.7rem, 8vw, 7rem);
+  font-size: var(--text-display-lg);
+  background: linear-gradient(135deg, var(--ink), var(--brand-gold));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .marketingLead,
@@ -338,6 +398,7 @@ textarea {
 .primaryCta {
   color: #07111b;
   font-weight: 700;
+  font-size: var(--text-base);
   background: linear-gradient(135deg, var(--brand-gold), #efe2c7);
   box-shadow: 0 18px 35px rgba(196, 173, 129, 0.22);
 }
@@ -470,9 +531,10 @@ textarea {
 }
 
 .marketingSection {
-  margin-top: 1.5rem;
+  margin-top: var(--space-8);
   border-radius: clamp(1.6rem, 3vw, 2.4rem);
   padding: clamp(1.4rem, 2vw, 2.2rem);
+  scroll-margin-top: var(--space-8);
 }
 
 .marketingSectionHeader {
@@ -514,9 +576,10 @@ textarea {
   display: grid;
   grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
   gap: 1rem;
-  margin-top: 1.5rem;
+  margin-top: var(--space-8);
   padding: clamp(1.4rem, 2vw, 2.2rem);
   border-radius: clamp(1.6rem, 3vw, 2.6rem);
+  scroll-margin-top: var(--space-8);
 }
 
 .marketingEditorialQuote {
@@ -557,9 +620,10 @@ textarea {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  margin-top: 1.5rem;
+  margin-top: var(--space-8);
   padding: clamp(1.3rem, 2vw, 2rem);
   border-radius: clamp(1.5rem, 3vw, 2.4rem);
+  scroll-margin-top: var(--space-8);
 }
 
 .marketingClosing h2 {
@@ -635,13 +699,24 @@ textarea {
   .marketingEditorialBand,
   .marketingClosing {
     border-radius: 24px;
-    padding: 1.15rem;
+    padding: var(--space-5);
+  }
+
+  .marketingHeroActions {
+    flex-direction: column;
+    gap: var(--space-3);
   }
 
   .marketingNav a,
   .primaryCta,
   .secondaryCta {
     width: 100%;
+    justify-content: center;
+  }
+
+  .primaryCta {
+    min-height: 3.2rem;
+    font-size: var(--text-lg);
   }
 }
 

@@ -38,15 +38,15 @@
 }
 
 .circle.critical {
-  background-color: var(--contracts-danger, #ef4444);
+  background-color: var(--contracts-danger, var(--status-danger));
 }
 
 .circle.attention {
-  background-color: var(--contracts-attention, #eab308);
+  background-color: var(--contracts-attention, var(--status-attention));
 }
 
 .circle.conforme {
-  background-color: var(--contracts-success, #22c55e);
+  background-color: var(--contracts-success, var(--status-success));
 }
 
 .nodeContent {
@@ -90,16 +90,16 @@
 }
 
 .pill_critical {
-  background-color: color-mix(in srgb, var(--contracts-danger, #ef4444) 20%, transparent);
-  color: var(--contracts-danger, #ef4444);
+  background-color: color-mix(in srgb, var(--contracts-danger, var(--status-danger)) 20%, transparent);
+  color: var(--contracts-danger, var(--status-danger));
 }
 
 .pill_attention {
-  background-color: color-mix(in srgb, var(--contracts-attention, #eab308) 20%, transparent);
-  color: var(--contracts-attention, #eab308);
+  background-color: color-mix(in srgb, var(--contracts-attention, var(--status-attention)) 20%, transparent);
+  color: var(--contracts-attention, var(--status-attention));
 }
 
 .pill_conforme {
-  background-color: color-mix(in srgb, var(--contracts-success, #22c55e) 20%, transparent);
-  color: var(--contracts-success, #22c55e);
+  background-color: color-mix(in srgb, var(--contracts-success, var(--status-success)) 20%, transparent);
+  color: var(--contracts-success, var(--status-success));
 }

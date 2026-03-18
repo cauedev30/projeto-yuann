@@ -58,18 +58,18 @@
 }
 
 .pillHigh {
-  background: rgba(34, 197, 94, 0.15);
-  color: #22c55e;
+  background: var(--status-success-soft);
+  color: var(--status-success);
 }
 
 .pillMedium {
-  background: rgba(234, 179, 8, 0.15);
-  color: #eab308;
+  background: var(--status-attention-soft);
+  color: var(--status-attention);
 }
 
 .pillLow {
-  background: rgba(239, 68, 68, 0.15);
-  color: #ef4444;
+  background: var(--status-danger-soft);
+  color: var(--status-danger);
 }
 
 .section {

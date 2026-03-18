@@ -2,6 +2,7 @@ import React from "react";
 
 import type { ContractFinding } from "@/entities/contracts/model";
 
+import { StatusBadge } from "../../../components/ui/status-badge";
 import styles from "../screens/contracts-screen.module.css";
 
 type FindingsSectionProps = {
@@ -12,6 +13,12 @@ const statusLabelMap: Record<ContractFinding["status"], string> = {
   critical: "Critico",
   attention: "Atencao",
   conforme: "Conforme",
+};
+
+const severityBorderClass: Record<ContractFinding["status"], string> = {
+  critical: styles.findingCritical,
+  attention: styles.findingAttention,
+  conforme: styles.findingConforme,
 };
 
 export function FindingsSection({ items }: FindingsSectionProps) {
@@ -27,16 +34,18 @@ export function FindingsSection({ items }: FindingsSectionProps) {
 
       <ul className={styles.findingsList}>
         {items.map((item) => (
-          <li className={styles.findingItem} key={`${item.clauseName}-${item.status}`}>
+          <li
+            className={`${styles.findingItem} ${severityBorderClass[item.status] ?? ""}`}
+            key={`${item.clauseName}-${item.status}`}
+          >
             <div className={styles.findingHeader}>
               <strong className={styles.findingTitle}>{item.clauseName}</strong>
-              <span
-                className={`${styles.statusPill} ${styles[`status${statusLabelMap[item.status]}`]}`}
-                role="status"
-                aria-label={`Status do finding ${item.clauseName}: ${statusLabelMap[item.status]}`}
+              <StatusBadge
+                variant={item.status}
+                size="md"
               >
                 {statusLabelMap[item.status]}
-              </span>
+              </StatusBadge>
             </div>
             <p className={styles.findingDescription}>{item.riskExplanation}</p>
             <p className={styles.findingMeta}>Atual: {item.currentSummary}</p>

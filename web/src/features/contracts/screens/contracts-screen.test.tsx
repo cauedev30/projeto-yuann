@@ -96,7 +96,7 @@ describe("ContractsScreen", () => {
     expect(scope.getByText("Mesa de analise")).toBeInTheDocument();
     expect(scope.getByText("Triagem contratual com criterio juridico")).toBeInTheDocument();
     expect(scope.getByText("Nenhuma triagem foi executada nesta sessao.")).toBeInTheDocument();
-    expect(scope.getByText("Nenhum contrato persistido ainda.")).toBeInTheDocument();
+    expect(scope.getByText("Nenhum contrato persistido")).toBeInTheDocument();
   });
 
   it("shows processing feedback while the upload is pending", async () => {
@@ -207,7 +207,7 @@ describe("ContractsScreen", () => {
     render(<ContractsScreen submitContract={vi.fn()} loadContracts={loadContracts} />);
     const scope = getScreenScope();
 
-    expect(scope.getByLabelText("Carregando conteudo")).toBeInTheDocument();
+    expect(scope.getByLabelText("Carregando lista")).toBeInTheDocument();
     expect(scope.getAllByText("Carregando contratos...").length).toBeGreaterThan(0);
   });
 
@@ -234,7 +234,7 @@ describe("ContractsScreen", () => {
     );
     const scope = getScreenScope();
 
-    expect(await scope.findByText("Nenhum contrato persistido ainda.")).toBeInTheDocument();
+    expect(await scope.findByText("Nenhum contrato persistido")).toBeInTheDocument();
     await user.click(scope.getByRole("button", { name: "Atualizar lista" }));
 
     expect(refreshContracts).toHaveBeenCalledTimes(1);
@@ -256,7 +256,7 @@ describe("ContractsScreen", () => {
     );
     const scope = getScreenScope();
 
-    expect(await scope.findByText("Nenhum contrato persistido ainda.")).toBeInTheDocument();
+    expect(await scope.findByText("Nenhum contrato persistido")).toBeInTheDocument();
     await user.click(scope.getByRole("button", { name: "Enviar contrato" }));
 
     await waitFor(() => expect(refreshContracts).toHaveBeenCalledTimes(1));

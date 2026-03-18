@@ -3,7 +3,9 @@ import React from "react";
 
 import type { ContractListItemSummary } from "@/entities/contracts/model";
 
+import { EmptyState } from "../../../components/ui/empty-state";
 import { LoadingSkeleton } from "../../../components/ui/loading-skeleton";
+import { StatusBadge } from "../../../components/ui/status-badge";
 import styles from "../screens/contracts-screen.module.css";
 
 type ContractsListPanelProps = {
@@ -14,6 +16,13 @@ type ContractsListPanelProps = {
   onRefresh: () => Promise<void> | void;
   navigateToContract?: (contractId: string) => void;
 };
+
+function getRiskVariant(score: number | null): "critical" | "attention" | "conforme" | "neutral" {
+  if (score === null) return "neutral";
+  if (score >= 60) return "critical";
+  if (score >= 30) return "attention";
+  return "conforme";
+}
 
 function buildStatusLabel(
   item: ContractListItemSummary,
@@ -56,7 +65,7 @@ export function ContractsListPanel({
 
       {isLoading ? (
         <div className={styles.listStateBlock}>
-          <LoadingSkeleton heading={false} lines={3} />
+          <LoadingSkeleton heading={false} lines={3} variant="list" />
           <p className="sr-only">Carregando contratos...</p>
         </div>
       ) : error ? (
@@ -67,7 +76,10 @@ export function ContractsListPanel({
           </p>
         </div>
       ) : items.length === 0 ? (
-        <p className={styles.listState}>Nenhum contrato persistido ainda.</p>
+        <EmptyState
+          title="Nenhum contrato persistido"
+          body="Envie um PDF na area de upload para iniciar o portfolio de contratos monitorados."
+        />
       ) : (
         <ul className={styles.contractsList}>
           {items.map((item) => (
@@ -86,7 +98,9 @@ export function ContractsListPanel({
               >
                 <div className={styles.contractRowHeader}>
                   <strong className={styles.contractTitle}>{item.title}</strong>
-                  <span className={styles.contractStatus}>{buildStatusLabel(item)}</span>
+                  <StatusBadge variant={getRiskVariant(item.latestRiskScore)}>
+                    {buildStatusLabel(item)}
+                  </StatusBadge>
                 </div>
 
                 <div className={styles.contractMetaGrid}>
