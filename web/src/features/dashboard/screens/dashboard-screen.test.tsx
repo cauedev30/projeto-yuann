@@ -13,6 +13,7 @@ describe("DashboardScreen", () => {
     expect(
       screen.getByRole("heading", { name: "Governanca contratual em andamento" }),
     ).toBeInTheDocument();
+    expect(screen.getByLabelText("Carregando conteudo")).toBeInTheDocument();
     expect(screen.getByText("Carregando dashboard operacional...")).toBeInTheDocument();
   });
 

@@ -32,6 +32,8 @@ export function FindingsSection({ items }: FindingsSectionProps) {
               <strong className={styles.findingTitle}>{item.clauseName}</strong>
               <span
                 className={`${styles.statusPill} ${styles[`status${statusLabelMap[item.status]}`]}`}
+                role="status"
+                aria-label={`Status do finding ${item.clauseName}: ${statusLabelMap[item.status]}`}
               >
                 {statusLabelMap[item.status]}
               </span>

@@ -11,6 +11,7 @@ describe("HomePage", () => {
     render(<HomePage />);
 
     expect(screen.getByText("LegalTech")).toBeInTheDocument();
+    expect(screen.getByText("Workspace pronto para uso")).toBeInTheDocument();
     expect(
       screen.getByRole("heading", {
         name: "A materia contratual em formato de decisao.",
@@ -30,6 +31,10 @@ describe("HomePage", () => {
     ).toBeInTheDocument();
     expect(screen.getByText("Triagem orientada por risco")).toBeInTheDocument();
     expect(screen.getByText("Acompanhamento com trilha executiva")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Comece agora" })).toHaveAttribute(
+      "href",
+      "/contracts",
+    );
   });
 
   it("sets the application language to pt-BR", () => {

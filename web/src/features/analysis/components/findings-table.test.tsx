@@ -6,7 +6,7 @@ import { FindingsTable } from "./findings-table";
 
 
 describe("FindingsTable", () => {
-  it("renders critical findings with the expected badge", () => {
+  it("renders an accessible findings table with explicit column headers", () => {
     render(
       <FindingsTable
         items={[
@@ -22,6 +22,9 @@ describe("FindingsTable", () => {
       />,
     );
 
+    expect(screen.getByRole("table", { name: "Tabela de findings" })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "Clausula" })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "Status" })).toBeInTheDocument();
     expect(screen.getByText("critical")).toBeInTheDocument();
     expect(screen.getByText("Prazo de vigencia")).toBeInTheDocument();
   });

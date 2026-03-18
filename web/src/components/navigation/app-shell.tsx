@@ -10,6 +10,9 @@ type AppShellProps = {
 export function AppShell({ children }: AppShellProps) {
   return (
     <div className={styles.shell}>
+      <a className={styles.skipLink} href="#main-content">
+        Pular para o conteudo principal
+      </a>
       <aside className={styles.sidebar}>
         <Link aria-label="LegalTech" className={styles.brand} href="/">
           <span aria-hidden="true" className={styles.brandMark}>
@@ -84,7 +87,9 @@ export function AppShell({ children }: AppShellProps) {
           </div>
         </header>
 
-        <main className={styles.content}>{children}</main>
+        <main className={styles.content} id="main-content">
+          {children}
+        </main>
       </div>
     </div>
   );

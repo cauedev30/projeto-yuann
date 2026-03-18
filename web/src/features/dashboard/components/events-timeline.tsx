@@ -64,6 +64,18 @@ function matchesFilter(event: DashboardEvent, filter: TimelineFilter): boolean {
 export function EventsTimeline({ events, showTitle = true }: EventsTimelineProps) {
   const [activeFilter, setActiveFilter] = useState<TimelineFilter>("all");
   const orderedEvents = [...events].sort((left, right) => left.eventDate.localeCompare(right.eventDate));
+  const filterCounts = (Object.keys(FILTER_LABELS) as TimelineFilter[]).reduce<Record<TimelineFilter, number>>(
+    (counts, filter) => ({
+      ...counts,
+      [filter]: orderedEvents.filter((event) => matchesFilter(event, filter)).length,
+    }),
+    {
+      all: 0,
+      overdue: 0,
+      window: 0,
+      future: 0,
+    },
+  );
   const visibleEvents = orderedEvents.filter((event) => matchesFilter(event, activeFilter));
 
   return (
@@ -74,11 +86,12 @@ export function EventsTimeline({ events, showTitle = true }: EventsTimelineProps
         {(Object.keys(FILTER_LABELS) as TimelineFilter[]).map((filter) => (
           <button
             key={filter}
+            aria-pressed={activeFilter === filter}
             className={activeFilter === filter ? styles.filterButtonActive : styles.filterButton}
             onClick={() => setActiveFilter(filter)}
             type="button"
           >
-            {FILTER_LABELS[filter]}
+            {`${FILTER_LABELS[filter]} (${filterCounts[filter]})`}
           </button>
         ))}
       </div>
@@ -88,7 +101,10 @@ export function EventsTimeline({ events, showTitle = true }: EventsTimelineProps
       ) : (
         <ul className={styles.list}>
           {visibleEvents.map((event) => (
-            <li key={event.id} className={styles.item}>
+            <li
+              key={event.id}
+              className={`${styles.item} ${event.isOverdue ? styles.overdueItem : ""}`}
+            >
               <div className={styles.itemTop}>
                 <strong>{formatEventType(event.eventType)}</strong>
                 <span>{formatEventDate(event.eventDate)}</span>

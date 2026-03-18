@@ -4,6 +4,23 @@
   min-height: 100vh;
 }
 
+.skipLink {
+  position: absolute;
+  top: -100%;
+  left: 1rem;
+  z-index: 100;
+  padding: 0.75rem 1.25rem;
+  border-radius: 999px;
+  background: var(--brand-gold);
+  color: var(--bg);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.skipLink:focus {
+  top: 1rem;
+}
+
 .sidebar {
   position: sticky;
   top: 0;
@@ -197,13 +214,18 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 3rem;
+  min-height: 44px;
   padding: 0.85rem 1rem;
   border: 1px solid var(--line);
   border-radius: 999px;
   background: rgba(10, 18, 29, 0.88);
   cursor: pointer;
   list-style: none;
+}
+
+.mobileSummary:focus-visible {
+  border-color: var(--line-strong);
+  box-shadow: 0 0 0 3px rgba(196, 173, 129, 0.16);
 }
 
 .mobileSummary::-webkit-details-marker {
@@ -213,7 +235,20 @@
 .mobilePanel {
   display: grid;
   gap: 0.6rem;
+  max-height: 0;
+  padding-top: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition:
+    max-height 280ms ease,
+    opacity 180ms ease,
+    padding-top 180ms ease;
+}
+
+.mobileNav[open] .mobilePanel {
+  max-height: 16rem;
   padding-top: 0.75rem;
+  opacity: 1;
 }
 
 .content {

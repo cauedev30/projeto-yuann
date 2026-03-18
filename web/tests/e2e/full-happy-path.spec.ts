@@ -19,9 +19,6 @@ function resolveBackendPython(): string {
     "Scripts",
     "python.exe",
   );
-  const windowsSystemPython = process.env.LOCALAPPDATA
-    ? path.join(process.env.LOCALAPPDATA, "Programs", "Python", "Python313", "python.exe")
-    : "";
   const unixVenvPython = path.join(backendDir, ".venv", "bin", "python");
   const unixSharedVenvPython = path.resolve(
     backendDir,
@@ -35,6 +32,10 @@ function resolveBackendPython(): string {
   );
 
   if (process.platform === "win32") {
+    const windowsSystemPython = process.env.LOCALAPPDATA
+      ? path.join(process.env.LOCALAPPDATA, "Programs", "Python", "Python313", "python.exe")
+      : "";
+
     if (existsSync(windowsVenvPython)) {
       return windowsVenvPython;
     }
@@ -67,33 +68,40 @@ test.beforeEach(() => {
   prepareDashboardRuntime("clear");
 });
 
-test("operator sees an honest unavailable dashboard state before runtime data is integrated", async ({ page }) => {
-  await page.goto("/dashboard");
-
-  await expect(page.getByText("Governanca contratual em andamento")).toBeVisible();
-  await expect(page.getByText("Dashboard indisponivel no momento.")).toBeVisible();
-});
-
-test("operator sees the populated dashboard, filters the timeline, and keeps full alert history", async ({
+test("operator completes the full release journey from intake to operational dashboard", async ({
   page,
 }) => {
   prepareDashboardRuntime("seed");
 
-  await page.goto("/dashboard");
+  await page.goto("/contracts");
+  await page.getByLabel("Titulo do contrato").fill("Loja E2E Full");
+  await page.getByLabel("Referencia externa").fill("LOC-E2E-FULL");
+  await page.getByLabel("Contrato PDF").setInputFiles("tests/fixtures/third-party-draft.pdf");
+  await page.getByRole("button", { name: "Enviar contrato" }).click();
+
+  await expect(page.getByRole("heading", { name: "Findings principais" })).toBeVisible();
+  await expect(page.getByText("Prazo de vigencia", { exact: true })).toBeVisible();
+  await expect(page.getByText("Critico", { exact: true })).toBeVisible();
+  await expect(page.locator("span", { hasText: "Triagem concluida" })).toBeVisible();
+
+  const contractLink = page.getByRole("link", { name: /LOC-E2E-FULL/i });
+  await expect(contractLink).toBeVisible();
+  await Promise.all([
+    page.waitForURL(/\/contracts\/.+/, { timeout: 15000 }),
+    contractLink.click(),
+  ]);
+
+  await expect(page.getByRole("heading", { name: "Loja E2E Full" })).toBeVisible();
+  await expect(page.getByText("third-party-draft.pdf")).toBeVisible();
+
+  await Promise.all([
+    page.waitForURL(/\/dashboard$/, { timeout: 15000 }),
+    page.getByRole("link", { name: "Dashboard" }).click(),
+  ]);
 
   await expect(page.getByText("Resumo do portifolio")).toBeVisible();
   await expect(page.getByText("Contratos ativos")).toBeVisible();
-  await expect(page.getByText("Findings criticos")).toBeVisible();
-  await expect(page.getByText("Vencendo em 12 meses")).toBeVisible();
+  await expect(page.getByText("Timeline de eventos")).toBeVisible();
+  await expect(page.getByText("Historico de notificacoes")).toBeVisible();
   await expect(page.getByText("finance@example.com")).toBeVisible();
-  await expect(page.getByText("Loja Centro", { exact: true }).first()).toBeVisible();
-  await expect(page.getByText("Loja Norte", { exact: true }).first()).toBeVisible();
-
-  await page.getByRole("button", { name: /^Vencidos/ }).click();
-  await expect(page.getByText("Atrasado ha 5 dias")).toBeVisible();
-  await expect(page.getByText("Dentro da janela de alerta (30 dias)")).not.toBeVisible();
-
-  await page.getByRole("button", { name: /^Na janela/ }).click();
-  await expect(page.getByText("Dentro da janela de alerta (30 dias)")).toBeVisible();
-  await expect(page.getByText("Atrasado ha 5 dias")).not.toBeVisible();
 });

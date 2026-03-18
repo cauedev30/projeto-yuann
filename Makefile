@@ -1,5 +1,10 @@
-PYTHON ?= C:/Users/win/AppData/Local/Programs/Python/Python313/python.exe
-NPM ?= "C:/Program Files/nodejs/npm.cmd"
+ifeq ($(OS),Windows_NT)
+PYTHON ?= .venv/Scripts/python.exe
+NPM ?= npm.cmd
+else
+PYTHON ?= .venv/bin/python
+NPM ?= npm
+endif
 
 .PHONY: up down backend-test web-test release-clear-dashboard release-seed-dashboard release-verify
 

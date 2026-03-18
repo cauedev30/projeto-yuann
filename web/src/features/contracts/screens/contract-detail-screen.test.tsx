@@ -60,6 +60,15 @@ function buildContractDetail() {
 }
 
 describe("ContractDetailScreen", () => {
+  it("shows a loading skeleton while detail data is pending", () => {
+    render(
+      <ContractDetailScreen contractId="ctr-1" loadContractDetail={() => new Promise(() => undefined)} />,
+    );
+
+    expect(screen.getByLabelText("Carregando conteudo")).toBeInTheDocument();
+    expect(screen.getByText("Carregando contrato...")).toBeInTheDocument();
+  });
+
   it("renders the latest analysis findings when available", async () => {
     const loadContractDetail = vi.fn().mockResolvedValue(buildContractDetail());
 

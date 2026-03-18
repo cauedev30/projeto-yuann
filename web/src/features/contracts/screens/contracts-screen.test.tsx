@@ -118,7 +118,7 @@ describe("ContractsScreen", () => {
     await waitFor(() => expect(loadContracts).toHaveBeenCalledTimes(1));
     await user.click(scope.getByRole("button", { name: "Enviar contrato" }));
 
-    expect(scope.getByText("Processando triagem inicial...")).toBeInTheDocument();
+    expect(scope.getAllByText("Processando triagem inicial...").length).toBeGreaterThan(0);
 
     resolveUpload?.(buildUploadResult());
     await waitFor(() =>
@@ -207,7 +207,8 @@ describe("ContractsScreen", () => {
     render(<ContractsScreen submitContract={vi.fn()} loadContracts={loadContracts} />);
     const scope = getScreenScope();
 
-    expect(scope.getByText("Carregando contratos...")).toBeInTheDocument();
+    expect(scope.getByLabelText("Carregando conteudo")).toBeInTheDocument();
+    expect(scope.getAllByText("Carregando contratos...").length).toBeGreaterThan(0);
   });
 
   it("shows a contextual error when the persisted contracts list fails", async () => {

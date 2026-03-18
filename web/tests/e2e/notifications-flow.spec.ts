@@ -19,9 +19,6 @@ function resolveBackendPython(): string {
     "Scripts",
     "python.exe",
   );
-  const windowsSystemPython = process.env.LOCALAPPDATA
-    ? path.join(process.env.LOCALAPPDATA, "Programs", "Python", "Python313", "python.exe")
-    : "";
   const unixVenvPython = path.join(backendDir, ".venv", "bin", "python");
   const unixSharedVenvPython = path.resolve(
     backendDir,
@@ -35,6 +32,10 @@ function resolveBackendPython(): string {
   );
 
   if (process.platform === "win32") {
+    const windowsSystemPython = process.env.LOCALAPPDATA
+      ? path.join(process.env.LOCALAPPDATA, "Programs", "Python", "Python313", "python.exe")
+      : "";
+
     if (existsSync(windowsVenvPython)) {
       return windowsVenvPython;
     }
@@ -67,33 +68,20 @@ test.beforeEach(() => {
   prepareDashboardRuntime("clear");
 });
 
-test("operator sees an honest unavailable dashboard state before runtime data is integrated", async ({ page }) => {
-  await page.goto("/dashboard");
-
-  await expect(page.getByText("Governanca contratual em andamento")).toBeVisible();
-  await expect(page.getByText("Dashboard indisponivel no momento.")).toBeVisible();
-});
-
-test("operator sees the populated dashboard, filters the timeline, and keeps full alert history", async ({
+test("operator reviews notification history with recipients, statuses, channel, and contract context", async ({
   page,
 }) => {
   prepareDashboardRuntime("seed");
 
   await page.goto("/dashboard");
+  const historyCard = page
+    .getByRole("heading", { name: "Historico de notificacoes" })
+    .locator("xpath=ancestor::section[1]");
 
-  await expect(page.getByText("Resumo do portifolio")).toBeVisible();
-  await expect(page.getByText("Contratos ativos")).toBeVisible();
-  await expect(page.getByText("Findings criticos")).toBeVisible();
-  await expect(page.getByText("Vencendo em 12 meses")).toBeVisible();
-  await expect(page.getByText("finance@example.com")).toBeVisible();
-  await expect(page.getByText("Loja Centro", { exact: true }).first()).toBeVisible();
-  await expect(page.getByText("Loja Norte", { exact: true }).first()).toBeVisible();
-
-  await page.getByRole("button", { name: /^Vencidos/ }).click();
-  await expect(page.getByText("Atrasado ha 5 dias")).toBeVisible();
-  await expect(page.getByText("Dentro da janela de alerta (30 dias)")).not.toBeVisible();
-
-  await page.getByRole("button", { name: /^Na janela/ }).click();
-  await expect(page.getByText("Dentro da janela de alerta (30 dias)")).toBeVisible();
-  await expect(page.getByText("Atrasado ha 5 dias")).not.toBeVisible();
+  await expect(page.getByText("Historico de notificacoes")).toBeVisible();
+  await expect(historyCard.getByText("finance@example.com")).toBeVisible();
+  await expect(historyCard.getByText("Enviado", { exact: true })).toBeVisible();
+  await expect(historyCard.getByText("Pendente", { exact: true })).toBeVisible();
+  await expect(historyCard.locator("p").filter({ hasText: /· email ·/ }).first()).toBeVisible();
+  await expect(historyCard.locator("strong").first()).toContainText(/Loja/);
 });

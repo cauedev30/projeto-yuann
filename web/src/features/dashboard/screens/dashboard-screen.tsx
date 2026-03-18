@@ -3,6 +3,7 @@
 import React from "react";
 import { useEffect, useState } from "react";
 
+import { LoadingSkeleton } from "../../../components/ui/loading-skeleton";
 import { PageHeader } from "../../../components/ui/page-header";
 import { SurfaceCard } from "../../../components/ui/surface-card";
 import type { DashboardSnapshot } from "../../../entities/dashboard/model";
@@ -81,6 +82,10 @@ export function DashboardScreen({
 
   return (
     <section className={styles.page}>
+      <div aria-atomic="true" aria-live="polite" className="sr-only">
+        {isLoading ? "Carregando dashboard operacional..." : ""}
+        {error?.message ?? ""}
+      </div>
       <PageHeader
         eyebrow="Mesa juridica"
         title="Governanca contratual em andamento"
@@ -89,7 +94,7 @@ export function DashboardScreen({
 
       {isLoading ? (
         <SurfaceCard title="Dashboard operacional">
-          <p className={styles.sectionText}>Carregando dashboard operacional...</p>
+          <LoadingSkeleton heading lines={3} />
         </SurfaceCard>
       ) : error ? (
         <SurfaceCard title="Dashboard operacional">

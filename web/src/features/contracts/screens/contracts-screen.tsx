@@ -169,6 +169,12 @@ export function ContractsScreen({
 
   return (
     <main className={styles.page}>
+      <div aria-atomic="true" aria-live="polite" className="sr-only">
+        {isSubmitting ? "Processando triagem inicial..." : ""}
+        {isLoadingContracts ? "Carregando contratos..." : ""}
+        {error ?? contractsError ?? ""}
+      </div>
+
       <ContractsHero />
 
       <div className={styles.topGrid}>

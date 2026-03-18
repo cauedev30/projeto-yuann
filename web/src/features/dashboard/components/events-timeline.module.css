@@ -21,6 +21,7 @@
     transform 180ms ease,
     border-color 180ms ease,
     background 180ms ease;
+  touch-action: manipulation;
 }
 
 .filterButton:hover,
@@ -51,6 +52,10 @@
   background: linear-gradient(180deg, rgba(17, 29, 45, 0.92), rgba(11, 21, 35, 0.96));
 }
 
+.overdueItem {
+  border-left: 3px solid rgba(242, 141, 141, 0.55);
+}
+
 .itemTop {
   display: flex;
   justify-content: space-between;
@@ -75,4 +80,10 @@
 .emptyState {
   margin: 0;
   line-height: 1.6;
+}
+
+@media (max-width: 640px) {
+  .filters {
+    flex-wrap: wrap;
+  }
 }

@@ -86,15 +86,24 @@ describe("EventsTimeline", () => {
       />,
     );
 
-    await user.click(screen.getByRole("button", { name: "Vencidos" }));
+    const allFilter = screen.getByRole("button", { name: "Todos (3)" });
+    const overdueFilter = screen.getByRole("button", { name: "Vencidos (1)" });
+    const futureFilter = screen.getByRole("button", { name: "Futuros (1)" });
+
+    expect(allFilter).toHaveAttribute("aria-pressed", "true");
+    expect(overdueFilter).toHaveAttribute("aria-pressed", "false");
+
+    await user.click(overdueFilter);
 
     expect(screen.getByText("Loja Centro")).toBeInTheDocument();
     expect(screen.queryByText("Loja Norte")).not.toBeInTheDocument();
     expect(screen.queryByText("Loja Sul")).not.toBeInTheDocument();
+    expect(overdueFilter).toHaveAttribute("aria-pressed", "true");
 
-    await user.click(screen.getByRole("button", { name: "Futuros" }));
+    await user.click(futureFilter);
 
     expect(screen.getByText("Loja Sul")).toBeInTheDocument();
     expect(screen.queryByText("Loja Centro")).not.toBeInTheDocument();
+    expect(futureFilter).toHaveAttribute("aria-pressed", "true");
   });
 });

@@ -4,6 +4,7 @@ import React from "react";
 import { useEffect, useState } from "react";
 
 import { EmptyState } from "../../../components/ui/empty-state";
+import { LoadingSkeleton } from "../../../components/ui/loading-skeleton";
 import { PageHeader } from "../../../components/ui/page-header";
 import { StatCard } from "../../../components/ui/stat-card";
 import { SurfaceCard } from "../../../components/ui/surface-card";
@@ -42,6 +43,11 @@ export function ContractDetailScreen({
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  const liveMessage = isRefreshing
+    ? "Atualizando detalhe do contrato..."
+    : isLoading
+      ? "Carregando contrato..."
+      : error?.message ?? "";
 
   useEffect(() => {
     let isActive = true;
@@ -111,13 +117,16 @@ export function ContractDetailScreen({
   if (isLoading) {
     return (
       <section className={styles.page}>
+        <div aria-atomic="true" aria-live="polite" className="sr-only">
+          {liveMessage}
+        </div>
         <PageHeader
           eyebrow="Contracts"
           title={contractId}
           description="Carregando a leitura persistida deste contrato."
         />
         <SurfaceCard title="Detalhe do contrato">
-          <p className={styles.sectionText}>Carregando contrato...</p>
+          <LoadingSkeleton heading lines={4} />
         </SurfaceCard>
       </section>
     );
@@ -126,6 +135,9 @@ export function ContractDetailScreen({
   if (error && isNotFoundError(error)) {
     return (
       <section className={styles.page}>
+        <div aria-atomic="true" aria-live="polite" className="sr-only">
+          {liveMessage}
+        </div>
         <PageHeader
           eyebrow="Contracts"
           title="Contrato nao encontrado."
@@ -142,6 +154,9 @@ export function ContractDetailScreen({
   if (error || !detail) {
     return (
       <section className={styles.page}>
+        <div aria-atomic="true" aria-live="polite" className="sr-only">
+          {liveMessage}
+        </div>
         <PageHeader
           eyebrow="Contracts"
           title={contractId}
@@ -169,6 +184,9 @@ export function ContractDetailScreen({
 
   return (
     <section className={styles.page}>
+      <div aria-atomic="true" aria-live="polite" className="sr-only">
+        {liveMessage}
+      </div>
       <PageHeader
         eyebrow="Contracts"
         title={detail.contract.title}

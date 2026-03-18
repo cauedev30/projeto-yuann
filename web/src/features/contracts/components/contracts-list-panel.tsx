@@ -3,6 +3,7 @@ import React from "react";
 
 import type { ContractListItemSummary } from "@/entities/contracts/model";
 
+import { LoadingSkeleton } from "../../../components/ui/loading-skeleton";
 import styles from "../screens/contracts-screen.module.css";
 
 type ContractsListPanelProps = {
@@ -54,7 +55,10 @@ export function ContractsListPanel({
       </div>
 
       {isLoading ? (
-        <p className={styles.listState}>Carregando contratos...</p>
+        <div className={styles.listStateBlock}>
+          <LoadingSkeleton heading={false} lines={3} />
+          <p className="sr-only">Carregando contratos...</p>
+        </div>
       ) : error ? (
         <div className={styles.listStateBlock}>
           <p className={styles.listState}>Nao foi possivel atualizar o portfolio.</p>

@@ -11,6 +11,7 @@ export default function HomePage() {
       <section className="marketingHero">
         <div className="marketingHeroCopy">
           <p className="marketingEyebrow">Plataforma juridica operacional</p>
+          <span className="marketingHeroBadge">Workspace pronto para uso</span>
           <h1>A materia contratual em formato de decisao.</h1>
           <p className="marketingLead">
             Leitura juridica, trilha operacional e proximas acoes em uma mesma
@@ -141,8 +142,8 @@ export default function HomePage() {
           <p className="marketingSectionKicker">LegalTech workspace</p>
           <h2>Entre no produto e valide o fluxo na pratica.</h2>
         </div>
-        <Link className="primaryCta" href="/dashboard">
-          Ir para o dashboard
+        <Link className="primaryCta" href="/contracts">
+          Comece agora
         </Link>
       </section>
     </main>

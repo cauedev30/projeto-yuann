@@ -143,6 +143,20 @@
   font-weight: 700;
 }
 
+.statusChip {
+  gap: 0.45rem;
+  transition: all 300ms ease;
+}
+
+.statusChip::before {
+  content: "";
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: var(--contracts-muted);
+  box-shadow: 0 0 0 6px rgba(147, 160, 179, 0.12);
+}
+
 .summaryCallout,
 .emptyCallout {
   color: var(--contracts-accent);
@@ -161,12 +175,32 @@
   background: linear-gradient(180deg, rgba(12, 26, 33, 0.94), rgba(8, 15, 26, 0.96));
 }
 
+.sessionToneLoading .statusChip::before {
+  background: var(--brand-blue);
+  box-shadow: 0 0 0 6px rgba(134, 168, 216, 0.14);
+}
+
 .sessionToneError {
   background: linear-gradient(180deg, rgba(35, 15, 21, 0.94), rgba(8, 15, 26, 0.96));
 }
 
+.sessionToneError .statusChip::before {
+  background: var(--contracts-danger);
+  box-shadow: 0 0 0 6px rgba(242, 141, 141, 0.14);
+}
+
 .sessionToneSuccess {
   background: linear-gradient(180deg, rgba(13, 29, 25, 0.94), rgba(8, 15, 26, 0.96));
+}
+
+.sessionToneSuccess .statusChip::before {
+  background: var(--contracts-success);
+  box-shadow: 0 0 0 6px rgba(151, 210, 189, 0.14);
+}
+
+.sessionToneEmpty .statusChip::before {
+  background: var(--contracts-attention);
+  box-shadow: 0 0 0 6px rgba(231, 188, 107, 0.14);
 }
 
 .sessionMessage {
@@ -308,6 +342,7 @@
   white-space: pre-wrap;
   word-break: break-word;
   overflow: auto;
+  overflow-x: auto;
   max-height: 22rem;
   line-height: 1.68;
   font-family: "IBM Plex Mono", "SFMono-Regular", monospace;
@@ -408,13 +443,26 @@
 }
 
 @media (max-width: 900px) {
-  .topGrid,
   .summaryGrid {
     grid-template-columns: 1fr;
   }
 }
 
+@media (max-width: 820px) {
+  .topGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 640px) {
+  .contractMetaGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .contractsList {
+    gap: 0.7rem;
+  }
+
   .hero,
   .uploadPanel,
   .sessionCard,

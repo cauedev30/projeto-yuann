@@ -88,6 +88,27 @@ textarea {
   background: rgba(196, 173, 129, 0.78);
 }
 
+:focus-visible {
+  outline: 2px solid var(--brand-gold);
+  outline-offset: 2px;
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .marketingPage {
   width: min(calc(100% - 2rem), var(--max-width));
   margin: 0 auto;
@@ -265,6 +286,31 @@ textarea {
   max-width: 34rem;
   margin: 0;
   font-size: 1rem;
+}
+
+.marketingHeroBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  width: fit-content;
+  min-height: 2.2rem;
+  padding: 0.45rem 0.85rem;
+  border: 1px solid rgba(196, 173, 129, 0.18);
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(196, 173, 129, 0.14), rgba(134, 168, 216, 0.08));
+  color: var(--ink-soft);
+  font-size: 0.84rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.marketingHeroBadge::before {
+  content: "";
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: var(--brand-green);
+  box-shadow: 0 0 0 6px rgba(78, 141, 131, 0.16);
 }
 
 .marketingHeroActions {

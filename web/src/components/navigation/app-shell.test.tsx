@@ -15,8 +15,13 @@ describe("AppShell", () => {
     const navigation = screen.getByRole("navigation", {
       name: "Navegacao principal do workspace",
     });
+    const contentRegion = screen.getByRole("main");
 
+    expect(
+      screen.getByRole("link", { name: "Pular para o conteudo principal" }),
+    ).toHaveAttribute("href", "#main-content");
     expect(navigation).toBeInTheDocument();
+    expect(contentRegion).toHaveAttribute("id", "main-content");
     expect(screen.getByRole("link", { name: "LegalTech" })).toHaveAttribute("href", "/");
     expect(within(navigation).getByRole("link", { name: "Dashboard" })).toHaveAttribute(
       "href",

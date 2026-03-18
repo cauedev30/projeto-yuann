@@ -26,16 +26,22 @@ def seed_dashboard_data(session: Session, *, reference_date: date = date(2026, 4
         title="Loja Centro",
         external_reference="LOC-001",
         status="uploaded",
+        parties={"locador": "Imobiliaria Centro", "locatario": "Rede Comercial X"},
+        financial_terms={"valor_mensal": "R$ 12.500,00", "indice_reajuste": "IGPM"},
     )
     active_contract = Contract(
         title="Loja Norte",
         external_reference="LOC-002",
         status="active",
+        parties={"locador": "Patrimonio Norte S.A.", "locatario": "Operacao Varejo Norte"},
+        financial_terms={"valor_mensal": "R$ 18.000,00", "indice_reajuste": "IPCA"},
     )
     draft_contract = Contract(
         title="Rascunho Interno",
         external_reference="LOC-003",
         status="draft",
+        parties={"locador": "Fundo Urbano Atlas", "locatario": "Marca Piloto"},
+        financial_terms={"valor_mensal": "R$ 9.800,00", "indice_reajuste": "IGPM"},
     )
 
     uploaded_contract.analyses.extend(
