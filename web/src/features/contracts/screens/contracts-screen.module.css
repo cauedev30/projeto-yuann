@@ -1,18 +1,18 @@
 .page {
   --contracts-ink: var(--ink);
   --contracts-muted: var(--ink-muted);
-  --contracts-line: var(--line);
-  --contracts-line-strong: var(--line-strong);
-  --contracts-surface: var(--surface);
-  --contracts-surface-strong: var(--surface-strong);
-  --contracts-accent: var(--brand-blue);
-  --contracts-accent-soft: var(--line-border);
-  --contracts-attention: var(--status-attention);
-  --contracts-attention-soft: var(--status-attention-soft);
-  --contracts-danger: var(--status-danger);
-  --contracts-danger-soft: var(--status-danger-soft);
-  --contracts-success: var(--status-success);
-  --contracts-success-soft: var(--status-success-soft);
+  --contracts-line: var(--glass-border);
+  --contracts-line-strong: rgba(255, 255, 255, 0.2);
+  --contracts-surface: rgba(13, 13, 18, 0.6);
+  --contracts-surface-strong: rgba(20, 20, 26, 0.8);
+  --contracts-accent: var(--brand-accent);
+  --contracts-accent-soft: rgba(16, 185, 129, 0.2);
+  --contracts-attention: #fcd34d;
+  --contracts-attention-soft: rgba(252, 211, 77, 0.15);
+  --contracts-danger: #fca5a5;
+  --contracts-danger-soft: rgba(252, 165, 165, 0.15);
+  --contracts-success: var(--brand-accent);
+  --contracts-success-soft: rgba(16, 185, 129, 0.15);
   display: grid;
   gap: 1.25rem;
   color: var(--contracts-ink);
@@ -21,41 +21,36 @@
 
 .successBanner {
   padding: var(--space-4);
-  border: 1px solid rgba(5, 150, 105, 0.2);
+  border: 1px solid rgba(16, 185, 129, 0.4);
   border-radius: var(--radius-sm);
-  background: #ecfdf5;
-  color: var(--brand-green);
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--contracts-success);
   font-weight: 700;
   font-size: var(--text-sm);
   animation: bannerSlideDown 280ms ease-out, bannerFadeOut 800ms ease 4200ms forwards;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
 }
 
 @keyframes bannerSlideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes bannerFadeOut {
-  from {
-    opacity: 1;
-  }
-  to {
-    opacity: 0;
-  }
+  from { opacity: 1; }
+  to { opacity: 0; }
 }
 
 .hero,
 .panel {
   position: relative;
   border: 1px solid var(--contracts-line);
-  border-radius: var(--radius-md);
-  background: var(--bg-elevated);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(145deg, rgba(20, 20, 26, 0.6), rgba(13, 13, 18, 0.8));
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  transition: transform var(--transition-base), box-shadow var(--transition-base), border-color var(--transition-base);
 }
 
 .hero {
@@ -76,7 +71,8 @@
 
 .eyebrow,
 .panelEyebrow {
-  color: var(--ink-muted);
+  color: var(--brand-accent);
+  text-shadow: 0 0 8px var(--brand-glow);
 }
 
 .heroTitle,
@@ -84,12 +80,15 @@
   margin: 0;
   font-family: var(--font-body);
   line-height: 1.2;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.02em;
 }
 
 .heroTitle {
   font-size: clamp(1.5rem, 2.5vw, 2rem);
   max-width: 20ch;
+  background: linear-gradient(135deg, #ffffff 30%, #a1a1aa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .heroDescription {
@@ -102,7 +101,7 @@
 
 .topGrid {
   display: grid;
-  gap: 1rem;
+  gap: 1.25rem;
   grid-template-columns: minmax(0, 1.35fr) minmax(18rem, 0.85fr);
   align-items: start;
 }
@@ -114,7 +113,7 @@
 .findingsSection,
 .textPanel,
 .emptyPanel {
-  padding: 1.35rem;
+  padding: 1.5rem;
 }
 
 .sectionHeader {
@@ -127,6 +126,7 @@
 .sectionTitle {
   margin-top: 0.35rem;
   font-size: clamp(1.25rem, 1rem + 0.8vw, 1.75rem);
+  color: var(--ink);
 }
 
 .panelDescription,
@@ -152,17 +152,18 @@
   align-items: center;
   justify-content: center;
   min-height: 2rem;
-  padding: 0.45rem 0.8rem;
-  border-radius: var(--radius-xs);
-  border: 1px solid var(--line-border);
-  background: var(--bg-elevated);
+  padding: 0.45rem 1rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--glass-border);
+  background: rgba(255, 255, 255, 0.05);
   color: var(--contracts-ink);
   font-size: 0.82rem;
   font-weight: 700;
+  backdrop-filter: blur(8px);
 }
 
 .statusChip {
-  gap: 0.45rem;
+  gap: 0.5rem;
   transition: all 300ms ease;
 }
 
@@ -172,80 +173,100 @@
   height: 0.55rem;
   border-radius: 50%;
   background: var(--contracts-muted);
-  box-shadow: 0 0 0 6px rgba(107, 114, 128, 0.12);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.2);
 }
 
 .summaryCallout,
 .emptyCallout {
   color: var(--contracts-accent);
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.3);
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.2) inset;
 }
 
 .sessionCard {
   display: grid;
-  gap: 0.9rem;
+  gap: 1rem;
+  /* Glassmorphism overriden per tone */
 }
 
 .sessionToneEmpty {
-  background: #fffbeb;
+  background: rgba(255, 255, 255, 0.02);
+  border-color: rgba(252, 211, 77, 0.2);
+  box-shadow: 0 0 20px rgba(252, 211, 77, 0.05) inset, 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
 .sessionToneLoading {
-  background: #eff6ff;
+  background: rgba(14, 165, 233, 0.05);
+  border-color: rgba(14, 165, 233, 0.3);
+  box-shadow: 0 0 20px rgba(14, 165, 233, 0.1) inset, 0 8px 32px rgba(0, 0, 0, 0.4);
+  animation: sessionPulseLoading 2s infinite alternate;
+}
+
+@keyframes sessionPulseLoading {
+  from { box-shadow: 0 0 10px rgba(14, 165, 233, 0.1) inset, 0 8px 32px rgba(0, 0, 0, 0.4); }
+  to { box-shadow: 0 0 30px rgba(14, 165, 233, 0.2) inset, 0 8px 32px rgba(0, 0, 0, 0.4); }
 }
 
 .sessionToneLoading .statusChip::before {
-  background: var(--brand-blue);
-  box-shadow: 0 0 0 6px rgba(37, 99, 235, 0.14);
+  background: #38bdf8;
+  box-shadow: 0 0 10px #38bdf8;
 }
 
 .sessionToneError {
-  background: #fef2f2;
+  background: rgba(239, 68, 68, 0.05);
+  border-color: rgba(239, 68, 68, 0.3);
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.1) inset, 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
 .sessionToneError .statusChip::before {
   background: var(--contracts-danger);
-  box-shadow: 0 0 0 6px rgba(220, 38, 38, 0.14);
+  box-shadow: 0 0 10px var(--contracts-danger);
 }
 
 .sessionToneSuccess {
-  background: #ecfdf5;
+  background: rgba(16, 185, 129, 0.05);
+  border-color: rgba(16, 185, 129, 0.3);
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.1) inset, 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
 .sessionToneSuccess .statusChip::before {
   background: var(--contracts-success);
-  box-shadow: 0 0 0 6px rgba(5, 150, 105, 0.14);
+  box-shadow: 0 0 10px var(--contracts-success);
 }
 
 .sessionToneEmpty .statusChip::before {
   background: var(--contracts-attention);
-  box-shadow: 0 0 0 6px rgba(217, 119, 6, 0.14);
+  box-shadow: 0 0 10px var(--contracts-attention);
 }
 
 .sessionMessage {
   margin: 0;
   padding: 1rem;
-  border-radius: var(--radius-input);
-  border: 1px solid var(--line-border);
-  background: var(--bg);
-  font-weight: 700;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--glass-border);
+  background: rgba(0, 0, 0, 0.2);
+  font-weight: 600;
+  color: var(--ink-soft);
 }
 
 .uploadShell {
   display: grid;
-  gap: 1rem;
+  gap: 1.25rem;
 }
 
 .uploadHint {
   display: grid;
   gap: 0.45rem;
-  padding: 1rem;
-  border-radius: var(--radius-input);
-  border: 1px solid var(--line-border);
-  background: var(--bg-elevated);
+  padding: 1.2rem;
+  border-radius: var(--radius-sm);
+  border: 1px dashed var(--glass-border);
+  background: rgba(255, 255, 255, 0.02);
 }
 
 .uploadHint strong {
   font-size: 1rem;
+  color: var(--contracts-ink);
 }
 
 .uploadHint p {
@@ -262,10 +283,16 @@
 }
 
 .summaryCard {
-  padding: 1rem;
-  border-radius: var(--radius-input);
-  border: 1px solid var(--line-border);
-  background: var(--bg-elevated);
+  padding: 1.2rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--glass-border);
+  background: rgba(20, 20, 26, 0.4);
+  transition: transform var(--transition-base), border-color var(--transition-base);
+}
+
+.summaryCard:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 .summaryLabel {
@@ -274,10 +301,11 @@
 
 .summaryValue {
   display: block;
-  margin-top: 0.45rem;
+  margin-top: 0.5rem;
   font-family: var(--font-body);
   font-size: clamp(1.8rem, 1.2rem + 1vw, 2.5rem);
   line-height: 0.95;
+  color: var(--ink);
 }
 
 .summaryMeta {
@@ -294,10 +322,15 @@
 }
 
 .findingItem {
-  padding: 1rem;
-  border-radius: var(--radius-input);
-  border: 1px solid var(--line-border);
-  background: var(--bg-elevated);
+  padding: 1.2rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--glass-border);
+  background: rgba(20, 20, 26, 0.4);
+  transition: background var(--transition-fast);
+}
+
+.findingItem:hover {
+  background: rgba(20, 20, 26, 0.7);
 }
 
 .findingHeader {
@@ -308,44 +341,50 @@
 }
 
 .findingTitle {
-  font-size: 1rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--ink);
 }
 
 .statusPill {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  border-radius: var(--radius-xs);
-  padding: 0.35rem 0.7rem;
+  border-radius: var(--radius-pill);
+  padding: 0.4rem 0.8rem;
   font-size: 0.8rem;
   font-weight: 700;
+  box-shadow: 0 0 10px rgba(0,0,0,0.3) inset;
 }
 
 .statusCritico {
   background: var(--contracts-danger-soft);
   color: var(--contracts-danger);
+  border: 1px solid rgba(252, 165, 165, 0.3);
 }
 
 .statusAtencao {
   background: var(--contracts-attention-soft);
   color: var(--contracts-attention);
+  border: 1px solid rgba(252, 211, 77, 0.3);
 }
 
 .statusConforme {
   background: var(--contracts-success-soft);
   color: var(--contracts-success);
+  border: 1px solid rgba(16, 185, 129, 0.3);
 }
 
 .findingCritical {
-  border-left: 3px solid var(--status-danger);
+  border-left: 4px solid var(--contracts-danger);
 }
 
 .findingAttention {
-  border-left: 3px solid var(--status-attention);
+  border-left: 4px solid var(--contracts-attention);
 }
 
 .findingConforme {
-  border-left: 3px solid var(--status-success);
+  border-left: 4px solid var(--contracts-success);
 }
 
 .findingDescription {
@@ -364,11 +403,11 @@
 
 .extractedText {
   margin: 0;
-  padding: 1rem;
-  border-radius: var(--radius-input);
-  border: 1px solid var(--line-border);
-  background: #f9fafb;
-  color: var(--contracts-ink);
+  padding: 1.2rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--glass-border);
+  background: rgba(0, 0, 0, 0.4);
+  color: var(--ink-soft);
   white-space: pre-wrap;
   word-break: break-word;
   overflow: auto;
@@ -382,6 +421,8 @@
 .emptyPanel {
   display: grid;
   gap: 0.8rem;
+  background: rgba(255,255,255,0.02);
+  border-style: dashed;
 }
 
 .listPanel {
@@ -391,30 +432,31 @@
 
 .refreshButton {
   min-height: 2.75rem;
-  padding: var(--space-3) var(--space-4);
-  border: 1px solid var(--line-border-strong);
-  border-radius: var(--radius-input);
-  background: var(--bg);
+  padding: var(--space-3) var(--space-5);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.05);
   color: var(--contracts-ink);
   font: inherit;
   font-weight: 700;
   cursor: pointer;
-  transition:
-    border-color var(--transition-base);
+  transition: all var(--transition-base);
+  backdrop-filter: blur(8px);
 }
 
 .refreshButton:hover:not(:disabled) {
-  border-color: var(--line-strong);
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .refreshButton:focus-visible {
-  outline: 2px solid var(--brand-blue);
+  outline: 2px solid var(--brand-accent);
   outline-offset: 2px;
 }
 
 .refreshButton:disabled {
   cursor: wait;
-  opacity: 0.72;
+  opacity: 0.5;
 }
 
 .listStateBlock {
@@ -425,16 +467,17 @@
 .listState,
 .listAlert {
   margin: 0;
-  padding: 1rem;
-  border-radius: var(--radius-input);
-  border: 1px solid var(--line-border);
-  background: var(--bg-elevated);
+  padding: 1.2rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--glass-border);
+  background: rgba(20, 20, 26, 0.4);
   color: var(--contracts-muted);
   line-height: 1.6;
 }
 
 .listAlert {
   color: var(--contracts-danger);
+  border-color: rgba(252, 165, 165, 0.3);
 }
 
 .contractsList {
@@ -442,38 +485,34 @@
   padding: 0;
   list-style: none;
   display: grid;
-  gap: 0.85rem;
+  gap: 1rem;
 }
 
 .contractRow {
-  border-radius: var(--radius-input);
-  border: 1px solid var(--line-border);
-  background: var(--bg);
-  transition:
-    border-color var(--transition-fast),
-    background var(--transition-fast);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--glass-border);
+  background: rgba(20, 20, 26, 0.4);
+  transition: all var(--transition-fast);
 }
 
 .contractRow:hover {
-  border-color: var(--line-strong);
-  background: var(--bg-elevated);
-}
-
-.contractsList .contractRow + .contractRow {
-  border-top-color: var(--line-border);
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
 
 .contractLink {
   display: grid;
   gap: var(--space-3);
-  padding: var(--space-4);
+  padding: var(--space-4) var(--space-5);
   color: inherit;
   text-decoration: none;
-  border-radius: var(--radius-input);
+  border-radius: var(--radius-md);
 }
 
 .contractLink:focus-visible {
-  outline: 2px solid var(--brand-blue);
+  outline: 2px solid var(--brand-accent);
   outline-offset: -2px;
 }
 
@@ -485,13 +524,17 @@
 }
 
 .contractTitle {
-  font-size: 1rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--ink);
 }
 
 .contractStatus {
   color: var(--contracts-accent);
-  font-size: 0.82rem;
+  font-size: 0.85rem;
   font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .contractMetaGrid {
@@ -519,7 +562,7 @@
   }
 
   .contractsList {
-    gap: var(--space-3);
+    gap: var(--space-4);
   }
 
   .contractLink {
@@ -536,7 +579,7 @@
   .textPanel,
   .emptyPanel {
     padding: var(--space-4);
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-md);
   }
 
   .sectionHeader,

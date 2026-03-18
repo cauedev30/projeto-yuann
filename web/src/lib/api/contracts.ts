@@ -114,3 +114,54 @@ export async function getContractDetail(
   const payload = (await response.json()) as ContractDetailResponsePayload;
   return mapContractDetailResponse(payload);
 }
+
+export async function deleteContract(
+  contractId: string,
+  fetchImpl: typeof fetch = fetch,
+): Promise<void> {
+  const { NEXT_PUBLIC_API_URL } = getClientEnv();
+  const response = await fetchImpl(`${NEXT_PUBLIC_API_URL}/api/contracts/${contractId}`, {
+    method: "DELETE",
+  });
+
+  if (!response.ok) {
+    throw await buildApiError(response, "Nao foi possivel apagar o contrato.");
+  }
+}
+
+export async function updateContract(
+  contractId: string,
+  updates: {
+    title?: string;
+    signatureDate?: string | null;
+    startDate?: string | null;
+    endDate?: string | null;
+    termMonths?: number | null;
+  },
+  fetchImpl: typeof fetch = fetch,
+): Promise<ContractDetail> {
+  const { NEXT_PUBLIC_API_URL } = getClientEnv();
+  
+  // Convert camelCase to snake_case payload
+  const payload: Record<string, unknown> = {};
+  if (updates.title !== undefined) payload.title = updates.title;
+  if (updates.signatureDate !== undefined) payload.signature_date = updates.signatureDate;
+  if (updates.startDate !== undefined) payload.start_date = updates.startDate;
+  if (updates.endDate !== undefined) payload.end_date = updates.endDate;
+  if (updates.termMonths !== undefined) payload.term_months = updates.termMonths;
+
+  const response = await fetchImpl(`${NEXT_PUBLIC_API_URL}/api/contracts/${contractId}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw await buildApiError(response, "Nao foi possivel atualizar o contrato.");
+  }
+
+  const responsePayload = (await response.json()) as ContractDetailResponsePayload;
+  return mapContractDetailResponse(responsePayload);
+}

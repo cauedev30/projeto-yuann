@@ -12,6 +12,7 @@ import { NotificationHistory } from "../../notifications/components/notification
 import { ContractsSummary } from "../components/contracts-summary";
 import { EmptyDashboardState } from "../components/empty-dashboard-state";
 import { EventsTimeline } from "../components/events-timeline";
+import { ManageContractsPanel } from "../components/manage-contracts-panel";
 import styles from "./dashboard-screen.module.css";
 
 type DashboardScreenProps = {
@@ -29,6 +30,7 @@ export function DashboardScreen({
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  const [showManagePanel, setShowManagePanel] = useState(false);
 
   useEffect(() => {
     let isActive = true;
@@ -117,14 +119,20 @@ export function DashboardScreen({
         <div className={styles.stack}>
           <div className={styles.refreshRow}>
             <button
-              className={styles.refreshButton}
-              disabled={isRefreshing}
-              onClick={() => void handleRefresh()}
+              className={styles.manageButton}
+              onClick={() => setShowManagePanel((prev) => !prev)}
               type="button"
             >
-              {isRefreshing ? "Atualizando..." : "Atualizar painel"}
+              {showManagePanel ? "Ocultar portfolio" : "Gerenciar portfolio"}
             </button>
           </div>
+
+          {showManagePanel && (
+            <ManageContractsPanel 
+              onClose={() => setShowManagePanel(false)}
+              onRefresh={() => void handleRefresh()} 
+            />
+          )}
 
           <SurfaceCard title="Resumo do portifolio">
             <ContractsSummary summary={snapshot.summary} />

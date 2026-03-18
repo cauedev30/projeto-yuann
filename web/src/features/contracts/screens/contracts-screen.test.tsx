@@ -93,8 +93,8 @@ describe("ContractsScreen", () => {
 
     await waitFor(() => expect(loadContracts).toHaveBeenCalledTimes(1));
 
-    expect(scope.getByText("Mesa de analise")).toBeInTheDocument();
-    expect(scope.getByText("Triagem contratual com criterio juridico")).toBeInTheDocument();
+    expect(scope.getByText("Contratos")).toBeInTheDocument();
+    expect(scope.getByText("Analise de contratos")).toBeInTheDocument();
     expect(scope.getByText("Nenhuma triagem foi executada nesta sessao.")).toBeInTheDocument();
     expect(scope.getByText("Nenhum contrato persistido")).toBeInTheDocument();
   });

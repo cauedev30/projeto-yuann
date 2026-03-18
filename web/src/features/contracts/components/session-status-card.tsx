@@ -9,9 +9,9 @@ type SessionStatusCardProps = {
 
 const stateMeta = {
   empty: {
-    title: "Estado da sessao",
-    badge: "Aguardando envio",
-    description: "A triagem ainda nao foi iniciada. O envio do PDF libera o resumo executivo e os detalhes da sessao.",
+    title: "Pronto para iniciar",
+    badge: "Aguardando documento",
+    description: "Nenhum arquivo enviado nesta sessao. O upload do contrato iniciara a triagem e liberara o resumo executivo.",
     tone: styles.sessionToneEmpty,
   },
   loading: {

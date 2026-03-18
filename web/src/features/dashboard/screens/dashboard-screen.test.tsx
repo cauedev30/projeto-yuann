@@ -9,9 +9,9 @@ describe("DashboardScreen", () => {
   it("shows a loading state before rendering the dashboard result", () => {
     render(<DashboardScreen loadDashboardSnapshot={() => new Promise(() => undefined)} />);
 
-    expect(screen.getByText("Mesa juridica")).toBeInTheDocument();
+    expect(screen.getByText("Dashboard")).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: "Governanca contratual em andamento" }),
+      screen.getByRole("heading", { name: "Resumo do portfolio" }),
     ).toBeInTheDocument();
     expect(screen.getByLabelText("Carregando conteudo")).toBeInTheDocument();
     expect(screen.getByText("Carregando dashboard operacional...")).toBeInTheDocument();

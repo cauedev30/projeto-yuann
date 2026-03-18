@@ -1,7 +1,11 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+
+vi.mock("next/font/google", () => ({
+  DM_Sans: () => ({ className: "mocked-font" }),
+}));
 
 import RootLayout from "./layout";
 import HomePage from "./page";
@@ -11,26 +15,25 @@ describe("HomePage", () => {
     render(<HomePage />);
 
     expect(screen.getByText("LegalTech")).toBeInTheDocument();
-    expect(screen.getByText("Workspace pronto para uso")).toBeInTheDocument();
+    expect(screen.getByText("Gestao contratual simplificada.")).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", {
-        name: "A materia contratual em formato de decisao.",
-      }),
+      screen.getByText(
+        "Intake, triagem e acompanhamento de contratos em um unico workspace."
+      )
     ).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Abrir workspace" })).toHaveAttribute(
       "href",
       "/dashboard",
     );
     expect(
-      screen.getByRole("heading", { name: "Do intake ao acompanhamento" }),
+      screen.getByRole("heading", { name: "Do intake ao acompanhamento" })
     ).toBeInTheDocument();
+    expect(screen.getByText("Intake estruturado")).toBeInTheDocument();
+    expect(screen.getByText("Triagem por risco")).toBeInTheDocument();
+    expect(screen.getByText("Acompanhamento executivo")).toBeInTheDocument();
     expect(
-      screen.getByText(
-        "Leitura juridica, trilha operacional e proximas acoes em uma mesma cadencia visual.",
-      ),
+      screen.getByRole("heading", { name: "Organize seu portfolio contratual." })
     ).toBeInTheDocument();
-    expect(screen.getByText("Triagem orientada por risco")).toBeInTheDocument();
-    expect(screen.getByText("Acompanhamento com trilha executiva")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Comece agora" })).toHaveAttribute(
       "href",
       "/contracts",
