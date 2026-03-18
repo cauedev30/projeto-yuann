@@ -1,24 +1,24 @@
 :root {
-  --bg: #ffffff;
-  --bg-elevated: #f9fafb;
+  --bg: #2e2f36;
+  --bg-elevated: #383940;
   --surface: #ffffff;
-  --surface-strong: #f3f4f6;
-  --surface-soft: #f9fafb;
-  --line: #e5e7eb;
-  --line-strong: #d1d5db;
-  --ink: #111827;
-  --ink-soft: #374151;
-  --ink-muted: #6b7280;
-  --brand-blue: #2563eb;
-  --brand-green: #059669;
-  --brand-gold: #2563eb;
+  --surface-strong: #eef0f4;
+  --surface-soft: #f7f8fa;
+  --line: #e2e4ea;
+  --line-strong: #d0d2da;
+  --ink: #f0f1f4;
+  --ink-soft: #c4c6d0;
+  --ink-muted: #8a8c96;
+  --brand-blue: #5b9cf6;
+  --brand-accent: #5b9cf6;
+  --brand-accent-hover: #4a8be5;
   --shadow-soft: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
   --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.05);
   --radius-lg: 16px;
   --radius-md: 12px;
   --radius-sm: 8px;
   --max-width: 1240px;
-  --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-body: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-display: var(--font-body);
 
   /* Spacing scale (base 4px) */
@@ -31,6 +31,9 @@
   --space-8: 2rem;
   --space-10: 2.5rem;
   --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
 
   /* Typographic scale */
   --text-xs: 0.75rem;
@@ -64,13 +67,13 @@
   /* Surface/gradient tokens */
   --surface-card-from: #ffffff;
   --surface-card-to: #ffffff;
-  --surface-panel-from: #f9fafb;
-  --surface-panel-to: #f9fafb;
+  --surface-panel-from: #f7f8fa;
+  --surface-panel-to: #f7f8fa;
   --surface-overlay-from: #ffffff;
   --surface-overlay-to: #ffffff;
-  --line-subtle: #f3f4f6;
-  --line-border: #e5e7eb;
-  --line-border-strong: #d1d5db;
+  --line-subtle: #eef0f4;
+  --line-border: #e2e4ea;
+  --line-border-strong: #d0d2da;
 
   /* Transition tokens */
   --transition-fast: 160ms ease;
@@ -114,11 +117,11 @@ textarea {
 
 ::selection {
   color: #ffffff;
-  background: rgba(37, 99, 235, 0.32);
+  background: rgba(91, 156, 246, 0.32);
 }
 
 :focus-visible {
-  outline: 2px solid var(--brand-blue);
+  outline: 2px solid var(--brand-accent);
   outline-offset: 2px;
 }
 
@@ -138,24 +141,23 @@ textarea {
   border: 0;
 }
 
+/* ─── Marketing Page ─── */
+
 .marketingPage {
   width: min(calc(100% - 2rem), var(--max-width));
   margin: 0 auto;
-  padding: 1.5rem 0 4rem;
+  padding: var(--space-12) 0 var(--space-16);
 }
 
+/* ─── Topbar ─── */
+
 .marketingTopbar {
-  position: sticky;
-  top: 1rem;
-  z-index: 10;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 0.9rem 1rem;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-md);
-  background: #ffffff;
+  padding: var(--space-4) 0;
+  background: transparent;
 }
 
 .marketingBrand {
@@ -171,13 +173,13 @@ textarea {
   justify-content: center;
   width: 2.45rem;
   height: 2.45rem;
-  border: 1px solid var(--line-strong);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 50%;
-  color: var(--ink);
+  color: rgba(255, 255, 255, 0.8);
   font-family: var(--font-body);
   font-size: 0.92rem;
   letter-spacing: 0.1em;
-  background: var(--bg-elevated);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .marketingBrandText {
@@ -191,7 +193,7 @@ textarea {
   display: flex;
   align-items: center;
   gap: 0.55rem;
-  color: var(--ink-muted);
+  color: rgba(255, 255, 255, 0.5);
   font-size: 0.95rem;
 }
 
@@ -203,127 +205,63 @@ textarea {
   padding: 0.75rem 1rem;
   border-radius: var(--radius-input);
   border: 1px solid transparent;
-  transition:
-    border-color 180ms ease,
-    color 180ms ease,
-    background 180ms ease;
+  transition: color var(--transition-base);
 }
 
 .marketingNav a:hover {
-  border-color: var(--line);
-  color: var(--ink);
+  color: rgba(255, 255, 255, 0.9);
 }
 
-.marketingNav a:last-child {
-  color: #ffffff;
-  background: var(--brand-blue);
+.marketingNav a.navCta {
+  color: #1a1a2e;
+  background: #ffffff;
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 0.65rem 1.2rem;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition-base);
 }
+
+.marketingNav a.navCta:hover {
+  background: #e8eaf0;
+}
+
+/* ─── Hero ─── */
 
 .marketingHero {
-  display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(21rem, 0.9fr);
-  gap: 1.4rem;
-  align-items: stretch;
-  margin-top: 1.6rem;
-}
-
-.marketingHeroCopy,
-.marketingHeroPanel,
-.marketingSection,
-.marketingClosing {
-  position: relative;
-  overflow: hidden;
-  border: 1px solid var(--line);
-  background: var(--bg-elevated);
-}
-
-.marketingHeroCopy {
-  display: grid;
-  gap: var(--space-5);
-  border-radius: var(--radius-lg);
-  padding: clamp(1.6rem, 3vw, 3.25rem);
-  align-content: start;
-}
-
-.marketingEyebrow,
-.marketingSectionKicker,
-.marketingPanelLabel,
-.marketingProofLabel {
-  margin: 0;
-  color: var(--ink-muted);
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  font-size: 0.75rem;
-  font-weight: 700;
-}
-
-.marketingHero h1,
-.marketingSection h2,
-.marketingClosing h2 {
-  margin: 0;
-  font-family: var(--font-body);
-  line-height: 1.15;
-  letter-spacing: -0.045em;
+  text-align: center;
+  max-width: 680px;
+  margin: 0 auto;
+  padding: clamp(4rem, 8vw, 8rem) 0;
 }
 
 .marketingHero h1 {
-  max-width: 20ch;
-  font-size: var(--text-display-lg);
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 5vw, 3.5rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.08;
   color: var(--ink);
 }
 
-.marketingLead,
-.marketingSublead,
-.marketingPanelBody,
-.marketingSectionHeader p,
-.marketingFeature p,
-.marketingProofCard span {
-  color: var(--ink-muted);
-  line-height: 1.7;
-}
-
 .marketingLead {
-  max-width: 40rem;
-  margin: 0;
-  font-size: 1.08rem;
-}
-
-.marketingSublead {
-  max-width: 34rem;
-  margin: 0;
-  font-size: 1rem;
-}
-
-.marketingHeroBadge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  width: fit-content;
-  min-height: 2.2rem;
-  padding: 0.45rem 0.85rem;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-input);
-  background: var(--bg-elevated);
-  color: var(--ink-soft);
-  font-size: 0.84rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-}
-
-.marketingHeroBadge::before {
-  content: "";
-  width: 0.55rem;
-  height: 0.55rem;
-  border-radius: 50%;
-  background: var(--brand-green);
-  box-shadow: 0 0 0 6px rgba(5, 150, 105, 0.16);
+  max-width: 500px;
+  margin: var(--space-4) auto 0;
+  font-size: clamp(1.1rem, 1.5vw, 1.25rem);
+  color: var(--ink-muted);
+  line-height: 1.6;
 }
 
 .marketingHeroActions {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 0.85rem;
+  margin-top: var(--space-6);
 }
+
+/* ─── CTAs ─── */
 
 .primaryCta,
 .secondaryCta {
@@ -331,234 +269,115 @@ textarea {
   align-items: center;
   justify-content: center;
   min-height: 3rem;
-  padding: 0.9rem 1.25rem;
-  border-radius: var(--radius-input);
-  border: 1px solid transparent;
-  transition:
-    box-shadow 180ms ease,
-    border-color 180ms ease,
-    background 180ms ease;
+  border-radius: var(--radius-sm);
+  border: none;
+  transition: background var(--transition-base), color var(--transition-base);
 }
 
 .primaryCta {
-  color: #ffffff;
-  font-weight: 700;
+  color: #1a1a2e;
+  font-weight: 600;
   font-size: var(--text-base);
-  background: var(--brand-blue);
+  padding: 0.85rem 1.6rem;
+  background: #ffffff;
+}
+
+.primaryCta:hover {
+  background: #e8eaf0;
 }
 
 .secondaryCta {
-  border-color: var(--line);
-  color: var(--ink-soft);
+  color: rgba(255, 255, 255, 0.55);
   background: transparent;
+  padding: 0.85rem 1.2rem;
 }
 
-.marketingHeroNotes {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.65rem;
-  margin-top: auto;
+.secondaryCta:hover {
+  color: rgba(255, 255, 255, 0.9);
 }
 
-.marketingHeroNotes span {
-  display: inline-flex;
-  align-items: center;
-  min-height: 2.2rem;
-  padding: 0.55rem 0.8rem;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-input);
-  color: var(--ink-soft);
-  background: var(--bg-elevated);
-  font-size: 0.88rem;
-}
-
-.marketingHeroPanel {
-  display: grid;
-  gap: 1rem;
-  border-radius: var(--radius-lg);
-  padding: 1.4rem;
-}
-
-.marketingPanelFrame {
-  display: grid;
-  gap: 0.7rem;
-  padding: 1.2rem;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-md);
-  background: var(--bg);
-}
-
-.marketingPanelTitle {
-  margin: 0;
-  font-family: var(--font-body);
-  font-size: clamp(1.8rem, 2vw, 2.4rem);
-  line-height: 1.02;
-}
-
-.marketingPanelBody {
-  margin: 0;
-}
-
-.marketingValueList {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.8rem;
-}
-
-.marketingValueCard,
-.marketingProofCard,
-.marketingFeature {
-  position: relative;
-  overflow: hidden;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-md);
-  background: var(--bg);
-  transition: border-color 180ms ease;
-}
-
-.marketingValueCard {
-  display: grid;
-  gap: 0.35rem;
-  padding: 1rem;
-}
-
-.marketingValueCard strong {
-  font-family: var(--font-body);
-  font-size: clamp(1.9rem, 2vw, 2.4rem);
-  line-height: 1;
-}
-
-.marketingValueCard span {
-  color: var(--ink-muted);
-  line-height: 1.55;
-  font-size: 0.92rem;
-}
-
-.marketingLedger {
-  display: grid;
-  gap: 0.55rem;
-  padding: 0.4rem 0;
-}
-
-.marketingLedgerRow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 0.9rem 0;
-  border-top: 1px solid var(--line);
-  color: var(--ink-soft);
-}
-
-.marketingLedgerRow:first-child {
-  border-top: 0;
-}
-
-.marketingLedgerRow strong {
-  color: var(--ink);
-  font-family: var(--font-body);
-  font-size: 1.05rem;
-  font-weight: 600;
-}
+/* ─── Features Section ─── */
 
 .marketingSection {
-  margin-top: var(--space-8);
-  border-radius: var(--radius-lg);
-  padding: clamp(1.4rem, 2vw, 2.2rem);
+  max-width: 900px;
+  margin: 0 auto;
+  padding: var(--space-20) 0;
+  text-align: center;
   scroll-margin-top: var(--space-8);
 }
 
-.marketingSectionHeader {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 1.25rem;
-}
-
-.marketingSectionHeader p {
-  margin: 0;
-  max-width: 36rem;
+.marketingSection h2 {
+  margin: 0 0 var(--space-10);
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  color: var(--ink);
 }
 
 .marketingFeatures {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1rem;
+  gap: var(--space-8);
 }
 
 .marketingFeature {
-  display: grid;
-  gap: 0.7rem;
-  padding: 1.3rem;
+  padding: var(--space-6);
+  text-align: center;
 }
 
 .marketingFeature h3 {
-  margin: 0;
-  font-size: 1.08rem;
-  line-height: 1.35;
+  margin: 0 0 var(--space-2);
+  font-weight: 600;
+  font-size: 1.05rem;
+  color: var(--ink);
 }
 
 .marketingFeature p {
   margin: 0;
+  color: var(--ink-muted);
+  font-size: 0.95rem;
+  line-height: 1.6;
 }
 
-.marketingProofCard {
-  display: grid;
-  gap: 0.5rem;
-  padding: 1.2rem;
-}
-
-.marketingProofCard strong {
-  font-size: 1.05rem;
-  line-height: 1.45;
-}
+/* ─── Closing CTA ─── */
 
 .marketingClosing {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-top: var(--space-8);
-  padding: clamp(1.3rem, 2vw, 2rem);
+  text-align: center;
+  gap: var(--space-6);
+  margin: var(--space-12) 0;
+  padding: var(--space-20) var(--space-6);
+  background: var(--bg-elevated);
   border-radius: var(--radius-lg);
-  scroll-margin-top: var(--space-8);
 }
 
 .marketingClosing h2 {
-  max-width: 11ch;
-  font-size: clamp(2.1rem, 4vw, 3.3rem);
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  color: var(--ink);
 }
 
-.marketingClosing .primaryCta {
-  flex-shrink: 0;
-}
-
-@media (max-width: 1100px) {
-  .marketingHero,
-  .marketingFeatures,
-  .marketingValueList {
-    grid-template-columns: 1fr;
-  }
-
-  .marketingHeroCopy {
-    min-height: auto;
-  }
-
-  .marketingClosing h2 {
-    max-width: none;
-  }
-}
+/* ─── Responsive ─── */
 
 @media (max-width: 860px) {
   .marketingPage {
     width: min(calc(100% - 1.25rem), var(--max-width));
-    padding-top: 1rem;
   }
 
-  .marketingTopbar,
-  .marketingSectionHeader,
-  .marketingClosing {
+  .marketingFeatures {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+
+  .marketingTopbar {
     align-items: flex-start;
     flex-direction: column;
   }
@@ -573,19 +392,6 @@ textarea {
 }
 
 @media (max-width: 640px) {
-  .marketingTopbar {
-    position: static;
-    border-radius: var(--radius-md);
-  }
-
-  .marketingHeroCopy,
-  .marketingHeroPanel,
-  .marketingSection,
-  .marketingClosing {
-    border-radius: var(--radius-md);
-    padding: var(--space-5);
-  }
-
   .marketingHeroActions {
     flex-direction: column;
     gap: var(--space-3);
@@ -602,6 +408,11 @@ textarea {
     min-height: 3.2rem;
     font-size: var(--text-lg);
   }
+
+  .marketingClosing {
+    padding: var(--space-12) var(--space-4);
+    margin: var(--space-8) 0;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -609,12 +420,8 @@ textarea {
     scroll-behavior: auto;
   }
 
-  .marketingHeroPanel,
   .primaryCta,
   .secondaryCta,
-  .marketingFeature,
-  .marketingProofCard,
-  .marketingValueCard,
   .marketingNav a {
     transition: none;
   }
