@@ -6,6 +6,10 @@ vi.mock("next/navigation", () => ({
   usePathname: () => "/dashboard",
 }));
 
+vi.mock("../../contexts/auth-context", () => ({
+  useAuth: () => ({ user: { fullName: "Test User" }, logout: vi.fn() }),
+}));
+
 import { AppShell } from "./app-shell";
 
 describe("AppShell", () => {
@@ -31,7 +35,7 @@ describe("AppShell", () => {
       "href",
       "/dashboard",
     );
-    expect(within(navigation).getByRole("link", { name: "Contracts" })).toHaveAttribute(
+    expect(within(navigation).getByRole("link", { name: "Contratos" })).toHaveAttribute(
       "href",
       "/contracts",
     );

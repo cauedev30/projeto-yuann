@@ -21,7 +21,7 @@ export function ContractsSummary({ summary }: ContractsSummaryProps) {
       <article
         className={`${uiStyles.statCard} ${summary.criticalFindings > 0 ? styles.criticalStatCard : ""}`}
       >
-        <p className={uiStyles.statLabel}>Findings criticos</p>
+        <p className={uiStyles.statLabel}>Achados criticos</p>
         <strong
           className={`${uiStyles.statValue} ${summary.criticalFindings > 0 ? styles.criticalStatValue : ""}`}
         >

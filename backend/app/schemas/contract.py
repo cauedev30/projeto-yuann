@@ -24,6 +24,14 @@ class ContractListResponse(BaseModel):
     items: list[ContractListItem]
 
 
+class ContractUpdateInput(BaseModel):
+    title: str | None = None
+    signature_date: date | None = None
+    start_date: date | None = None
+    end_date: date | None = None
+    term_months: int | None = None
+
+
 class ContractEventSummary(BaseModel):
     id: str
     event_type: str
@@ -81,3 +89,8 @@ class ContractDetailResponse(BaseModel):
     latest_version: ContractVersionSummary | None = None
     latest_analysis: ContractLatestAnalysisSummary | None = None
     events: list[ContractEventSummary] = Field(default_factory=list)
+
+
+class ContractSummaryResponse(BaseModel):
+    summary: str
+    key_points: list[str] = Field(default_factory=list)

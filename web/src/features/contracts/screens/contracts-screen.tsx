@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import React from "react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import {
   type ContractFinding,
@@ -23,7 +23,6 @@ import styles from "./contracts-screen.module.css";
 type ContractsScreenProps = {
   submitContract?: (payload: ContractUploadInput) => Promise<ContractUploadResult>;
   loadContracts?: () => Promise<ContractListResponse>;
-  refreshContracts?: () => Promise<ContractListResponse>;
   navigateToContract?: (contractId: string) => void;
 };
 
@@ -59,7 +58,6 @@ function buildPreviewFindings(text: string): ContractFinding[] {
 export function ContractsScreen({
   submitContract = uploadContract,
   loadContracts = listContracts,
-  refreshContracts = loadContracts,
   navigateToContract,
 }: ContractsScreenProps) {
   const router = useRouter();
@@ -138,12 +136,12 @@ export function ContractsScreen({
     };
   }, [loadContracts]);
 
-  async function refreshPersistedContracts() {
+  const refreshPersistedContracts = useCallback(async () => {
     setIsRefreshingContracts(true);
     setContractsError(null);
 
     try {
-      const response = await refreshContracts();
+      const response = await loadContracts();
       setContracts(response.items);
     } catch (refreshError) {
       setContractsError(
@@ -154,7 +152,7 @@ export function ContractsScreen({
     } finally {
       setIsRefreshingContracts(false);
     }
-  }
+  }, [loadContracts]);
 
   async function handleSubmit(payload: ContractUploadInput) {
     setIsSubmitting(true);

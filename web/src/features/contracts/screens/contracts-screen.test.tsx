@@ -157,7 +157,7 @@ describe("ContractsScreen", () => {
     );
 
     const summaryHeading = screen.getAllByRole("heading", { name: "Resumo da triagem" }).at(-1) as HTMLElement;
-    const findingsHeading = screen.getAllByRole("heading", { name: "Findings principais" }).at(-1) as HTMLElement;
+    const findingsHeading = screen.getAllByRole("heading", { name: "Achados principais" }).at(-1) as HTMLElement;
     const extractedTextHeading = screen.getAllByRole("heading", { name: "Texto extraido" }).at(-1) as HTMLElement;
 
     expect(
@@ -222,14 +222,15 @@ describe("ContractsScreen", () => {
 
   it("refreshes the persisted contracts list on demand", async () => {
     const user = userEvent.setup();
-    const loadContracts = vi.fn().mockResolvedValue({ items: [] });
-    const refreshContracts = vi.fn().mockResolvedValue(buildContractsListResult());
+    const loadContracts = vi
+      .fn()
+      .mockResolvedValueOnce({ items: [] })
+      .mockResolvedValue(buildContractsListResult());
 
     render(
       <ContractsScreen
         submitContract={vi.fn()}
         loadContracts={loadContracts}
-        refreshContracts={refreshContracts}
       />,
     );
     const scope = getScreenScope();
@@ -237,21 +238,22 @@ describe("ContractsScreen", () => {
     expect(await scope.findByText("Nenhum contrato persistido")).toBeInTheDocument();
     await user.click(scope.getByRole("button", { name: "Atualizar lista" }));
 
-    expect(refreshContracts).toHaveBeenCalledTimes(1);
+    expect(loadContracts).toHaveBeenCalledTimes(2);
     expect(await scope.findByText("Loja Centro")).toBeInTheDocument();
   });
 
   it("refreshes the persisted contracts list after a successful upload", async () => {
     const user = userEvent.setup();
-    const loadContracts = vi.fn().mockResolvedValue({ items: [] });
-    const refreshContracts = vi.fn().mockResolvedValue(buildContractsListResult());
+    const loadContracts = vi
+      .fn()
+      .mockResolvedValueOnce({ items: [] })
+      .mockResolvedValue(buildContractsListResult());
     const submitContract = vi.fn().mockResolvedValue(buildUploadResult());
 
     render(
       <ContractsScreen
         submitContract={submitContract}
         loadContracts={loadContracts}
-        refreshContracts={refreshContracts}
       />,
     );
     const scope = getScreenScope();
@@ -259,7 +261,7 @@ describe("ContractsScreen", () => {
     expect(await scope.findByText("Nenhum contrato persistido")).toBeInTheDocument();
     await user.click(scope.getByRole("button", { name: "Enviar contrato" }));
 
-    await waitFor(() => expect(refreshContracts).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(loadContracts).toHaveBeenCalledTimes(2));
     expect(await scope.findByText("Loja Centro")).toBeInTheDocument();
   });
 

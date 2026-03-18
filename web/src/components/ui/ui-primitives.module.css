@@ -108,6 +108,18 @@
   line-height: 1.55;
 }
 
+.statCardCompact {
+  padding: var(--space-3) var(--space-4);
+}
+
+.statCardCompact .statValue {
+  font-size: var(--text-xl);
+}
+
+.statCardCompact .statLabel {
+  font-size: var(--text-xs);
+}
+
 /* === Empty State === */
 .emptyState {
   position: relative;

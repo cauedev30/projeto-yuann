@@ -12,10 +12,16 @@ import { SurfaceCard } from "../../../components/ui/surface-card";
 import type { ContractDetail } from "../../../entities/contracts/model";
 import { ContractsApiError, getContractDetail } from "../../../lib/api/contracts";
 import { EventTimeline } from "../components/event-timeline";
+import { ContractSummaryPanel } from "../components/contract-summary-panel";
 import { ExtractedTextPanel } from "../components/extracted-text-panel";
 import { FindingsSection } from "../components/findings-section";
 import { MetadataSection } from "../components/metadata-section";
 import styles from "./contract-detail-screen.module.css";
+
+const SOURCE_LABELS: Record<string, string> = {
+  third_party_draft: "Minuta de terceiro",
+  signed_contract: "Contrato assinado",
+};
 
 type ContractDetailScreenProps = {
   contractId: string;
@@ -43,12 +49,19 @@ export function ContractDetailScreen({
   const [detail, setDetail] = useState<ContractDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [refreshSuccess, setRefreshSuccess] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const liveMessage = isRefreshing
     ? "Atualizando detalhe do contrato..."
     : isLoading
       ? "Carregando contrato..."
       : error?.message ?? "";
+
+  useEffect(() => {
+    if (!refreshSuccess) return;
+    const timer = setTimeout(() => setRefreshSuccess(false), 2000);
+    return () => clearTimeout(timer);
+  }, [refreshSuccess]);
 
   useEffect(() => {
     let isActive = true;
@@ -92,6 +105,7 @@ export function ContractDetailScreen({
     try {
       const response = await loadContractDetail(contractId);
       setDetail(response);
+      setRefreshSuccess(true);
     } catch (detailError) {
       setDetail(null);
       setError(normalizeDetailError(detailError));
@@ -122,7 +136,7 @@ export function ContractDetailScreen({
           {liveMessage}
         </div>
         <PageHeader
-          eyebrow="Contracts"
+          eyebrow="Contratos"
           title={contractId}
           description="Carregando a leitura persistida deste contrato."
         />
@@ -140,7 +154,7 @@ export function ContractDetailScreen({
           {liveMessage}
         </div>
         <PageHeader
-          eyebrow="Contracts"
+          eyebrow="Contratos"
           title="Contrato nao encontrado."
           description="O identificador informado nao corresponde a um contrato persistido no backend."
         />
@@ -159,7 +173,7 @@ export function ContractDetailScreen({
           {liveMessage}
         </div>
         <PageHeader
-          eyebrow="Contracts"
+          eyebrow="Contratos"
           title={contractId}
           description="Falha ao carregar a leitura completa deste contrato."
         />
@@ -189,12 +203,12 @@ export function ContractDetailScreen({
         {liveMessage}
       </div>
       <nav aria-label="Breadcrumb" className={styles.breadcrumb}>
-        <Link href="/contracts" className={styles.breadcrumbLink}>Contracts</Link>
+        <Link href="/contracts" className={styles.breadcrumbLink}>Contratos</Link>
         <span aria-hidden="true" className={styles.breadcrumbSeparator}>/</span>
         <span className={styles.breadcrumbCurrent}>{detail.contract.title}</span>
       </nav>
       <PageHeader
-        eyebrow="Contracts"
+        eyebrow="Contratos"
         title={detail.contract.title}
         description={buildContractDescription(detail)}
       />
@@ -206,14 +220,15 @@ export function ContractDetailScreen({
           onClick={() => void handleRefresh()}
           type="button"
         >
-          {isRefreshing ? "Atualizando..." : "Atualizar detalhe"}
+          {isRefreshing ? "Atualizando..." : refreshSuccess ? "Atualizado!" : "Atualizar detalhe"}
         </button>
       </div>
 
       <div className={styles.stack}>
         <div className={styles.statGrid}>
-          <StatCard label="Status" value={detail.contract.status} />
+          <StatCard compact label="Status" value={detail.contract.status} />
           <StatCard
+            compact
             label="Prazo"
             value={
               detail.contract.termMonths !== null
@@ -222,6 +237,7 @@ export function ContractDetailScreen({
             }
           />
           <StatCard
+            compact
             label="Score"
             value={detail.latestAnalysis?.contractRiskScore ?? "a confirmar"}
           />
@@ -246,7 +262,7 @@ export function ContractDetailScreen({
                 </div>
                 <div className={styles.summaryRow}>
                   <dt>Origem</dt>
-                  <dd>{detail.latestVersion.source}</dd>
+                  <dd>{SOURCE_LABELS[detail.latestVersion.source] ?? detail.latestVersion.source}</dd>
                 </div>
                 <div className={styles.summaryRow}>
                   <dt>Processamento</dt>
@@ -289,8 +305,18 @@ export function ContractDetailScreen({
           </div>
         </details>
 
+        <details className={styles.collapsible} open>
+          <summary className={styles.collapsibleSummary}>
+            <span className={styles.collapsibleTitle}>Resumo do contrato</span>
+            <span className={styles.collapsibleChevron} aria-hidden="true" />
+          </summary>
+          <div className={styles.collapsibleContent}>
+            <ContractSummaryPanel contractId={contractId} />
+          </div>
+        </details>
+
         {detail.latestVersion?.text ? (
-          <details className={styles.collapsible} open>
+          <details className={styles.collapsible}>
             <summary className={styles.collapsibleSummary}>
               <span className={styles.collapsibleTitle}>Texto extraido</span>
               <span className={styles.collapsibleChevron} aria-hidden="true" />

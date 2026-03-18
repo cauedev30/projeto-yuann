@@ -27,7 +27,7 @@ export function FindingsSection({ items }: FindingsSectionProps) {
       <div className={styles.sectionHeader}>
         <div>
           <p className={styles.panelEyebrow}>Leitura orientada</p>
-          <h2 className={styles.sectionTitle}>Findings principais</h2>
+          <h2 className={styles.sectionTitle}>Achados principais</h2>
         </div>
         <span className={styles.sectionMeta}>{items.length} item(ns) destacados</span>
       </div>

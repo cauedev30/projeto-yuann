@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+import unicodedata
 
 from app.schemas.analysis import AnalysisItem, ContractAnalysisResult
 
@@ -23,29 +24,88 @@ def _coerce_number(value: object) -> int | None:
     return None
 
 
-def extract_contract_facts(contract_text: str) -> dict[str, int]:
-    facts: dict[str, int] = {}
+def _parse_brl(raw: str) -> float | None:
+    cleaned = raw.replace(".", "").replace(",", ".")
+    try:
+        return float(cleaned)
+    except ValueError:
+        return None
 
-    term_match = re.search(r"(\d+)\s*meses", contract_text, re.IGNORECASE)
-    fine_match = re.search(r"multa\s+de\s+(\d+)\s+alug", contract_text, re.IGNORECASE)
 
-    if term_match:
-        facts["term_months"] = int(term_match.group(1))
+def extract_contract_facts(contract_text: str) -> dict[str, object]:
+    facts: dict[str, object] = {}
 
-    if fine_match:
-        facts["penalty_months"] = int(fine_match.group(1))
+    # Term months: use specific patterns to avoid matching reajuste/other periods
+    term_patterns = [
+        r"prazo\s+do\s+presente\s+contrato\s+[eé]\s+de\s+(\d+)\s*(?:\([^)]*\)\s*)?meses",
+        r"prazo\s+de\s+vig[eê]ncia\s*(?::\s*|\s+[eé]\s+de\s+)(\d+)\s*(?:\([^)]*\)\s*)?meses",
+        r"prazo\s+contratual\s*(?::\s*|\s+[eé]\s+de\s+)(\d+)\s*(?:\([^)]*\)\s*)?meses",
+        r"prazo\s+de\s+(\d+)\s*(?:\([^)]*\)\s*)?meses",
+        r"vig[eê]ncia\s+de\s+(\d+)\s*(?:\([^)]*\)\s*)?meses",
+        r"(\d+)\s*meses",  # generic fallback
+    ]
+    for pattern in term_patterns:
+        m = re.search(pattern, contract_text, re.IGNORECASE)
+        if m:
+            facts["term_months"] = int(m.group(1))
+            break
+
+    # Penalty: "multa ... NN vezes" or "multa de NN aluguéis"
+    fine_patterns = [
+        r"multa\s+.*?(\d+)\s*(?:\([^)]*\)\s*)?vezes\s+o\s+valor",
+        r"multa\s+de\s+(\d+)\s+alug",
+        r"equivalente\s+a\s+(\d+)\s*(?:\([^)]*\)\s*)?(?:vezes|alug)",
+    ]
+    for pattern in fine_patterns:
+        m = re.search(pattern, contract_text, re.IGNORECASE)
+        if m:
+            facts["penalty_months"] = int(m.group(1))
+            break
+
+    # Contract value: prefer explicit aluguel context over any R$ value
+    value_patterns = [
+        r"aluguel\s+mensal\s+(?:de\s+)?R\$\s*([\d.,]+)",
+        r"valor\s+(?:do\s+)?aluguel\s*(?::\s*|de\s+|ser[aá]\s+de\s+)R\$\s*([\d.,]+)",
+        r"aluguel\s+(?:de\s+)?R\$\s*([\d.,]+)",
+        r"R\$\s*([\d.,]+)\s*(?:\([^)]*\)\s*)?[,.]?\s*(?:mensal|mensais|por\s+m[eê]s|de\s+aluguel)",
+        r"R\$\s*([\d.,]+)",  # generic fallback
+    ]
+    for pattern in value_patterns:
+        m = re.search(pattern, contract_text, re.IGNORECASE)
+        if m:
+            parsed = _parse_brl(m.group(1))
+            if parsed is not None:
+                facts["contract_value"] = parsed
+                break
+
+    # Grace period
+    grace_days_match = re.search(r"car[eê]ncia\s*(?:de\s*)?(\d+)\s*dias", contract_text, re.IGNORECASE)
+    grace_months_match = re.search(r"car[eê]ncia\s*(?:de\s*)?(\d+)\s*meses", contract_text, re.IGNORECASE)
+
+    if grace_days_match:
+        facts["grace_period_days"] = int(grace_days_match.group(1))
+    elif grace_months_match:
+        facts["grace_period_days"] = int(grace_months_match.group(1)) * 30
 
     return facts
+
+
+def _normalize_clause_key(name: str) -> str:
+    normalized = unicodedata.normalize("NFD", name)
+    stripped = "".join(c for c in normalized if unicodedata.category(c) != "Mn")
+    return stripped.strip().lower()
 
 
 def merge_analysis_items(
     llm_items: list[AnalysisItem],
     deterministic_items: list[AnalysisItem],
 ) -> list[AnalysisItem]:
-    merged: dict[str, AnalysisItem] = {item.clause_name: item for item in llm_items}
+    merged: dict[str, AnalysisItem] = {
+        _normalize_clause_key(item.clause_name): item for item in llm_items
+    }
 
     for item in deterministic_items:
-        merged[item.clause_name] = item
+        merged[_normalize_clause_key(item.clause_name)] = item
 
     return list(merged.values())
 
@@ -91,6 +151,38 @@ def evaluate_rules(
                 )
             )
 
+        if code == "MAX_TERM_MONTHS":
+            max_term = _coerce_number(rule.get("value"))
+            actual_term = _coerce_number(extracted.get("term_months"))
+
+            if max_term is None or actual_term is None:
+                continue
+
+            is_critical = actual_term > max_term
+            items.append(
+                AnalysisItem(
+                    clause_name="Prazo maximo de vigencia",
+                    status="critical" if is_critical else "conforme",
+                    severity="high" if is_critical else "low",
+                    current_summary=f"Prazo atual de {actual_term} meses.",
+                    policy_rule=f"Prazo maximo permitido: {max_term} meses.",
+                    risk_explanation=(
+                        "O prazo encontrado excede o maximo da politica."
+                        if is_critical
+                        else "O prazo encontrado atende a politica."
+                    ),
+                    suggested_adjustment_direction=(
+                        f"Reduzir prazo para no maximo {max_term} meses."
+                        if is_critical
+                        else "Nenhum ajuste necessario."
+                    ),
+                    metadata={
+                        "term_months": actual_term,
+                        "maximum_term_months": max_term,
+                    },
+                )
+            )
+
         if code == "MAX_FINE_MONTHS":
             maximum_fine = _coerce_number(rule.get("value"))
             actual_fine = _coerce_number(extracted.get("penalty_months"))
@@ -119,6 +211,75 @@ def evaluate_rules(
                     metadata={
                         "penalty_months": actual_fine,
                         "maximum_fine_months": maximum_fine,
+                    },
+                )
+            )
+
+        if code == "MAX_VALUE":
+            max_value = _coerce_number(rule.get("value"))
+            actual_value_raw = extracted.get("contract_value")
+            actual_value = None
+            if isinstance(actual_value_raw, (int, float)):
+                actual_value = int(actual_value_raw) if isinstance(actual_value_raw, float) and actual_value_raw == int(actual_value_raw) else actual_value_raw
+
+            if max_value is None or actual_value is None:
+                continue
+
+            is_critical = float(actual_value) > float(max_value)
+            items.append(
+                AnalysisItem(
+                    clause_name="Valor do contrato",
+                    status="critical" if is_critical else "conforme",
+                    severity="high" if is_critical else "low",
+                    current_summary=f"Valor atual de R$ {actual_value}.",
+                    policy_rule=f"Valor maximo permitido: R$ {max_value}.",
+                    risk_explanation=(
+                        "O valor do contrato excede o teto definido pela politica."
+                        if is_critical
+                        else "O valor do contrato esta dentro da politica."
+                    ),
+                    suggested_adjustment_direction=(
+                        f"Renegociar valor para no maximo R$ {max_value}."
+                        if is_critical
+                        else "Nenhum ajuste necessario."
+                    ),
+                    metadata={
+                        "contract_value": float(actual_value),
+                        "maximum_value": float(max_value),
+                    },
+                )
+            )
+
+        if code == "GRACE_PERIOD_DAYS":
+            allowed_raw = rule.get("value")
+            allowed_values = allowed_raw if isinstance(allowed_raw, list) else [allowed_raw]
+            allowed_days = [int(v) for v in allowed_values if v is not None]
+            actual_grace = _coerce_number(extracted.get("grace_period_days"))
+
+            if not allowed_days or actual_grace is None:
+                continue
+
+            is_attention = actual_grace not in allowed_days
+            items.append(
+                AnalysisItem(
+                    clause_name="Periodo de carencia",
+                    status="attention" if is_attention else "conforme",
+                    severity="medium" if is_attention else "low",
+                    current_summary=f"Carencia atual de {actual_grace} dias.",
+                    policy_rule=f"Valores de carencia permitidos: {allowed_days} dias.",
+                    risk_explanation=(
+                        "O periodo de carencia nao esta entre os valores permitidos pela politica."
+                        if is_attention
+                        else "O periodo de carencia atende a politica."
+                    ),
+                    suggested_adjustment_direction=(
+                        f"Ajustar carencia para um dos valores permitidos: {allowed_days} dias."
+                        if is_attention
+                        else "Nenhum ajuste necessario."
+                    ),
+                    metadata={
+                        "grace_period_days": actual_grace,
+                        "allowed_grace_period_days": allowed_days,
                     },
                 )
             )

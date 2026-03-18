@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import calendar
-from datetime import date
+from datetime import date, timedelta
 
 from app.schemas.metadata import ContractMetadataResult, ScheduledEvent
 
@@ -31,7 +31,7 @@ def build_contract_events(
         events.append(
             ScheduledEvent(
                 event_type="renewal",
-                event_date=metadata.end_date,
+                event_date=metadata.end_date - timedelta(days=defaults["renewal"]),
                 lead_time_days=defaults["renewal"],
                 metadata={"derived_from": ["end_date"]},
             )
@@ -44,6 +44,25 @@ def build_contract_events(
                 metadata={"derived_from": ["end_date"]},
             )
         )
+
+        notification_schedule = [
+            (300, "10_months_before"),
+            (270, "9_months_before"),
+            (240, "8_months_before"),
+            (210, "7_months_before"),
+        ]
+        for lead_days, sequence_label in notification_schedule:
+            events.append(
+                ScheduledEvent(
+                    event_type="expiration",
+                    event_date=metadata.end_date,
+                    lead_time_days=lead_days,
+                    metadata={
+                        "derived_from": ["end_date"],
+                        "notification_sequence": sequence_label,
+                    },
+                )
+            )
 
     if metadata.start_date is not None and metadata.financial_terms.get("readjustment_type") == "annual":
         events.append(

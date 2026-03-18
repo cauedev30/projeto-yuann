@@ -1,3 +1,4 @@
+import { getAuthHeaders } from "./auth";
 import { getClientEnv } from "../env";
 import {
   type ContractDetail,
@@ -11,6 +12,11 @@ import {
   mapContractListResponse,
   mapUploadResponseToContractUploadResult,
 } from "../../entities/contracts/model";
+
+export type ContractSummaryResponse = {
+  summary: string;
+  key_points: string[];
+};
 
 const GENERIC_UPLOAD_ERROR = "Nao foi possivel enviar o contrato.";
 const GENERIC_LIST_ERROR = "Nao foi possivel carregar os contratos.";
@@ -75,6 +81,7 @@ export async function uploadContract(
   const { NEXT_PUBLIC_API_URL } = getClientEnv();
   const response = await fetchImpl(`${NEXT_PUBLIC_API_URL}/api/uploads/contracts`, {
     method: "POST",
+    headers: getAuthHeaders(),
     body: formData,
   });
 
@@ -90,7 +97,10 @@ export async function listContracts(
   fetchImpl: typeof fetch = fetch,
 ): Promise<ContractListResponse> {
   const { NEXT_PUBLIC_API_URL } = getClientEnv();
-  const response = await fetchImpl(`${NEXT_PUBLIC_API_URL}/api/contracts`);
+  const response = await fetchImpl(`${NEXT_PUBLIC_API_URL}/api/contracts`, {
+    headers: getAuthHeaders(),
+    cache: "no-store",
+  });
 
   if (!response.ok) {
     throw await buildApiError(response, GENERIC_LIST_ERROR);
@@ -105,7 +115,10 @@ export async function getContractDetail(
   fetchImpl: typeof fetch = fetch,
 ): Promise<ContractDetail> {
   const { NEXT_PUBLIC_API_URL } = getClientEnv();
-  const response = await fetchImpl(`${NEXT_PUBLIC_API_URL}/api/contracts/${contractId}`);
+  const response = await fetchImpl(`${NEXT_PUBLIC_API_URL}/api/contracts/${contractId}`, {
+    headers: getAuthHeaders(),
+    cache: "no-store",
+  });
 
   if (!response.ok) {
     throw await buildApiError(response, GENERIC_DETAIL_ERROR);
@@ -122,6 +135,7 @@ export async function deleteContract(
   const { NEXT_PUBLIC_API_URL } = getClientEnv();
   const response = await fetchImpl(`${NEXT_PUBLIC_API_URL}/api/contracts/${contractId}`, {
     method: "DELETE",
+    headers: getAuthHeaders(),
   });
 
   if (!response.ok) {
@@ -154,6 +168,7 @@ export async function updateContract(
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
+      ...getAuthHeaders(),
     },
     body: JSON.stringify(payload),
   });
@@ -164,4 +179,24 @@ export async function updateContract(
 
   const responsePayload = (await response.json()) as ContractDetailResponsePayload;
   return mapContractDetailResponse(responsePayload);
+}
+
+export async function getContractSummary(
+  contractId: string,
+  fetchImpl: typeof fetch = fetch,
+): Promise<ContractSummaryResponse> {
+  const { NEXT_PUBLIC_API_URL } = getClientEnv();
+  const response = await fetchImpl(
+    `${NEXT_PUBLIC_API_URL}/api/contracts/${contractId}/summary`,
+    {
+      headers: getAuthHeaders(),
+      cache: "no-store",
+    },
+  );
+
+  if (!response.ok) {
+    throw await buildApiError(response, "Nao foi possivel gerar o resumo do contrato.");
+  }
+
+  return (await response.json()) as ContractSummaryResponse;
 }

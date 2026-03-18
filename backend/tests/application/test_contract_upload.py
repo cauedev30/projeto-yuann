@@ -111,10 +111,13 @@ def test_upload_signed_contract_persists_snapshot_and_rebuilds_events(
                 "parties": 1.0,
                 "grace_period_months": 1.0,
                 "readjustment_type": 1.0,
+                "monthly_rent": 0.0,
+                "penalty_months": 0.0,
             },
             "match_labels": {
                 "signature_date": "data de assinatura",
                 "start_date": "inicio de vigencia",
+                "end_date": "prazo de vigencia",
                 "term_months": "prazo de vigencia",
                 "parties": "locataria",
                 "grace_period_months": "carencia de",
@@ -130,18 +133,22 @@ def test_upload_signed_contract_persists_snapshot_and_rebuilds_events(
             "parties": 1.0,
             "grace_period_months": 1.0,
             "readjustment_type": 1.0,
+            "monthly_rent": 0.0,
+            "penalty_months": 0.0,
         },
     }
-    assert sorted(event.event_type.value for event in events) == [
-        "expiration",
-        "grace_period_end",
-        "readjustment",
-        "renewal",
-    ]
-    assert {
+    event_types_sorted = sorted(event.event_type.value for event in events)
+    assert event_types_sorted.count("renewal") == 1
+    assert event_types_sorted.count("readjustment") == 1
+    assert event_types_sorted.count("grace_period_end") == 1
+    assert event_types_sorted.count("expiration") == 5  # 1 base + 4 notifications
+
+    base_events = {
         event.event_type.value: event.metadata_json
         for event in events
-    } == {
+        if not (event.metadata_json or {}).get("notification_sequence")
+    }
+    assert base_events == {
         "renewal": {
             "derived_from": ["end_date"],
             "source_contract_version_id": version.id,
@@ -159,6 +166,12 @@ def test_upload_signed_contract_persists_snapshot_and_rebuilds_events(
             "source_contract_version_id": version.id,
         },
     }
+
+    notification_events = [
+        event for event in events
+        if (event.metadata_json or {}).get("notification_sequence")
+    ]
+    assert len(notification_events) == 4
 
 
 def test_upload_signed_contract_replaces_existing_schedule_with_latest_version(
@@ -212,15 +225,18 @@ def test_upload_signed_contract_replaces_existing_schedule_with_latest_version(
     assert contract.start_date.isoformat() == "2027-05-01"
     assert contract.end_date.isoformat() == "2029-04-30"
     assert contract.term_months == 24
-    assert sorted(event.event_type.value for event in events) == ["expiration", "renewal"]
-    assert {event.event_type.value: event.event_date.isoformat() for event in events} == {
-        "renewal": "2029-04-30",
+    base_events = [e for e in events if not (e.metadata_json or {}).get("notification_sequence")]
+    notification_events = [e for e in events if (e.metadata_json or {}).get("notification_sequence")]
+    assert sorted(e.event_type.value for e in base_events) == ["expiration", "renewal"]
+    assert {e.event_type.value: e.event_date.isoformat() for e in base_events} == {
+        "renewal": "2028-11-01",
         "expiration": "2029-04-30",
     }
     assert {
-        event.event_type.value: event.metadata_json["source_contract_version_id"]
-        for event in events
+        e.event_type.value: e.metadata_json["source_contract_version_id"]
+        for e in base_events
     } == {
         "renewal": second_result.contract_version.id,
         "expiration": second_result.contract_version.id,
     }
+    assert len(notification_events) == 4

@@ -38,7 +38,7 @@ function formatDate(dateStr: string | null): string {
 
 function computeDaysUntil(eventDate: string | null): number | null {
   if (!eventDate) return null;
-  const today = new Date("2026-03-16");
+  const today = new Date();
   const target = new Date(eventDate);
   const diffMs = target.getTime() - today.getTime();
   return Math.round(diffMs / (1000 * 60 * 60 * 24));
@@ -80,16 +80,20 @@ function EventNode({ event }: EventNodeProps) {
 }
 
 export function EventTimeline({ events = [] }: EventTimelineProps) {
+  const displayEvents = events.filter(
+    (e) => !e.metadata?.notification_sequence,
+  );
+
   return (
     <SurfaceCard title="Eventos críticos">
-      {events.length === 0 ? (
+      {displayEvents.length === 0 ? (
         <EmptyState
           title="Nenhum evento identificado"
           body="Nenhum evento identificado para este contrato."
         />
       ) : (
         <ol className={styles.timeline}>
-          {events.map((event) => (
+          {displayEvents.map((event) => (
             <EventNode key={event.id} event={event} />
           ))}
         </ol>

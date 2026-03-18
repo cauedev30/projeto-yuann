@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import React from "react";
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { ContractEventSummary } from "../../../entities/contracts/model";
 import { EventTimeline, classifyEventUrgency } from "./event-timeline";
@@ -17,6 +17,15 @@ function makeEvent(overrides: Partial<ContractEventSummary> = {}): ContractEvent
 }
 
 describe("EventTimeline", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-03-16T12:00:00Z"));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it("shows empty state when events array is empty", () => {
     render(<EventTimeline events={[]} />);
     expect(screen.getByText("Nenhum evento identificado")).toBeInTheDocument();

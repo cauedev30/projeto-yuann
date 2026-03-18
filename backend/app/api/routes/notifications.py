@@ -3,11 +3,12 @@ from __future__ import annotations
 from datetime import date, datetime, time, timedelta, timezone
 from typing import Literal
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.api.dependencies import get_session
+from app.application.alerts import process_due_events
 from app.db.models.event import Notification, NotificationChannel
 from app.domain.notifications import dismiss_notification
 from app.schemas.notification import (
@@ -128,3 +129,21 @@ def dismiss_notifications_bulk(
         dismissed_count=dismissed_count,
         items=[_serialize_notification(notification) for notification in ordered_notifications],
     )
+
+
+@router.post("/process-due", status_code=200)
+def process_due_notifications(
+    request: Request,
+    session: Session = Depends(get_session),
+) -> dict:
+    """Trigger processing of due events and create notifications.
+
+    Intended to be called by a cron job or scheduler on a daily basis.
+    """
+    email_sender = getattr(request.app.state, "email_sender", None)
+    result = process_due_events(
+        session=session,
+        today=date.today(),
+        email_sender=email_sender,
+    )
+    return {"sent": result.sent, "skipped": result.skipped, "failed": result.failed}

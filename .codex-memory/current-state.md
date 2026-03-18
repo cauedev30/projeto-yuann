@@ -3,33 +3,42 @@
 ## Projeto
 - Monorepo `projeto-yuann` do MVP `LegalTech` para ingestao, analise e governanca de contratos.
 - Fonte de verdade usada nesta sessao: repositorio GitHub `git@github.com:cauedev30/projeto-yuann.git`.
-- Checkout verificado desta execucao: `/home/dvdev/projeto-yuann/.worktrees/f5-b-release-produto`
+- Checkout verificado desta execucao: `/home/dvdev/projeto-yuann`
 - Interface canonica de memoria compartilhada: `./.codex-memory/`
 
 ## Snapshot verificado
-- Base publicada verificada no GitHub antes do closeout: `19dab0b feat: prepare f5-b product release [F5-B]`
-- Branch ativa desta sessao: `feature/f5-g-final-gate`
-- O MVP LegalTech esta funcionalmente completo no repositorio: F1 (Upload), F2 (Analysis), F3 (Events), F4 (Dashboard/notifications), F5-A (Release Tecnico) e F5-B (Release Produto) ja aparecem no estado publicado revisado.
-- O gate `F5-G` foi revalidado localmente sobre essa base publicada e consolidado no artefato `docs/squad/artifacts/2026-03-17-f5-g-final-gate.md`.
-- `README.md` e `docs/release-candidate-runbook.md` foram reconciliados para refletir o estado final do MVP.
-- Esta memoria foi atualizada porque a versao publicada anteriormente ainda dizia que a `F5-B` nao estava integrada, o que contradizia o topo real do GitHub.
+- Base anterior: `19dab0b feat: prepare f5-b product release [F5-B]` / `main` (`0c09517`)
+- Pos-release implementado (2026-03-18): 5 fases do plano pos-MVP concluidas sobre a base publicada.
+- Fase 1: Pipeline de upload conectada — `contract_upload.py` agora chama `run_contract_pipeline` (metadata + events + analysis) para drafts, e `run_policy_analysis` para signed contracts (apos archive).
+- Fase 2: Regras de negocio — `MAX_TERM_MONTHS`, `MAX_VALUE`, `GRACE_PERIOD_DAYS` adicionadas a `evaluate_rules`; `extract_contract_facts` expandido com `contract_value` e `grace_period_days`; politica padrao seedada em `app_factory.py`.
+- Fase 3: Integracao OpenAI — `OpenAIAnalysisClient` em `infrastructure/openai_client.py` com prompts em `infrastructure/prompts.py`; fallback deterministico quando `OPENAI_API_KEY` ausente.
+- Fase 4: Notificacoes SMTP — `SmtpEmailSender` em `infrastructure/notifications.py`; eventos de notificacao em 10/9/8/7 meses antes do vencimento; corpo do email enriquecido.
+- Fase 5: Auth JWT — modelo `User`, rotas `/api/auth/register|login|me`, dependency `get_current_user`, migracao `0006`; frontend com `AuthProvider`, `AuthGuard`, pagina `/login` glassmorphic, headers `Authorization` em todos os API clients.
+
+## Plano de melhorias (2026-03-18) — 4 fases concluidas
+- Fase 1 (Correcoes rapidas frontend): data hardcoded na timeline corrigida para `new Date()`; traducoes "Contracts"→"Contratos", "Findings principais"→"Achados principais", "Findings criticos"→"Achados criticos"; labels de origem traduzidos; botao "Sair" na sidebar e mobile nav; StatCards com variante compact.
+- Fase 2 (Bugs de logica frontend): botao "Atualizar Lista" corrigido (removido prop `refreshContracts`, usa `loadContracts` via `useCallback`); botao "Atualizar Detalhe" com feedback "Atualizado!" por 2s e `cache: "no-store"` nos fetches; botao flutuante scroll-to-bottom com glassmorphism e animacao CSS.
+- Fase 3 (Backend): evento `renewal` agora usa `end_date - 180 dias` (data distinta de `expiration`); eventos de `notification_sequence` filtrados no frontend; prompt LLM reescrito com 8 clausulas obrigatorias, criterios de severidade e regras estritas; dedup de findings com normalizacao unicode; novo endpoint `GET /api/contracts/{id}/summary` + `summarize_contract` no OpenAI client; novo componente `ContractSummaryPanel` substitui "Texto extraido" como secao principal.
+- Fase 4 (Verificacao e polimento): endpoint `POST /api/notifications/process-due` adicionado para trigger de notificacoes; varredura de traducoes: "score"→"pontuacao", ultima eyebrow "Contracts" corrigida.
 
 ## Evidencia operacional mais recente
-- Backend: `55 passed in 1.82s`
+- Backend: `55 passed in 1.62s`
 - Frontend unitario: `19` arquivos e `81` testes passando
-- TypeScript: limpo
-- ESLint: limpo
-- Build Next.js: limpo
-- E2E Playwright: `9 passed (30.1s)`
-- Seeds e fixtures do dashboard permanecem cobertos pelo estado publicado e pelos specs E2E do release
+- TypeScript/Build: limpo (`npm run build` sem erros)
+- ESLint: limpo (apenas warning pre-existente em dashboard)
 
 ## Riscos / pendencias
-- `backend/pyproject.toml` continua declarando `requires-python = ">=3.13"`, mas a verificacao local deste closeout usou `Python 3.12.3`; risco nao-bloqueante mantido.
-- Reruns de Playwright neste harness podem deixar um `next dev` orfao em `127.0.0.1:3100`; a evidencia final registrada veio de um rerun limpo no worktree alinhado ao GitHub.
-- Cleanup de `.worktrees/`, `tmp/`, uploads legados e artefatos ignorados permanece fora do escopo do MVP.
+- `backend/pyproject.toml` continua declarando `requires-python = ">=3.13"`, mas a verificacao local usou `Python 3.12.3`.
+- Testes E2E Playwright nao foram re-executados nesta sessao (podem precisar de ajustes para o auth guard + traducoes).
+- A `OPENAI_API_KEY` deve ser configurada via `.env` apenas; nunca hardcoded.
+- `JWT_SECRET` padrao e `dev-secret-change-in-production` — deve ser substituido em producao.
+- Endpoint `POST /api/notifications/process-due` precisa de um cron externo para chamada diaria.
+- Cleanup de `.worktrees/`, `tmp/`, uploads legados permanece fora do escopo.
 
 ## Proximo passo recomendado
-- MVP fechado. Proximos trabalhos sao pos-MVP (hardening, auth, deploy cloud, etc.).
+- Configurar cron job para chamar `POST /api/notifications/process-due` diariamente.
+- Rodar testes E2E e ajustar para auth guard + traducoes.
+- Deploy em ambiente de staging para validacao integrada.
 
 ## Ultima atualizacao
-- 2026-03-17 23:18:07 -0300
+- 2026-03-18

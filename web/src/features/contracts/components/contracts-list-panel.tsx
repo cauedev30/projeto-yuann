@@ -8,6 +8,11 @@ import { LoadingSkeleton } from "../../../components/ui/loading-skeleton";
 import { StatusBadge } from "../../../components/ui/status-badge";
 import styles from "../screens/contracts-screen.module.css";
 
+const SOURCE_LABELS: Record<string, string> = {
+  third_party_draft: "Minuta de terceiro",
+  signed_contract: "Contrato assinado",
+};
+
 type ContractsListPanelProps = {
   items: ContractListItemSummary[];
   isLoading: boolean;
@@ -28,7 +33,7 @@ function buildStatusLabel(
   item: ContractListItemSummary,
 ): string {
   if (item.latestAnalysisStatus && item.latestRiskScore !== null) {
-    return `${item.latestAnalysisStatus} · score ${item.latestRiskScore}`;
+    return `${item.latestAnalysisStatus} · pontuacao ${item.latestRiskScore}`;
   }
 
   if (item.latestAnalysisStatus) {
@@ -109,7 +114,7 @@ export function ContractsListPanel({
                     Prazo: {item.termMonths !== null ? `${item.termMonths} meses` : "a confirmar"}
                   </span>
                   <span>
-                    Origem: {item.latestVersionSource ?? "a confirmar"}
+                    Origem: {item.latestVersionSource ? (SOURCE_LABELS[item.latestVersionSource] ?? item.latestVersionSource) : "a confirmar"}
                   </span>
                 </div>
               </Link>

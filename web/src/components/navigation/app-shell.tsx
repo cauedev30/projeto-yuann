@@ -4,6 +4,8 @@ import React, { type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { useAuth } from "../../contexts/auth-context";
+import { ScrollToBottom } from "../ui/scroll-to-bottom";
 import styles from "./app-shell.module.css";
 
 type AppShellProps = {
@@ -17,11 +19,11 @@ type TopbarContext = {
 
 function getTopbarContext(pathname: string): TopbarContext {
   if (pathname.startsWith("/contracts/")) {
-    return { title: "Contracts", subtitle: "Detalhe do contrato" };
+    return { title: "Contratos", subtitle: "Detalhe do contrato" };
   }
 
   if (pathname.startsWith("/contracts")) {
-    return { title: "Contracts", subtitle: "Intake e triagem" };
+    return { title: "Contratos", subtitle: "Intake e triagem" };
   }
 
   if (pathname.startsWith("/dashboard")) {
@@ -34,6 +36,7 @@ function getTopbarContext(pathname: string): TopbarContext {
 export function AppShell({ children }: AppShellProps) {
   const pathname = usePathname();
   const topbar = getTopbarContext(pathname);
+  const { logout, user } = useAuth();
 
   function navLinkClass(href: string): string {
     const isActive = pathname.startsWith(href);
@@ -63,13 +66,26 @@ export function AppShell({ children }: AppShellProps) {
               Portfolio, eventos e notificacoes
             </small>
           </Link>
-          <Link aria-label="Contracts" className={navLinkClass("/contracts")} href="/contracts">
-            <span className={styles.navTitle}>Contracts</span>
+          <Link aria-label="Contratos" className={navLinkClass("/contracts")} href="/contracts">
+            <span className={styles.navTitle}>Contratos</span>
             <small aria-hidden="true" className={styles.navMeta}>
               Intake, triagem e findings
             </small>
           </Link>
         </nav>
+
+        <div className={styles.sidebarFooter}>
+          {user ? (
+            <p className={styles.userName}>{user.fullName}</p>
+          ) : null}
+          <button
+            className={styles.logoutButton}
+            onClick={logout}
+            type="button"
+          >
+            Sair
+          </button>
+        </div>
       </aside>
 
       <div className={styles.contentFrame}>
@@ -83,13 +99,25 @@ export function AppShell({ children }: AppShellProps) {
                   Portfolio, eventos e notificacoes
                 </small>
               </Link>
-              <Link aria-label="Contracts" className={navLinkClass("/contracts")} href="/contracts">
-                <span className={styles.navTitle}>Contracts</span>
+              <Link aria-label="Contratos" className={navLinkClass("/contracts")} href="/contracts">
+                <span className={styles.navTitle}>Contratos</span>
                 <small aria-hidden="true" className={styles.navMeta}>
                   Intake, triagem e findings
                 </small>
               </Link>
             </nav>
+            <div className={styles.mobileLogout}>
+              {user ? (
+                <p className={styles.userName}>{user.fullName}</p>
+              ) : null}
+              <button
+                className={styles.logoutButton}
+                onClick={logout}
+                type="button"
+              >
+                Sair
+              </button>
+            </div>
           </details>
 
           <div className={styles.topbarCopy}>
@@ -102,6 +130,7 @@ export function AppShell({ children }: AppShellProps) {
           {children}
         </main>
       </div>
+      <ScrollToBottom />
     </div>
   );
 }
