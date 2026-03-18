@@ -1,5 +1,38 @@
 # Session Log
 
+- Data: 2026-03-18 20:30:00 -0300
+  - tarefa: implementar plano de melhorias completo (12 itens em 4 fases) — correcoes de bugs, traducoes, melhorias de UX e assertividade do backend.
+  - resultado: as 4 fases foram implementadas e verificadas; commit `bca0a39` publicado em `origin/main` com 28 arquivos alterados (1151 adicoes, 113 remocoes); `55` testes backend e `81` testes frontend passando, `npm run build` limpo.
+  - arquivos criados: `web/src/components/ui/scroll-to-bottom.tsx`, `web/src/components/ui/scroll-to-bottom.module.css`, `web/src/features/contracts/components/contract-summary-panel.tsx`, `web/src/features/contracts/components/contract-summary-panel.module.css`
+  - arquivos editados: `backend/app/domain/events.py` (renewal event_date = end_date - 180 dias), `backend/app/domain/contract_analysis.py` (dedup unicode), `backend/app/infrastructure/prompts.py` (prompt reescrito + SUMMARY_SYSTEM_PROMPT), `backend/app/infrastructure/openai_client.py` (metodo summarize_contract), `backend/app/api/routes/contracts.py` (endpoint summary), `backend/app/api/routes/notifications.py` (endpoint process-due), `backend/app/schemas/contract.py` (ContractSummaryResponse), `web/src/components/navigation/app-shell.tsx` (logout + scroll-to-bottom + traducoes), `web/src/components/navigation/app-shell.module.css` (sidebar footer + logout styles), `web/src/components/ui/stat-card.tsx` (prop compact), `web/src/components/ui/ui-primitives.module.css` (compact variant), `web/src/features/contracts/screens/contract-detail-screen.tsx` (traducoes + compact + refresh feedback + summary panel), `web/src/features/contracts/screens/contracts-screen.tsx` (fix refreshContracts), `web/src/features/contracts/components/event-timeline.tsx` (fix date + filter notifications), `web/src/features/contracts/components/findings-section.tsx` (traducao achados), `web/src/features/contracts/components/contracts-list-panel.tsx` (traducao origem + pontuacao), `web/src/features/dashboard/components/contracts-summary.tsx` (traducao achados criticos), `web/src/lib/api/contracts.ts` (cache no-store + getContractSummary), testes atualizados em `app-shell.test.tsx`, `event-timeline.test.tsx`, `contracts-screen.test.tsx`, `test_event_scheduler.py`, `test_contract_upload.py`
+  - pendencias: endpoint `POST /api/notifications/process-due` precisa de cron externo; testes E2E Playwright nao re-executados nesta sessao.
+  - proximos passos: configurar cron job para notificacoes; rodar testes E2E com ajustes para auth guard + traducoes; deploy em staging.
+
+- Data: 2026-03-18 14:30:00 -0300
+  - tarefa: implementar plano pos-release completo (5 fases) — pipeline de upload, regras de negocio, integracao OpenAI, notificacoes SMTP e autenticacao JWT.
+  - resultado: as 5 fases foram implementadas e validadas; `55` testes backend e `81` testes frontend passando, TypeScript limpo, ESLint limpo.
+  - arquivos criados: `backend/app/application/contract_pipeline.py`, `backend/app/infrastructure/openai_client.py`, `backend/app/infrastructure/prompts.py`, `backend/app/db/models/user.py`, `backend/app/domain/auth.py`, `backend/app/api/routes/auth.py`, `backend/alembic/versions/0006_add_user_model.py`, `web/src/app/(auth)/layout.tsx`, `web/src/app/(auth)/login/page.tsx`, `web/src/app/(auth)/login/page.module.css`, `web/src/lib/api/auth.ts`, `web/src/contexts/auth-context.tsx`, `web/src/components/guards/auth-guard.tsx`
+  - arquivos editados: `backend/app/application/contract_upload.py`, `backend/app/api/routes/contracts.py`, `backend/app/api/routes/uploads.py`, `backend/app/domain/contract_analysis.py`, `backend/app/domain/events.py`, `backend/app/core/app_factory.py`, `backend/app/core/config.py`, `backend/app/infrastructure/notifications.py`, `backend/app/api/dependencies.py`, `backend/app/db/models/__init__.py`, `web/src/app/(app)/layout.tsx`, `web/src/lib/api/contracts.ts`, `web/src/lib/api/dashboard.ts`, testes atualizados em `tests/api/test_contracts_api.py`, `tests/application/test_contract_upload.py`, `tests/services/test_event_scheduler.py`
+  - proximos passos: rodar E2E Playwright com ajustes para auth guard; deploy em staging.
+
+- Data: 2026-03-18 09:55:00 -0300
+  - tarefa: redesign da UI do painel principal (glassmorphism/dark theme) e implementacao da funcionalidade CRUD completa para contratos no Dashboard.
+  - resultado: as rotas de Dashboard e de Contratos receberam uma reformulacao visual completa; foi criado o painel `ManageContractsPanel` no Dashboard permitindo exclusao (`DELETE`) e alteracao (`PATCH`) de contratos com repercussao imediata na visualizacao; e o botao estatico "Atualizar painel" foi removido em favor do "Gerenciar portfolio". Todas as alteracoes passaram nos testes frontend.
+  - arquivos alterados: multiplos arquivos CSS/TSX na pasta `web` (App, Dashboard, Contracts), endpoints `PATCH` e `DELETE` no `backend/app/api/routes/contracts.py`, schema atualizado no `contract.py` e API clients no `contracts.ts`.
+  - proximos passos: publicar no GitHub `main`.
+
+- Data: 2026-03-18 01:06:08 -0300
+  - tarefa: retomar o boot local solicitado pelo usuario e deixar `backend` e `frontend` acessiveis no proprio host para teste manual.
+  - resultado: o diretorio `/home/dvdev/projeto-yuann` ja existia e foi reutilizado sem novo clone; o runtime precisou sair do sandbox para contornar o bloqueio local de sockets do harness, ficando com backend `FastAPI` responsivo em `http://127.0.0.1:8000/openapi.json` e frontend `Next.js` responsivo em `http://127.0.0.1:3000/`, ambos confirmados por `curl`; processos ativos no closeout: `uvicorn` PID `58550` e `next dev` PID `58582`.
+  - arquivos alterados: `./.codex-memory/current-state.md`, `./.codex-memory/session-log.md`
+  - proximos passos: usar a UI local para teste manual; encerrar os processos com `pkill -f 'uvicorn app.main:app --host 127.0.0.1 --port 8000'` e `pkill -f 'next dev --hostname 127.0.0.1 --port 3000'` quando nao forem mais necessarios.
+
+- Data: 2026-03-18 00:33:13 -0300
+  - tarefa: preparar o checkout local de `projeto-yuann` para teste manual no proprio host.
+  - resultado: o diretorio `/home/dvdev/projeto-yuann` ja existia e foi reutilizado; o boot local confirmou backend em `http://127.0.0.1:8000/openapi.json`, frontend em `http://127.0.0.1:3000/` e payload valido em `GET /api/dashboard`, usando o ambiente ja presente com `Python 3.12.3` no backend e dependencias web instaladas.
+  - arquivos alterados: `./.codex-memory/current-state.md`, `./.codex-memory/session-log.md`
+  - proximos passos: usar a UI local para teste manual; encerrar os processos com `pkill -f 'uvicorn app.main:app --host 127.0.0.1 --port 8000'` e `pkill -f 'next dev --hostname 127.0.0.1 --port 3000'` quando nao forem mais necessarios.
+
 - Data: 2026-03-17 23:18:07 -0300
   - tarefa: executar o `F5-G Gate final` usando o estado publicado do GitHub como unica fonte de verdade e reconciliar a memoria local.
   - resultado: o topo publicado do GitHub (`19dab0b feat: prepare f5-b product release [F5-B]`) foi revalidado com `55` testes backend, `81` testes frontend, `tsc`, `lint`, `build` e `9` cenarios Playwright verdes; `README.md`, `docs/release-candidate-runbook.md`, `docs/squad/artifacts/2026-03-17-f5-g-final-gate.md` e `./.codex-memory/current-state.md` foram atualizados para refletir o MVP completo e corrigir a memoria que ainda tratava a `F5-B` como nao integrada.

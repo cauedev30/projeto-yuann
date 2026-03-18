@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.application.contract_pipeline import run_contract_pipeline, run_policy_analysis
 from app.db.models.contract import Contract, ContractSource, ContractVersion
 from app.infrastructure.pdf_text import TextExtractionError
 from app.infrastructure.ocr import OCRClient
@@ -34,6 +35,7 @@ def upload_contract_file(
     content: bytes,
     storage_service: LocalStorageService,
     ocr_client: OCRClient | None = None,
+    llm_client: object | None = None,
 ) -> ContractUploadResult:
     contract = session.scalar(select(Contract).where(Contract.external_reference == external_reference))
     if contract is None:
@@ -62,6 +64,14 @@ def upload_contract_file(
 
         if contract_version.source == ContractSource.signed_contract:
             process_signed_contract_archive(session, contract_version=contract_version)
+            run_policy_analysis(
+                session, contract, contract_version.text_content or "",
+                llm_client=llm_client,
+            )
+        else:
+            run_contract_pipeline(
+                session, contract, contract_version, llm_client=llm_client,
+            )
         session.commit()
     except TextExtractionError as exc:
         session.rollback()

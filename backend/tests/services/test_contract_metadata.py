@@ -47,10 +47,13 @@ def test_extract_contract_metadata_accepts_label_variants_and_tracks_snapshot_co
         "parties": 1.0,
         "grace_period_months": 1.0,
         "readjustment_type": 1.0,
+        "monthly_rent": 0.0,
+        "penalty_months": 0.0,
     }
     assert result.match_labels == {
         "signature_date": "data de assinatura",
         "start_date": "inicio da vigencia",
+        "end_date": "prazo contratual",
         "term_months": "prazo contratual",
         "parties": "locataria / franqueada",
         "grace_period_months": "carencia",

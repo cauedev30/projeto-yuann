@@ -2,6 +2,7 @@ from app.db.models.analysis import AnalysisStatus, ContractAnalysis, ContractAna
 from app.db.models.contract import Contract, ContractSource, ContractVersion
 from app.db.models.event import ContractEvent, EventType, Notification, NotificationChannel
 from app.db.models.policy import Policy, PolicyRule
+from app.db.models.user import User
 
 __all__ = [
     "AnalysisStatus",
@@ -16,4 +17,5 @@ __all__ = [
     "NotificationChannel",
     "Policy",
     "PolicyRule",
+    "User",
 ]

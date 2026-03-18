@@ -1,3 +1,4 @@
+import { getAuthHeaders } from "./auth";
 import { getClientEnv } from "../env";
 import {
   type DashboardSnapshot,
@@ -44,7 +45,9 @@ export async function getDashboardSnapshot(
   fetchImpl: typeof fetch = fetch,
 ): Promise<DashboardSnapshot | null> {
   const { NEXT_PUBLIC_API_URL } = getClientEnv();
-  const response = await fetchImpl(`${NEXT_PUBLIC_API_URL}/api/dashboard`);
+  const response = await fetchImpl(`${NEXT_PUBLIC_API_URL}/api/dashboard`, {
+    headers: getAuthHeaders(),
+  });
 
   if (!response.ok) {
     throw await buildDashboardError(response);

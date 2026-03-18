@@ -1,7 +1,14 @@
 from collections.abc import Generator
 
-from fastapi import HTTPException, Request
+from fastapi import Depends, HTTPException, Request
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from sqlalchemy import select
 from sqlalchemy.orm import Session
+
+from app.db.models.user import User
+from app.domain.auth import decode_access_token
+
+_bearer_scheme = HTTPBearer(auto_error=False)
 
 
 def get_session(request: Request) -> Generator[Session, None, None]:
@@ -14,3 +21,24 @@ def get_session(request: Request) -> Generator[Session, None, None]:
         yield session
     finally:
         session.close()
+
+
+def get_current_user(
+    request: Request,
+    credentials: HTTPAuthorizationCredentials | None = Depends(_bearer_scheme),
+    session: Session = Depends(get_session),
+) -> User:
+    if credentials is None:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+
+    jwt_secret = getattr(request.app.state, "jwt_secret", "dev-secret")
+    payload = decode_access_token(credentials.credentials, secret=jwt_secret)
+    if payload is None:
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
+
+    user_id = payload.get("sub")
+    user = session.scalar(select(User).where(User.id == user_id))
+    if user is None or not user.is_active:
+        raise HTTPException(status_code=401, detail="User not found or inactive")
+
+    return user

@@ -40,6 +40,7 @@ async def upload_contract(
 
     content = await file.read()
     ocr_client = getattr(request.app.state, "ocr_client", None)
+    llm_client = getattr(request.app.state, "llm_client", None)
     try:
         result = upload_contract_file(
             session=session,
@@ -50,6 +51,7 @@ async def upload_contract(
             content=content,
             storage_service=storage_service,
             ocr_client=ocr_client,
+            llm_client=llm_client,
         )
     except ContractUploadError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
