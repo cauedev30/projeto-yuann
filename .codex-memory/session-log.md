@@ -2,7 +2,7 @@
 
 - Data: 2026-03-17 21:52:59 -0300
   - tarefa: validar e fechar operacionalmente a `F5-A Preparar release tecnico` com evidencia fresca, sincronizacao Git/Trello e memoria final.
-  - resultado: `main` e `origin/main` ficaram alinhadas em `fd46992`, o checklist Trello foi fechado em `5/5 complete`, o card foi movido para `Concluido` e a verificacao fresca fechou com `55` testes backend, `80` testes frontend, `tsc` limpo, `lint` limpo, `5` cenarios Playwright e seeds/fixtures validados.
+  - resultado: `main` e `origin/main` ficaram alinhadas apos a publicacao do closeout da `F5-A` e do sync final da memoria, o checklist Trello foi fechado em `5/5 complete`, o card foi movido para `Concluido` e a verificacao fresca fechou com `55` testes backend, `80` testes frontend, `tsc` limpo, `lint` limpo, `5` cenarios Playwright e seeds/fixtures validados.
   - arquivos alterados: `README.md`, `docs/release-candidate-runbook.md`, `docs/squad/artifacts/2026-03-17-f5-a-release-tecnico.md`, `web/playwright.config.ts`, `web/tests/e2e/dashboard-alerts.spec.ts`, `web/tests/release-candidate-assets.test.ts`, `./.codex-memory/current-state.md`, `./.codex-memory/session-log.md`
   - proximos passos: iniciar `F5-B` ou `F5-G`; worktrees historicos permanecem como cleanup opcional.
 

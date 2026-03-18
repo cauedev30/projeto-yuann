@@ -7,8 +7,7 @@
 
 ## Snapshot verificado
 - Branch atual do checkout principal: `main`
-- `HEAD` do checkout principal: `fd469928ec17c8756d5654496d7a200898c0858f`
-- `origin/main`: `fd469928ec17c8756d5654496d7a200898c0858f`
+- `main` e `origin/main` estao novamente alinhadas apos a publicacao do closeout da `F5-A` e do sync final da memoria operacional.
 - `F5-A Preparar release tecnico` foi fechada operacionalmente e publicada em `main` e `origin/main` via `fd46992 feat: validate and close f5-a release tecnico [F5-A]`.
 - O artefato oficial da entrega foi atualizado com evidencia fresca em `docs/squad/artifacts/2026-03-17-f5-a-release-tecnico.md`.
 - O card Trello `F5-A Preparar release tecnico` (`69b79d6556fa3b7d415cdd24`) foi sincronizado nesta sessao:
@@ -45,4 +44,4 @@
 - Iniciar `F5-B` ou `F5-G`, agora que a `F5-A` esta publicada e o card correspondente foi movido para `Concluido`.
 
 ## Ultima atualizacao
-- 2026-03-17 21:52:59 -0300
+- 2026-03-17 21:56:59 -0300
