@@ -9,14 +9,37 @@ const runtimeSeedScript = path.join("tests", "support", "seed_dashboard_runtime.
 
 function resolveBackendPython(): string {
   const windowsVenvPython = path.join(backendDir, ".venv", "Scripts", "python.exe");
+  const windowsSharedVenvPython = path.resolve(
+    backendDir,
+    "..",
+    "..",
+    "..",
+    "backend",
+    ".venv",
+    "Scripts",
+    "python.exe",
+  );
   const windowsSystemPython = process.env.LOCALAPPDATA
     ? path.join(process.env.LOCALAPPDATA, "Programs", "Python", "Python313", "python.exe")
     : "";
   const unixVenvPython = path.join(backendDir, ".venv", "bin", "python");
+  const unixSharedVenvPython = path.resolve(
+    backendDir,
+    "..",
+    "..",
+    "..",
+    "backend",
+    ".venv",
+    "bin",
+    "python",
+  );
 
   if (process.platform === "win32") {
     if (existsSync(windowsVenvPython)) {
       return windowsVenvPython;
+    }
+    if (existsSync(windowsSharedVenvPython)) {
+      return windowsSharedVenvPython;
     }
     if (windowsSystemPython && existsSync(windowsSystemPython)) {
       return windowsSystemPython;
@@ -26,6 +49,9 @@ function resolveBackendPython(): string {
 
   if (existsSync(unixVenvPython)) {
     return unixVenvPython;
+  }
+  if (existsSync(unixSharedVenvPython)) {
+    return unixSharedVenvPython;
   }
   return "python3";
 }

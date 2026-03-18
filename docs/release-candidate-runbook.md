@@ -11,25 +11,26 @@ Close `F5-A Preparar release tecnico` with one reproducible local verification f
 
 ## Preconditions
 - `main` or the release branch is clean before verification starts.
+- Backend virtualenv is active, or the shell can call the intended interpreter directly with `python`.
 - Backend and web dependencies are installed.
-- Optional infrastructure from `docker-compose.yml` is not required for the release baseline.
+- Optional infrastructure from `docker-compose.yml` can be started with `make up`, but it is not required for the verified release baseline.
 - Local manual smoke commands:
-  - `cd backend && py -3.13 -m uvicorn app.main:app --host 127.0.0.1 --port 8000`
-  - `cd web && $env:NEXT_PUBLIC_API_URL="http://127.0.0.1:8000"; npm run dev -- --hostname 127.0.0.1 --port 3000`
+  - `cd backend && python -m uvicorn app.main:app --host 127.0.0.1 --port 8000`
+  - `cd web && NEXT_PUBLIC_API_URL="http://127.0.0.1:8000" npm run dev -- --hostname 127.0.0.1 --port 3000`
 - Demo assets available in the repo:
   - `web/tests/fixtures/third-party-draft.pdf`
   - `web/tests/fixtures/unreadable-upload.pdf`
 - Dashboard demo commands:
-  - `cd backend && py -3.13 -m tests.support.seed_dashboard_runtime clear`
-  - `cd backend && py -3.13 -m tests.support.seed_dashboard_runtime seed`
+  - `cd backend && python -m tests.support.seed_dashboard_runtime clear`
+  - `cd backend && python -m tests.support.seed_dashboard_runtime seed`
 
 ## Verification order
-1. `cd backend && py -3.13 -m pytest -q`
+1. `cd backend && python -m pytest -q`
 2. `cd web && npm run test`
 3. `cd web && npx tsc --noEmit`
 4. `cd web && npm run lint`
 5. `cd web && npm run build`
-6. `cd web && npx playwright test`
+6. `cd web && npm run e2e`
 
 ## Expected outcome
 - Backend suite green.
@@ -40,13 +41,13 @@ Close `F5-A Preparar release tecnico` with one reproducible local verification f
 - Playwright suite completes green under the serialized config.
 
 ## Manual smoke
-1. Start the backend with `cd backend && py -3.13 -m uvicorn app.main:app --host 127.0.0.1 --port 8000`.
-2. Start the frontend with `cd web && $env:NEXT_PUBLIC_API_URL="http://127.0.0.1:8000"; npm run dev -- --hostname 127.0.0.1 --port 3000`.
+1. Start the backend with `cd backend && python -m uvicorn app.main:app --host 127.0.0.1 --port 8000`.
+2. Start the frontend with `cd web && NEXT_PUBLIC_API_URL="http://127.0.0.1:8000" npm run dev -- --hostname 127.0.0.1 --port 3000`.
 3. Open `http://127.0.0.1:3000/contracts` and verify the upload form renders.
 4. Upload `web/tests/fixtures/third-party-draft.pdf` and confirm the triage result renders.
 5. Upload `web/tests/fixtures/unreadable-upload.pdf` and confirm the friendly error copy renders.
-6. Run `cd backend && py -3.13 -m tests.support.seed_dashboard_runtime clear`, then open `http://127.0.0.1:3000/dashboard` and confirm the unavailable state.
-7. Run `cd backend && py -3.13 -m tests.support.seed_dashboard_runtime seed`, then refresh `http://127.0.0.1:3000/dashboard` and confirm the populated dashboard renders.
+6. Run `cd backend && python -m tests.support.seed_dashboard_runtime clear`, then open `http://127.0.0.1:3000/dashboard` and confirm the unavailable state.
+7. Run `cd backend && python -m tests.support.seed_dashboard_runtime seed`, then refresh `http://127.0.0.1:3000/dashboard` and confirm the populated dashboard renders.
 
 ## Known non-blocking risks
 - `web/src/app/globals.css` still emits the known autoprefixer warning for `end`.

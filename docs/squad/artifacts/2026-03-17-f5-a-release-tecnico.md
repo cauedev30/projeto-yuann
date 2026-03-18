@@ -63,14 +63,35 @@
 
 - Status: `pass`
 - Evidence:
-  - `cd backend && py -3.13 -m pytest -q`
+  - `cd /home/dvdev/projeto-yuann/.worktrees/f5-a-release-tecnico/backend && /home/dvdev/projeto-yuann/backend/.venv/bin/python -m pytest -v`
 
 ```text
-55 passed in 2.24s
+55 passed in 1.26s
 ```
 
 - Non-blocking notes:
   - o runtime local de release continua acoplado a SQLite e filesystem; isso segue intencional para o baseline atual
+
+## Seeds Validation
+
+- Status: `pass`
+- Evidence:
+  - `cd /home/dvdev/projeto-yuann/.worktrees/f5-a-release-tecnico/backend && /home/dvdev/projeto-yuann/backend/.venv/bin/python tests/support/seed_dashboard_runtime.py clear`
+  - `cd /home/dvdev/projeto-yuann/.worktrees/f5-a-release-tecnico/backend && /home/dvdev/projeto-yuann/backend/.venv/bin/python tests/support/seed_dashboard_runtime.py seed`
+  - fixture check: `cd /home/dvdev/projeto-yuann/.worktrees/f5-a-release-tecnico/web && ls -la tests/fixtures`
+  - SQLite counts confirmed after seeding:
+
+```text
+contracts: 3 rows
+contract_analyses: 3 rows
+contract_analysis_findings: 3 rows
+contract_events: 3 rows
+notifications: 3 rows
+```
+
+- Notes:
+  - os nomes canonicos de tabela do schema atual sao `contract_analyses` e `contract_analysis_findings`; a validacao funcional foi registrada com esses nomes reais
+  - fixtures presentes: `web/tests/fixtures/third-party-draft.pdf` e `web/tests/fixtures/unreadable-upload.pdf`
 
 ## Frontend QA Review
 
@@ -81,6 +102,7 @@
 ```text
 Test Files  19 passed (19)
      Tests  80 passed (80)
+   Duration  2.53s
 ```
 
   - `cd web && npx tsc --noEmit`
@@ -96,41 +118,40 @@ TypeScript completed with no output.
 > eslint .
 ```
 
-  - `cd web && npm run build`
+- Non-blocking notes:
+  - a suite falhou na primeira tentativa porque `web/tests/release-candidate-assets.test.ts` ainda validava o README antigo; o teste foi alinhado com a documentacao shell-agnostic antes da reexecucao
+  - o worktree nao tinha `web/node_modules` nem `eslint`; foi necessario executar `npm install` no worktree antes da evidência final
 
-```text
-Next.js build completed successfully.
-```
+## E2E QA Review
 
-  - `cd web && npx playwright test`
+- Status: `pass`
+- Evidence:
+  - `cd /home/dvdev/projeto-yuann/.worktrees/f5-a-release-tecnico/web && npx playwright test`
 
 ```text
 Running 5 tests using 1 worker
-  5 passed
+  5 passed (16.0s)
 ```
 
-  - documented local boot smoke:
-    - `cd backend && py -3.13 -m uvicorn app.main:app --host 127.0.0.1 --port 8000`
-    - `cd web && $env:NEXT_PUBLIC_API_URL="http://127.0.0.1:8000"; npm run dev -- --hostname 127.0.0.1 --port 3000`
-
-```text
-Manual smoke passed: /contracts render, valid upload, unreadable upload, dashboard clear, dashboard seeded.
-```
-
+- Browser: `Chromium`
+- Specs executadas:
+  - `tests/e2e/contract-analysis.spec.ts`
+  - `tests/e2e/contracts-list-detail.spec.ts`
+  - `tests/e2e/dashboard-alerts.spec.ts`
 - Non-blocking notes:
-  - o warning conhecido do autoprefixer em `web/src/app/globals.css` continua aparecendo no bootstrap do build, sem bloquear a verificacao
-  - o shell Windows do harness nao expoe `make`; por isso o fluxo de demo ficou documentado com os comandos Python diretos e com `NEXT_PUBLIC_API_URL` explicito no boot do frontend, mantendo os targets do `Makefile` apenas como conveniencia quando o utilitario estiver disponivel
+  - o Playwright precisou de fallback explicito para o venv compartilhado do backend, porque o worktree novo nao tinha `backend/.venv`
+  - `dashboard-alerts.spec.ts` tambem precisou usar esse mesmo fallback para os comandos `clear` e `seed`
 
 ## Documentation Update Note
 
 - Updated docs:
-  - `Makefile`
   - `README.md`
   - `docs/release-candidate-runbook.md`
   - `docs/squad/artifacts/2026-03-17-f5-a-release-tecnico.md`
-  - `./.codex-memory/current-state.md`
-  - `./.codex-memory/session-log.md`
-- External sync:
-  - `a confirmar` neste harness
-- Notes marked `a confirmar`:
-  - proximo card do roadmap apos a integracao da branch em `main`
+  - `web/playwright.config.ts`
+  - `web/tests/e2e/dashboard-alerts.spec.ts`
+  - `web/tests/release-candidate-assets.test.ts`
+
+## Final Verification Timestamp
+
+- `2026-03-17 21:49:45 -0300`

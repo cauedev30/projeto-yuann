@@ -2,20 +2,26 @@ import { defineConfig } from "@playwright/test";
 import { existsSync } from "node:fs";
 
 const windowsVenvPython = "../backend/.venv/Scripts/python.exe";
+const windowsSharedVenvPython = "../../../backend/.venv/Scripts/python.exe";
 const windowsSystemPython = process.env.LOCALAPPDATA
   ? `${process.env.LOCALAPPDATA.replace(/\\/g, "/")}/Programs/Python/Python313/python.exe`
   : "";
-const unixVenvPython = "./.venv/bin/python";
+const unixVenvPython = "../backend/.venv/bin/python";
+const unixSharedVenvPython = "../../../backend/.venv/bin/python";
 
 const backendPythonCommand =
   process.platform === "win32"
     ? existsSync(windowsVenvPython)
       ? ".\\.venv\\Scripts\\python.exe"
+      : existsSync(windowsSharedVenvPython)
+        ? windowsSharedVenvPython
       : existsSync(windowsSystemPython)
         ? windowsSystemPython
         : "python"
     : existsSync(unixVenvPython)
-      ? unixVenvPython
+      ? ".venv/bin/python"
+      : existsSync(unixSharedVenvPython)
+        ? unixSharedVenvPython
       : "python3";
 
 export default defineConfig({

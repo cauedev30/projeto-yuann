@@ -34,14 +34,14 @@ describe("release candidate assets", () => {
       "utf8",
     );
 
-    expect(readme).toContain("py -3.13 -m uvicorn app.main:app --host 127.0.0.1 --port 8000");
+    expect(readme).toContain("python -m uvicorn app.main:app --host 127.0.0.1 --port 8000");
     expect(readme).toContain('NEXT_PUBLIC_API_URL="http://127.0.0.1:8000"');
-    expect(readme).toContain("py -3.13 -m tests.support.seed_dashboard_runtime seed");
+    expect(readme).toContain("python -m tests.support.seed_dashboard_runtime seed");
     expect(readme).toContain("tests/fixtures/third-party-draft.pdf");
-    expect(runbook).toContain("py -3.13 -m uvicorn app.main:app --host 127.0.0.1 --port 8000");
+    expect(runbook).toContain("python -m uvicorn app.main:app --host 127.0.0.1 --port 8000");
     expect(runbook).toContain('NEXT_PUBLIC_API_URL="http://127.0.0.1:8000"');
-    expect(runbook).toContain("py -3.13 -m tests.support.seed_dashboard_runtime seed");
-    expect(runbook).toContain("py -3.13 -m tests.support.seed_dashboard_runtime clear");
+    expect(runbook).toContain("python -m tests.support.seed_dashboard_runtime seed");
+    expect(runbook).toContain("python -m tests.support.seed_dashboard_runtime clear");
     expect(runbook).toContain("tests/fixtures/third-party-draft.pdf");
   });
 });
