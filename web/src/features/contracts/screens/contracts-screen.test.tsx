@@ -157,7 +157,7 @@ describe("ContractsScreen", () => {
     );
 
     const summaryHeading = screen.getAllByRole("heading", { name: "Resumo da triagem" }).at(-1) as HTMLElement;
-    const findingsHeading = screen.getAllByRole("heading", { name: "Achados principais" }).at(-1) as HTMLElement;
+    const findingsHeading = screen.getAllByRole("heading", { name: "Principais Pontos" }).at(-1) as HTMLElement;
     const aiSummaryHeading = screen.getAllByRole("heading", { name: "Resumo do contrato" }).at(-1) as HTMLElement;
 
     expect(

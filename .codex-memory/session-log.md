@@ -1,5 +1,17 @@
 # Session Log
 
+- Data: 2026-03-18 23:50:00 -0300
+  - tarefa: corrigir fallback da IA por falta de `.env` carregado no uvicorn, alterar titulo de achados na UI para "Principais Pontos", resolver duplicidade de visualizacao no banco de "Prazo de vigencia".
+  - resultado: backend reiniciado localmente com `--env-file .env`; titulo alterado no `findings-section.tsx` e teste respectivo; reanalise disparada via API para o contrato, atualizando o DB de analise para remover a visualizacao "Prazo maximo de vigencia" duplicada. Publicacao na branch main.
+  - arquivos criados/modificados: `web/src/features/contracts/components/findings-section.tsx`, `web/src/features/contracts/screens/contracts-screen.test.tsx`, `.codex-memory/current-state.md`, `.codex-memory/session-log.md`
+  - proximos passos: a definir pelo usuario.
+
+- Data: 2026-03-18 21:20:00 -0300
+  - tarefa: traduzir interface remanescente para o portugues, remodelar `AppShell` para UX Premium, corrigir discrepancias e bugs na tela de contratos, resolver erro de hidratacao do React (`AuthGuard`) e resolver bugs de redundancia/falha de extracao de IA do backend (OpenAI missing).
+  - resultado: A sidebar foi reprojetada com padrao *glassmorphism*; paineis vazios e textos em ingles foram traduzidos; botoes defeituosos de `Atualizar` em listas/detalhes foram extirpados; bug do `AuthGuard` consertado e discrepancia do Score visual solucionada; No backend, a chave do OpenAI reposta no `.env`, regexes de extração de Parte arrumadas p/ limitar a captura indiscriminada de texto e juncao no script de dedup da rule de prazos para resolver a repeticao das flags "Prazo de vigencia".
+  - arquivos criados/modificados: `backend/pyproject.toml`, `backend/.env`, `app/domain/contract_analysis.py`, `app/domain/contract_metadata.py`, variaveis componentes UI do frontend `contracts-list-panel.tsx`, `contracts-screen.tsx`, `app-shell.tsx`, `auth-guard.tsx`, etc.
+  - proximos passos: publicar na `main`.
+
 - Data: 2026-03-18 20:30:00 -0300
   - tarefa: implementar plano de melhorias completo (12 itens em 4 fases) — correcoes de bugs, traducoes, melhorias de UX e assertividade do backend.
   - resultado: as 4 fases foram implementadas e verificadas; commit `bca0a39` publicado em `origin/main` com 28 arquivos alterados (1151 adicoes, 113 remocoes); `55` testes backend e `81` testes frontend passando, `npm run build` limpo.

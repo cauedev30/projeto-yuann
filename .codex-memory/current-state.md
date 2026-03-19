@@ -14,12 +14,14 @@
 - Fase 3: Integracao OpenAI — `OpenAIAnalysisClient` em `infrastructure/openai_client.py` com prompts em `infrastructure/prompts.py`; fallback deterministico quando `OPENAI_API_KEY` ausente.
 - Fase 4: Notificacoes SMTP — `SmtpEmailSender` em `infrastructure/notifications.py`; eventos de notificacao em 10/9/8/7 meses antes do vencimento; corpo do email enriquecido.
 - Fase 5: Auth JWT — modelo `User`, rotas `/api/auth/register|login|me`, dependency `get_current_user`, migracao `0006`; frontend com `AuthProvider`, `AuthGuard`, pagina `/login` glassmorphic, headers `Authorization` em todos os API clients.
+- Fase 6 (Micro Ajustes): AI summary ativado passando `.env` para o uvicorn localmente. UI com titulo de achados alterado para "Principais Pontos". Duplicidade de visualizacao do Prazo de Vigencia resolvida limpando DB obsoleto via reanalise da API.
 
 ## Plano de melhorias (2026-03-18) — 4 fases concluidas
 - Fase 1 (Correcoes rapidas frontend): data hardcoded na timeline corrigida para `new Date()`; traducoes "Contracts"→"Contratos", "Findings principais"→"Achados principais", "Findings criticos"→"Achados criticos"; labels de origem traduzidos; botao "Sair" na sidebar e mobile nav; StatCards com variante compact.
 - Fase 2 (Bugs de logica frontend): botao "Atualizar Lista" corrigido (removido prop `refreshContracts`, usa `loadContracts` via `useCallback`); botao "Atualizar Detalhe" com feedback "Atualizado!" por 2s e `cache: "no-store"` nos fetches; botao flutuante scroll-to-bottom com glassmorphism e animacao CSS.
 - Fase 3 (Backend): evento `renewal` agora usa `end_date - 180 dias` (data distinta de `expiration`); eventos de `notification_sequence` filtrados no frontend; prompt LLM reescrito com 8 clausulas obrigatorias, criterios de severidade e regras estritas; dedup de findings com normalizacao unicode; novo endpoint `GET /api/contracts/{id}/summary` + `summarize_contract` no OpenAI client; novo componente `ContractSummaryPanel` substitui "Texto extraido" como secao principal.
 - Fase 4 (Verificacao e polimento): endpoint `POST /api/notifications/process-due` adicionado para trigger de notificacoes; varredura de traducoes: "score"→"pontuacao", ultima eyebrow "Contracts" corrigida.
+- Fase 5 (Contratos e IA): substituicao de "Texto extraido" por `ContractSummaryPanel`; remocao de botoes falhos de atualizar; correcao do erro de "Hydration failed" no `AuthGuard`; otimizacao em `evaluate_rules` para agrupar limites de `Prazo de vigencia` e fix do parser regex de entidades locais; estilizacao premium com glassmorphism no `AppShell` da sidebar.
 
 ## Evidencia operacional mais recente
 - Backend: `55 passed in 1.62s`
