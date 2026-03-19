@@ -11,12 +11,21 @@ type AuthGuardProps = {
 export function AuthGuard({ children }: AuthGuardProps) {
   const { user, isLoading } = useAuth();
   const router = useRouter();
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
 
   React.useEffect(() => {
     if (!isLoading && !user) {
       router.replace("/login");
     }
   }, [isLoading, user, router]);
+
+  if (!mounted) {
+    return null;
+  }
 
   if (isLoading) {
     return (

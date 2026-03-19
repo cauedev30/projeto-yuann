@@ -23,14 +23,14 @@ function getTopbarContext(pathname: string): TopbarContext {
   }
 
   if (pathname.startsWith("/contracts")) {
-    return { title: "Contratos", subtitle: "Intake e triagem" };
+    return { title: "Contratos", subtitle: "Entrada e triagem" };
   }
 
   if (pathname.startsWith("/dashboard")) {
     return { title: "Dashboard", subtitle: "Governanca contratual" };
   }
 
-  return { title: "Workspace", subtitle: "Governanca contratual" };
+  return { title: "Espaço de trabalho", subtitle: "Governanca contratual" };
 }
 
 export function AppShell({ children }: AppShellProps) {
@@ -69,7 +69,7 @@ export function AppShell({ children }: AppShellProps) {
           <Link aria-label="Contratos" className={navLinkClass("/contracts")} href="/contracts">
             <span className={styles.navTitle}>Contratos</span>
             <small aria-hidden="true" className={styles.navMeta}>
-              Intake, triagem e findings
+              Entrada, triagem e achados
             </small>
           </Link>
         </nav>
@@ -102,7 +102,7 @@ export function AppShell({ children }: AppShellProps) {
               <Link aria-label="Contratos" className={navLinkClass("/contracts")} href="/contracts">
                 <span className={styles.navTitle}>Contratos</span>
                 <small aria-hidden="true" className={styles.navMeta}>
-                  Intake, triagem e findings
+                  Entrada, triagem e achados
                 </small>
               </Link>
             </nav>

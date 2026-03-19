@@ -116,72 +116,51 @@ def evaluate_rules(
 ) -> ContractAnalysisResult:
     items: list[AnalysisItem] = []
 
+    actual_term = _coerce_number(extracted.get("term_months"))
+    min_term = next((_coerce_number(r.get("value")) for r in rules if str(r.get("code", "")).upper() == "MIN_TERM_MONTHS"), None)
+    max_term = next((_coerce_number(r.get("value")) for r in rules if str(r.get("code", "")).upper() == "MAX_TERM_MONTHS"), None)
+
+    if actual_term is not None and (min_term is not None or max_term is not None):
+        is_critical_min = min_term is not None and actual_term < min_term
+        is_critical_max = max_term is not None and actual_term > max_term
+        is_critical = is_critical_min or is_critical_max
+        
+        policy_str_parts = []
+        if min_term is not None: policy_str_parts.append(f"Minimo: {min_term} meses")
+        if max_term is not None: policy_str_parts.append(f"Maximo: {max_term} meses")
+        
+        if is_critical_min:
+            explanation = "O prazo encontrado esta abaixo da politica minima."
+            suggestion = f"Solicitar prazo minimo de {min_term} meses."
+        elif is_critical_max:
+            explanation = "O prazo encontrado excede o maximo da politica."
+            suggestion = f"Reduzir prazo para no maximo {max_term} meses."
+        else:
+            explanation = "O prazo encontrado atende a politica."
+            suggestion = "Nenhum ajuste necessario."
+
+        items.append(
+            AnalysisItem(
+                clause_name="Prazo de vigencia",
+                status="critical" if is_critical else "conforme",
+                severity="high" if is_critical else "low",
+                current_summary=f"Prazo atual de {actual_term} meses.",
+                policy_rule=" | ".join(policy_str_parts),
+                risk_explanation=explanation,
+                suggested_adjustment_direction=suggestion,
+                metadata={
+                    "term_months": actual_term,
+                    "min_term_months": min_term,
+                    "max_term_months": max_term,
+                },
+            )
+        )
+
     for rule in rules:
         code = str(rule.get("code", "")).upper()
 
-        if code == "MIN_TERM_MONTHS":
-            required_term = _coerce_number(rule.get("value"))
-            actual_term = _coerce_number(extracted.get("term_months"))
-
-            if required_term is None or actual_term is None:
-                continue
-
-            is_critical = actual_term < required_term
-            items.append(
-                AnalysisItem(
-                    clause_name="Prazo de vigencia",
-                    status="critical" if is_critical else "conforme",
-                    severity="high" if is_critical else "low",
-                    current_summary=f"Prazo atual de {actual_term} meses.",
-                    policy_rule=f"Prazo minimo exigido: {required_term} meses.",
-                    risk_explanation=(
-                        "O prazo encontrado esta abaixo da politica minima."
-                        if is_critical
-                        else "O prazo encontrado atende a politica."
-                    ),
-                    suggested_adjustment_direction=(
-                        f"Solicitar prazo minimo de {required_term} meses."
-                        if is_critical
-                        else "Nenhum ajuste necessario."
-                    ),
-                    metadata={
-                        "term_months": actual_term,
-                        "required_term_months": required_term,
-                    },
-                )
-            )
-
-        if code == "MAX_TERM_MONTHS":
-            max_term = _coerce_number(rule.get("value"))
-            actual_term = _coerce_number(extracted.get("term_months"))
-
-            if max_term is None or actual_term is None:
-                continue
-
-            is_critical = actual_term > max_term
-            items.append(
-                AnalysisItem(
-                    clause_name="Prazo maximo de vigencia",
-                    status="critical" if is_critical else "conforme",
-                    severity="high" if is_critical else "low",
-                    current_summary=f"Prazo atual de {actual_term} meses.",
-                    policy_rule=f"Prazo maximo permitido: {max_term} meses.",
-                    risk_explanation=(
-                        "O prazo encontrado excede o maximo da politica."
-                        if is_critical
-                        else "O prazo encontrado atende a politica."
-                    ),
-                    suggested_adjustment_direction=(
-                        f"Reduzir prazo para no maximo {max_term} meses."
-                        if is_critical
-                        else "Nenhum ajuste necessario."
-                    ),
-                    metadata={
-                        "term_months": actual_term,
-                        "maximum_term_months": max_term,
-                    },
-                )
-            )
+        if code in ("MIN_TERM_MONTHS", "MAX_TERM_MONTHS"):
+            continue
 
         if code == "MAX_FINE_MONTHS":
             maximum_fine = _coerce_number(rule.get("value"))

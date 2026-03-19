@@ -1,6 +1,6 @@
 .shell {
   display: grid;
-  grid-template-columns: 19.5rem minmax(0, 1fr);
+  grid-template-columns: 17rem minmax(0, 1fr);
   min-height: 100vh;
 }
 
@@ -29,8 +29,10 @@
   gap: var(--space-5);
   min-height: 100vh;
   padding: var(--space-5) var(--space-4);
-  border-right: 1px solid var(--line);
-  background: var(--bg);
+  border-right: 1px solid var(--glass-border);
+  background: rgba(3, 3, 5, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 .brand {
@@ -82,47 +84,84 @@
 }
 
 .sidebarNav {
-  display: grid;
-  gap: 0.7rem;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
 }
 
 .navLink {
-  display: grid;
-  gap: 0.18rem;
-  padding: var(--space-4);
-  border: 1px solid var(--line-border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid transparent;
   border-left: 3px solid transparent;
-  border-radius: var(--radius-input);
-  background: var(--bg);
-  transition:
-    border-color var(--transition-base),
-    background var(--transition-base);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  transition: all var(--transition-base);
+  position: relative;
+  overflow: hidden;
+}
+
+.navLink::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--brand-glow), transparent);
+  opacity: 0;
+  transition: opacity var(--transition-base), width var(--transition-base);
+  z-index: 0;
+}
+
+.navLink > * {
+  position: relative;
+  z-index: 1;
 }
 
 .navLink:hover {
-  border-color: var(--line-strong);
-  background: var(--bg-elevated);
+  background: rgba(255, 255, 255, 0.03);
+  border-color: var(--line-subtle);
+}
+
+.navLink:hover::before {
+  opacity: 0.5;
+  width: 100%;
 }
 
 .navLinkActive {
-  border-left-color: var(--brand-blue);
-  border-color: var(--line-strong);
-  background: var(--bg-elevated);
+  background: linear-gradient(90deg, rgba(16, 185, 129, 0.08), transparent);
+  border-color: var(--line-border);
+  border-left-color: var(--brand-accent);
+  box-shadow: inset 20px 0 20px -20px var(--brand-glow);
+}
+
+.navLinkActive::before {
+  display: none;
 }
 
 .navLinkActive:hover {
-  transform: none;
+  background: linear-gradient(90deg, rgba(16, 185, 129, 0.12), transparent);
 }
 
 .navTitle {
-  font-size: var(--text-base);
-  font-weight: 700;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--ink);
+  transition: color var(--transition-base);
+}
+
+.navLinkActive .navTitle {
+  color: var(--brand-accent);
+  text-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
 }
 
 .navMeta {
   color: var(--ink-muted);
-  font-size: var(--text-sm);
-  line-height: 1.5;
+  font-size: var(--text-xs);
+  line-height: 1.4;
 }
 
 .contentFrame {

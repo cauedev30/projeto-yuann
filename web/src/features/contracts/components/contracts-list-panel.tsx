@@ -32,15 +32,19 @@ function getRiskVariant(score: number | null): "critical" | "attention" | "confo
 function buildStatusLabel(
   item: ContractListItemSummary,
 ): string {
+  const statusLabels: Record<string, string> = {
+    completed: "concluído",
+    pending: "pendente",
+    failed: "falha",
+  };
+
+  const statusStr = statusLabels[item.latestAnalysisStatus ?? ""] ?? item.latestAnalysisStatus ?? item.status;
+
   if (item.latestAnalysisStatus && item.latestRiskScore !== null) {
-    return `${item.latestAnalysisStatus} · pontuacao ${item.latestRiskScore}`;
+    return `${statusStr} · pontuação ${item.latestRiskScore}`;
   }
 
-  if (item.latestAnalysisStatus) {
-    return item.latestAnalysisStatus;
-  }
-
-  return item.status;
+  return statusStr;
 }
 
 export function ContractsListPanel({
@@ -55,17 +59,9 @@ export function ContractsListPanel({
     <section className={`${styles.panel} ${styles.listPanel}`}>
       <div className={styles.sectionHeader}>
         <div>
-          <p className={styles.panelEyebrow}>Portfolio</p>
+          <p className={styles.panelEyebrow}>Portfólio</p>
           <h2 className={styles.sectionTitle}>Contratos monitorados</h2>
         </div>
-        <button
-          className={styles.refreshButton}
-          disabled={isLoading || isRefreshing}
-          onClick={() => void onRefresh()}
-          type="button"
-        >
-          {isRefreshing ? "Atualizando..." : "Atualizar lista"}
-        </button>
       </div>
 
       {isLoading ? (
@@ -83,7 +79,7 @@ export function ContractsListPanel({
       ) : items.length === 0 ? (
         <EmptyState
           title="Nenhum contrato persistido"
-          body="Envie um PDF na area de upload para iniciar o portfolio de contratos monitorados."
+          body="Envie um PDF na area de upload para iniciar o portfólio de contratos monitorados."
         />
       ) : (
         <ul className={styles.contractsList}>

@@ -13,7 +13,7 @@ export function MarketingTopbar() {
       <nav aria-label="Navegacao institucional" className="marketingNav">
         <Link href="#fluxo">Fluxo</Link>
         <Link className="primaryCta navCta" href="/dashboard">
-          Workspace
+          Espaço de trabalho
         </Link>
       </nav>
     </header>

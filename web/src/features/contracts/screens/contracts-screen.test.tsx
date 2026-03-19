@@ -158,14 +158,14 @@ describe("ContractsScreen", () => {
 
     const summaryHeading = screen.getAllByRole("heading", { name: "Resumo da triagem" }).at(-1) as HTMLElement;
     const findingsHeading = screen.getAllByRole("heading", { name: "Achados principais" }).at(-1) as HTMLElement;
-    const extractedTextHeading = screen.getAllByRole("heading", { name: "Texto extraido" }).at(-1) as HTMLElement;
+    const aiSummaryHeading = screen.getAllByRole("heading", { name: "Resumo do contrato" }).at(-1) as HTMLElement;
 
     expect(
       summaryHeading.compareDocumentPosition(findingsHeading) &
         Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
     expect(
-      findingsHeading.compareDocumentPosition(extractedTextHeading) &
+      findingsHeading.compareDocumentPosition(aiSummaryHeading) &
         Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
   });
@@ -220,27 +220,6 @@ describe("ContractsScreen", () => {
     expect(await scope.findByRole("alert")).toHaveTextContent("Falha ao carregar contratos");
   });
 
-  it("refreshes the persisted contracts list on demand", async () => {
-    const user = userEvent.setup();
-    const loadContracts = vi
-      .fn()
-      .mockResolvedValueOnce({ items: [] })
-      .mockResolvedValue(buildContractsListResult());
-
-    render(
-      <ContractsScreen
-        submitContract={vi.fn()}
-        loadContracts={loadContracts}
-      />,
-    );
-    const scope = getScreenScope();
-
-    expect(await scope.findByText("Nenhum contrato persistido")).toBeInTheDocument();
-    await user.click(scope.getByRole("button", { name: "Atualizar lista" }));
-
-    expect(loadContracts).toHaveBeenCalledTimes(2);
-    expect(await scope.findByText("Loja Centro")).toBeInTheDocument();
-  });
 
   it("refreshes the persisted contracts list after a successful upload", async () => {
     const user = userEvent.setup();

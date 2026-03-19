@@ -213,16 +213,7 @@ export function ContractDetailScreen({
         description={buildContractDescription(detail)}
       />
 
-      <div className={styles.refreshRow}>
-        <button
-          className={styles.refreshButton}
-          disabled={isRefreshing}
-          onClick={() => void handleRefresh()}
-          type="button"
-        >
-          {isRefreshing ? "Atualizando..." : refreshSuccess ? "Atualizado!" : "Atualizar detalhe"}
-        </button>
-      </div>
+
 
       <div className={styles.stack}>
         <div className={styles.statGrid}>

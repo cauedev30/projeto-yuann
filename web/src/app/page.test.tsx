@@ -18,21 +18,21 @@ describe("HomePage", () => {
     expect(screen.getByText("Gestao contratual simplificada.")).toBeInTheDocument();
     expect(
       screen.getByText(
-        "Intake, triagem e acompanhamento de contratos em um unico workspace."
+        "Entrada, triagem e acompanhamento de contratos em um unico espaço de trabalho."
       )
     ).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Abrir workspace" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Abrir espaço de trabalho" })).toHaveAttribute(
       "href",
       "/dashboard",
     );
     expect(
-      screen.getByRole("heading", { name: "Do intake ao acompanhamento" })
+      screen.getByRole("heading", { name: "Da entrada ao acompanhamento" })
     ).toBeInTheDocument();
-    expect(screen.getByText("Intake estruturado")).toBeInTheDocument();
+    expect(screen.getByText("Entrada estruturada")).toBeInTheDocument();
     expect(screen.getByText("Triagem por risco")).toBeInTheDocument();
     expect(screen.getByText("Acompanhamento executivo")).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: "Organize seu portfolio contratual." })
+      screen.getByRole("heading", { name: "Organize seu portfólio contratual." })
     ).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Comece agora" })).toHaveAttribute(
       "href",

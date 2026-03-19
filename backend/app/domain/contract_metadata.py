@@ -91,11 +91,11 @@ def _extract_parties(contract_text: str) -> tuple[list[str], str | None]:
     seen_names: set[str] = set()
     label: str | None = None
     party_patterns: list[tuple[str, str]] = [
-        (r"LOCADOR(?:A)?\s*:\s*(.+?)(?:\n|,\s*(?:inscrit|CNPJ|CPF|com sede|residente|portador|pessoa))", "locador"),
-        (r"LOCAT[AÁ]RIO(?:A)?\s*:\s*(.+?)(?:\n|,\s*(?:inscrit|CNPJ|CPF|com sede|residente|portador|pessoa))", "locatario"),
-        (r"locat[aá]ria\s*/\s*franqueada\s*:\s*(.+?)(?=\s+(?:car[eê]ncia|reajuste|data|assinatura|in[ií]cio|prazo)\b|[.;]|$)", "locataria / franqueada"),
-        (r"locat[aá]ria\s*:\s*(.+?)(?=\s+(?:car[eê]ncia|reajuste|data|assinatura|in[ií]cio|prazo)\b|[.;]|$)", "locataria"),
-        (r"franqueada\s*:\s*(.+?)(?=\s+(?:car[eê]ncia|reajuste|data|assinatura|in[ií]cio|prazo)\b|[.;]|$)", "franqueada"),
+        (r"LOCADOR(?:A)?\s*:\s*(.{2,130}?)(?:\n|,\s*(?:inscrit|CNPJ|CPF|com sede|residente|portador|pessoa|empresa|denominad))", "locador"),
+        (r"LOCAT[AÁ]RIO(?:A)?\s*:\s*(.{2,130}?)(?:\n|,\s*(?:inscrit|CNPJ|CPF|com sede|residente|portador|pessoa|empresa|denominad))", "locatario"),
+        (r"locat[aá]ria\s*/\s*franqueada\s*:\s*(.{2,130}?)(?=\s+(?:car[eê]ncia|reajuste|data|assinatura|in[ií]cio|prazo)\b|[.;\n]|$)", "locataria / franqueada"),
+        (r"locat[aá]ria\s*:\s*(.{2,130}?)(?=\s+(?:car[eê]ncia|reajuste|data|assinatura|in[ií]cio|prazo)\b|[.;\n]|$)", "locataria"),
+        (r"franqueada\s*:\s*(.{2,130}?)(?=\s+(?:car[eê]ncia|reajuste|data|assinatura|in[ií]cio|prazo)\b|[.;\n]|$)", "franqueada"),
     ]
     for pattern, role in party_patterns:
         m = re.search(pattern, contract_text, re.IGNORECASE)
@@ -103,7 +103,7 @@ def _extract_parties(contract_text: str) -> tuple[list[str], str | None]:
             name = m.group(1).strip().rstrip(",;.")
             normalized = name.upper()
             if name and len(name) > 2 and normalized not in seen_names:
-                parties.append(name)
+                parties.append(name[:145])
                 seen_names.add(normalized)
                 if label is None:
                     label = role

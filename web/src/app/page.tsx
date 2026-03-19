@@ -11,11 +11,11 @@ export default function HomePage() {
       <section className="marketingHero">
         <h1>Gestao contratual simplificada.</h1>
         <p className="marketingLead">
-          Intake, triagem e acompanhamento de contratos em um unico workspace.
+          Entrada, triagem e acompanhamento de contratos em um unico espaço de trabalho.
         </p>
         <div className="marketingHeroActions">
           <Link className="primaryCta" href="/dashboard">
-            Abrir workspace
+            Abrir espaço de trabalho
           </Link>
           <Link className="secondaryCta" href="#fluxo">
             Conhecer o fluxo
@@ -24,10 +24,10 @@ export default function HomePage() {
       </section>
 
       <section className="marketingSection" id="fluxo">
-        <h2>Do intake ao acompanhamento</h2>
+        <h2>Da entrada ao acompanhamento</h2>
         <div className="marketingFeatures">
           <div className="marketingFeature">
-            <h3>Intake estruturado</h3>
+            <h3>Entrada estruturada</h3>
             <p>Entrada clara para documentos com contexto minimo de revisao.</p>
           </div>
           <div className="marketingFeature">
@@ -42,7 +42,7 @@ export default function HomePage() {
       </section>
 
       <section className="marketingClosing">
-        <h2>Organize seu portfolio contratual.</h2>
+        <h2>Organize seu portfólio contratual.</h2>
         <Link className="primaryCta" href="/contracts">
           Comece agora
         </Link>

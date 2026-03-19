@@ -13,7 +13,7 @@ import {
 import { listContracts, uploadContract } from "../../../lib/api/contracts";
 import { ContractsListPanel } from "../components/contracts-list-panel";
 import { ContractsHero } from "../components/contracts-hero";
-import { ExtractedTextPanel } from "../components/extracted-text-panel";
+import { ContractSummaryPanel } from "../components/contract-summary-panel";
 import { FindingsSection } from "../components/findings-section";
 import { SessionStatusCard } from "../components/session-status-card";
 import { UploadSummaryCards } from "../components/upload-summary-cards";
@@ -43,12 +43,12 @@ function buildPreviewFindings(text: string): ContractFinding[] {
     ];
   }
 
-  return [
+      return [
     {
       clauseName: "Analise inicial",
       status: "conforme",
       riskExplanation: "Nenhum desvio critico identificado na triagem inicial.",
-      currentSummary: "Texto extraido com sucesso.",
+      currentSummary: "Resumo gerado com sucesso.",
       policyRule: "Continuar com a analise juridica completa.",
       suggestedAdjustmentDirection: "Validar findings detalhados na proxima etapa.",
     },
@@ -72,7 +72,12 @@ export function ContractsScreen({
   const [showSuccessBanner, setShowSuccessBanner] = useState(false);
 
   const findings = result ? buildPreviewFindings(result.text) : [];
-  const riskScore = findings.some((item) => item.status === "critical") ? 80 : 10;
+  
+  const uploadedContract = result ? contracts.find(c => c.id === result.contractId) : null;
+  const riskScore = uploadedContract && uploadedContract.latestRiskScore !== null
+    ? uploadedContract.latestRiskScore
+    : (findings.some((item) => item.status === "critical") ? 80 : 10);
+
   const statusState = error
     ? "error"
     : isSubmitting
@@ -184,7 +189,7 @@ export function ContractsScreen({
 
       {showSuccessBanner && (
         <div className={styles.successBanner} role="status">
-          Triagem concluida com sucesso — contrato adicionado ao portfolio.
+          Triagem concluida com sucesso — contrato adicionado ao portfólio.
         </div>
       )}
 
@@ -232,7 +237,7 @@ export function ContractsScreen({
             usedOcr={result.usedOcr}
           />
           <FindingsSection items={findings} />
-          <ExtractedTextPanel text={result.text} />
+          <ContractSummaryPanel contractId={result.contractId} />
         </>
       ) : (
         <section className={`${styles.panel} ${styles.emptyPanel}`}>
@@ -245,8 +250,7 @@ export function ContractsScreen({
           </div>
 
           <p className={styles.emptyCopy}>
-            Envie um PDF para liberar o resumo da triagem, os findings e o texto
-            extraido.
+            Envie um PDF para liberar o resumo da triagem, os findings e o resumo em inteligência artificial.
           </p>
         </section>
       )}
