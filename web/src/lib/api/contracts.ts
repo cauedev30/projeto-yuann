@@ -200,3 +200,61 @@ export async function getContractSummary(
 
   return (await response.json()) as ContractSummaryResponse;
 }
+
+export type CorrectionItem = {
+  clause_name: string;
+  original_text: string;
+  corrected_text: string;
+  reason: string;
+};
+
+export type CorrectedContractResponse = {
+  corrected_text: string;
+  corrections: CorrectionItem[];
+};
+
+export async function analyzeContract(
+  contractId: string,
+  fetchImpl: typeof fetch = fetch,
+): Promise<ContractDetail> {
+  const { NEXT_PUBLIC_API_URL } = getClientEnv();
+  const response = await fetchImpl(
+    `${NEXT_PUBLIC_API_URL}/api/contracts/${contractId}/analyze`,
+    {
+      method: "POST",
+      headers: getAuthHeaders(),
+    },
+  );
+
+  if (!response.ok) {
+    throw await buildApiError(response, "Nao foi possivel analisar o contrato.");
+  }
+
+  const payload = (await response.json()) as ContractDetailResponsePayload;
+  return mapContractDetailResponse(payload);
+}
+
+export async function generateCorrectedContract(
+  contractId: string,
+  fetchImpl: typeof fetch = fetch,
+): Promise<CorrectedContractResponse> {
+  const { NEXT_PUBLIC_API_URL } = getClientEnv();
+  const response = await fetchImpl(
+    `${NEXT_PUBLIC_API_URL}/api/contracts/${contractId}/generate-corrected`,
+    {
+      method: "POST",
+      headers: getAuthHeaders(),
+    },
+  );
+
+  if (!response.ok) {
+    throw await buildApiError(response, "Nao foi possivel gerar o contrato corrigido.");
+  }
+
+  return (await response.json()) as CorrectedContractResponse;
+}
+
+export function getDownloadCorrectedUrl(contractId: string): string {
+  const { NEXT_PUBLIC_API_URL } = getClientEnv();
+  return `${NEXT_PUBLIC_API_URL}/api/contracts/${contractId}/download-corrected`;
+}
