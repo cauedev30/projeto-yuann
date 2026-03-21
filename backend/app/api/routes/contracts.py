@@ -16,6 +16,7 @@ from app.db.models.analysis import ContractAnalysis
 from app.db.models.contract import Contract
 from app.domain.playbook import PLAYBOOK_CLAUSES
 from app.infrastructure.contract_chunker import chunk_contract
+from app.infrastructure.docx_generator import generate_corrected_contract_docx
 from app.schemas.contract import (
     ContractDetailResponse,
     ContractListResponse,
@@ -340,4 +341,67 @@ def generate_corrected_contract(
             }
             for c in result.corrections
         ],
+    )
+
+
+@router.post("/{contract_id}/download-corrected")
+def download_corrected_contract_docx(
+    contract_id: str,
+    request: Request,
+    session: Session = Depends(get_session),
+):
+    """Generate and download corrected contract as DOCX file."""
+    contract = session.scalar(_contract_query().where(Contract.id == contract_id))
+    if contract is None:
+        raise HTTPException(status_code=404, detail="Contract not found")
+
+    latest_version = (
+        max(contract.versions, key=lambda v: (v.created_at, v.id))
+        if contract.versions
+        else None
+    )
+    if latest_version is None or not latest_version.text_content:
+        raise HTTPException(status_code=422, detail="No text content available")
+
+    latest_analysis = (
+        max(contract.analyses, key=lambda a: (a.created_at, a.id))
+        if contract.analyses
+        else None
+    )
+    if latest_analysis is None:
+        raise HTTPException(status_code=422, detail="No analysis available. Run analysis first.")
+
+    llm_client = getattr(request.app.state, "llm_client", None)
+    if llm_client is None:
+        raise HTTPException(status_code=503, detail="LLM service not configured")
+
+    findings_list = [
+        {
+            "clause_code": f.clause_name,
+            "severity": f.severity,
+            "explanation": f.risk_explanation,
+            "suggested_correction": f.suggested_adjustment_direction,
+        }
+        for f in latest_analysis.findings
+    ]
+
+    result = llm_client.generate_corrected_contract(
+        original=latest_version.text_content,
+        findings=findings_list,
+        playbook=list(PLAYBOOK_CLAUSES),
+    )
+
+    docx_buffer = generate_corrected_contract_docx(
+        result=result,
+        contract_title=contract.title or "Contrato Corrigido",
+    )
+
+    filename = f"contrato-corrigido-{contract_id[:8]}.docx"
+    
+    return StreamingResponse(
+        docx_buffer,
+        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        headers={
+            "Content-Disposition": f'attachment; filename="{filename}"',
+        },
     )
