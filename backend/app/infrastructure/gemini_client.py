@@ -28,8 +28,8 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 CHUNK_SEPARATOR = "\n\n---\n\n"
-MAX_RETRIES = 1
-RETRY_BACKOFF_SECONDS = 1.0
+MAX_RETRIES = 3
+RETRY_BACKOFF_SECONDS = 2.0
 
 
 class GeminiAnalysisClient:
@@ -39,7 +39,7 @@ class GeminiAnalysisClient:
     Retries once on failure; never returns empty dicts — always typed results.
     """
 
-    def __init__(self, api_key: str, model: str = "gemini-2.5-flash") -> None:
+    def __init__(self, api_key: str, model: str = "gemini-1.5-flash") -> None:
         self._api_key = api_key
         self._model = model
         self._client = genai.Client(api_key=api_key)
@@ -158,7 +158,14 @@ class GeminiAnalysisClient:
                     exc,
                 )
                 if attempt < MAX_RETRIES:
-                    time.sleep(RETRY_BACKOFF_SECONDS)
+                    wait_time = RETRY_BACKOFF_SECONDS * (2**attempt)
+                    logger.warning(
+                        "Gemini call failed (attempt %d/%d). Retrying in %.1fs...",
+                        attempt + 1,
+                        MAX_RETRIES + 1,
+                        wait_time,
+                    )
+                    time.sleep(wait_time)
 
         # All retries exhausted — return fallback with error detail
         error_msg = str(last_error)

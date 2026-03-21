@@ -17,6 +17,7 @@ from app.infrastructure.contract_chunker import chunk_contract
 
 if TYPE_CHECKING:
     from app.infrastructure.gemini_client import GeminiAnalysisClient
+    from app.infrastructure.openai_client import OpenAIAnalysisClient
 
 
 def run_policy_analysis(
@@ -24,7 +25,7 @@ def run_policy_analysis(
     contract: Contract,
     contract_text: str,
     *,
-    llm_client: GeminiAnalysisClient | None = None,
+    llm_client: GeminiAnalysisClient | OpenAIAnalysisClient | None = None,
 ) -> None:
     """Run policy analysis using Gemini + playbook.
     
@@ -47,6 +48,12 @@ def run_policy_analysis(
             playbook=list(PLAYBOOK_CLAUSES),
         )
         
+        # Filter only critical/attention findings (ignore conforme)
+        relevant_items = [
+            item for item in analysis_result.items
+            if item.severity in ("critical", "attention")
+        ]
+        
         # Create analysis record with findings
         analysis = ContractAnalysis(
             contract_id=contract.id,
@@ -54,24 +61,24 @@ def run_policy_analysis(
             status=AnalysisStatus.completed,
             contract_risk_score=analysis_result.contract_risk_score,
             raw_payload={
-                "items": [item.model_dump() for item in analysis_result.items],
+                "items": [item.model_dump() for item in relevant_items],
                 "summary": analysis_result.summary,
             },
             findings=[
                 ContractAnalysisFinding(
-                    clause_name=item.clause_code,
-                    status="evaluated",
+                    clause_name=item.clause_title,
+                    status="avaliado",
                     severity=item.severity,
                     current_summary=item.explanation,
                     policy_rule=item.clause_code,
                     risk_explanation=item.explanation,
-                    suggested_adjustment_direction=item.suggested_correction,
+                    suggested_adjustment_direction=item.suggested_correction if item.suggested_correction else "",
                     metadata_json={
                         "risk_score": item.risk_score,
-                        "playbook_title": item.clause_title,
+                        "clause_code": item.clause_code,
                     },
                 )
-                for item in analysis_result.items
+                for item in relevant_items
             ],
         )
     else:
@@ -113,7 +120,7 @@ def run_contract_pipeline(
     contract: Contract,
     contract_version: ContractVersion,
     *,
-    llm_client: GeminiAnalysisClient | None = None,
+    llm_client: GeminiAnalysisClient | OpenAIAnalysisClient | None = None,
 ) -> None:
     """Full pipeline: extract metadata, generate events, and run policy analysis.
 
@@ -134,7 +141,7 @@ def run_contract_pipeline(
         contract.parties = {"entities": metadata_result.parties}
     if metadata_result.financial_terms:
         contract.financial_terms = metadata_result.financial_terms
-    contract.status = "analyzed"
+    contract.status = "analisado"
 
     existing_meta = dict(contract_version.extraction_metadata or {})
     existing_meta["field_confidence"] = metadata_result.field_confidence

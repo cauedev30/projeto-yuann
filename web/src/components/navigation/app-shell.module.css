@@ -44,19 +44,11 @@
   border-bottom: 1px solid var(--line-border);
 }
 
-.brandMark {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+.brandLogo {
   width: 2.85rem;
   height: 2.85rem;
-  border: 1px solid var(--line-strong);
+  object-fit: contain;
   border-radius: var(--radius-input);
-  color: var(--ink);
-  font-family: var(--font-body);
-  font-size: var(--text-base);
-  letter-spacing: 0.12em;
-  background: var(--bg-elevated);
 }
 
 .brandCopy {

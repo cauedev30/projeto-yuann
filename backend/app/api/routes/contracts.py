@@ -234,7 +234,7 @@ async def _analysis_stream(
                     ],
                 )
                 session.add(analysis)
-                contract.status = "analyzed"
+                contract.status = "analisado"
                 session.commit()
         
         yield f"data: {json.dumps({'stage': 'completed', 'message': 'Análise concluída!', 'risk_score': result.contract_risk_score, 'findings_count': len(result.items)})}\n\n"
@@ -287,7 +287,10 @@ def generate_corrected_contract(
     request: Request,
     session: Session = Depends(get_session),
 ) -> CorrectedContractResponse:
-    """Generate a corrected version of the contract based on analysis findings."""
+    """Generate a corrected version of the contract based on analysis findings.
+    
+    Saves the result to the database for fast download later.
+    """
     contract = session.scalar(_contract_query().where(Contract.id == contract_id))
     if contract is None:
         raise HTTPException(status_code=404, detail="Contract not found")
@@ -300,7 +303,7 @@ def generate_corrected_contract(
     if latest_version is None or not latest_version.text_content:
         raise HTTPException(status_code=422, detail="No text content available")
 
-    # Get latest analysis findings
+    # Get latest analysis
     latest_analysis = (
         max(contract.analyses, key=lambda a: (a.created_at, a.id))
         if contract.analyses
@@ -309,11 +312,19 @@ def generate_corrected_contract(
     if latest_analysis is None:
         raise HTTPException(status_code=422, detail="No analysis available. Run analysis first.")
 
+    # Check if we already have a corrected version for this analysis
+    if latest_analysis.corrected_text:
+        corrections = latest_analysis.corrections_summary or []
+        return CorrectedContractResponse(
+            corrected_text=latest_analysis.corrected_text,
+            corrections=corrections,
+        )
+
     llm_client = getattr(request.app.state, "llm_client", None)
     if llm_client is None:
         raise HTTPException(status_code=503, detail="LLM service not configured")
 
-    # Convert findings to dict format expected by generate_corrected_contract
+    # Filter only critical/attention findings
     findings_list = [
         {
             "clause_code": f.clause_name,
@@ -322,46 +333,56 @@ def generate_corrected_contract(
             "suggested_correction": f.suggested_adjustment_direction,
         }
         for f in latest_analysis.findings
+        if f.severity.lower() in ("critical", "attention", "high", "medium")
     ]
+
+    if not findings_list:
+        # No corrections needed - return original
+        return CorrectedContractResponse(
+            corrected_text=latest_version.text_content,
+            corrections=[],
+        )
 
     result = llm_client.generate_corrected_contract(
         original=latest_version.text_content,
         findings=findings_list,
         playbook=list(PLAYBOOK_CLAUSES),
     )
+
+    corrections_list = [
+        {
+            "clause_name": c.clause_name,
+            "original_text": c.original_text,
+            "corrected_text": c.corrected_text,
+            "reason": c.reason,
+        }
+        for c in result.corrections
+    ]
+
+    # Save to database for fast download later
+    latest_analysis.corrected_text = result.corrected_text
+    latest_analysis.corrections_summary = corrections_list
+    session.commit()
 
     return CorrectedContractResponse(
         corrected_text=result.corrected_text,
-        corrections=[
-            {
-                "clause_name": c.clause_name,
-                "original_text": c.original_text,
-                "corrected_text": c.corrected_text,
-                "reason": c.reason,
-            }
-            for c in result.corrections
-        ],
+        corrections=corrections_list,
     )
 
 
-@router.post("/{contract_id}/download-corrected")
+@router.get("/{contract_id}/download-corrected")
 def download_corrected_contract_docx(
     contract_id: str,
-    request: Request,
     session: Session = Depends(get_session),
 ):
-    """Generate and download corrected contract as DOCX file."""
+    """Download corrected contract as DOCX file.
+    
+    Requires generate-corrected to be called first. Downloads are instant
+    since the corrected text is retrieved from the database.
+    """
     contract = session.scalar(_contract_query().where(Contract.id == contract_id))
     if contract is None:
         raise HTTPException(status_code=404, detail="Contract not found")
-
-    latest_version = (
-        max(contract.versions, key=lambda v: (v.created_at, v.id))
-        if contract.versions
-        else None
-    )
-    if latest_version is None or not latest_version.text_content:
-        raise HTTPException(status_code=422, detail="No text content available")
 
     latest_analysis = (
         max(contract.analyses, key=lambda a: (a.created_at, a.id))
@@ -371,24 +392,28 @@ def download_corrected_contract_docx(
     if latest_analysis is None:
         raise HTTPException(status_code=422, detail="No analysis available. Run analysis first.")
 
-    llm_client = getattr(request.app.state, "llm_client", None)
-    if llm_client is None:
-        raise HTTPException(status_code=503, detail="LLM service not configured")
+    # Check if corrected version exists in DB
+    if not latest_analysis.corrected_text:
+        raise HTTPException(
+            status_code=422, 
+            detail="Corrected contract not generated yet. Click 'Gerar Contrato Corrigido' first."
+        )
 
-    findings_list = [
-        {
-            "clause_code": f.clause_name,
-            "severity": f.severity,
-            "explanation": f.risk_explanation,
-            "suggested_correction": f.suggested_adjustment_direction,
-        }
-        for f in latest_analysis.findings
-    ]
-
-    result = llm_client.generate_corrected_contract(
-        original=latest_version.text_content,
-        findings=findings_list,
-        playbook=list(PLAYBOOK_CLAUSES),
+    # Build a simple result object for docx generator
+    from app.infrastructure.gemini_models import CorrectedContractResult, CorrectionItem
+    
+    corrections = latest_analysis.corrections_summary or []
+    result = CorrectedContractResult(
+        corrected_text=latest_analysis.corrected_text,
+        corrections=[
+            CorrectionItem(
+                clause_name=c.get("clause_name", ""),
+                original_text=c.get("original_text", ""),
+                corrected_text=c.get("corrected_text", ""),
+                reason=c.get("reason", ""),
+            )
+            for c in corrections
+        ],
     )
 
     docx_buffer = generate_corrected_contract_docx(

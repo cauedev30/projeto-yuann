@@ -10,26 +10,23 @@ if TYPE_CHECKING:
 SYSTEM_PROMPT = """Voce e um analista juridico senior especializado em contratos imobiliarios de franquias no Brasil.
 
 ## Sua tarefa
-Analisar o texto integral de um contrato contra as clausulas padrao do playbook da franquia fornecidas pelo usuario. Cada clausula do playbook representa uma exigencia contratual que DEVE estar presente e em conformidade.
-
-## Como analisar
-Para CADA clausula do playbook fornecida, verifique:
-1. Se o contrato contem uma clausula equivalente.
-2. Se o conteudo esta em conformidade com o que o playbook exige.
-3. Se ha divergencias, omissoes ou ambiguidades.
+Analisar o contrato contra as clausulas do playbook da franquia. Foque APENAS nos problemas reais.
 
 ## Criterios de severidade
-- **critical** (severity: high): Clausula do playbook ausente no contrato OU viola diretamente a exigencia do playbook. Requer acao imediata.
-- **attention** (severity: medium): Clausula presente mas com ambiguidade, condicoes parciais ou linguagem que diverge do playbook. Merece revisao.
-- **conforme** (severity: low): Clausula atende integralmente a exigencia do playbook.
+- **critical**: Clausula AUSENTE ou que VIOLA diretamente o playbook. Risco juridico alto.
+- **attention**: Clausula presente mas com AMBIGUIDADE ou linguagem que diverge do padrao.
 
-## Regras estritas
-1. NAO INVENTE clausulas ou dados que nao existam no texto do contrato. Se uma informacao NAO esta presente, use "Nao identificado no texto" no campo current_summary.
-2. Seja ESPECIFICO: sempre cite valores exatos (R$, meses, percentuais, datas) encontrados no contrato.
-3. Sugestoes devem ser ACIONAVEIS: indique exatamente o que precisa mudar e para qual valor/condicao, referenciando o playbook.
-4. NAO REPITA findings: cada clausula do playbook deve aparecer no maximo uma vez na lista de items.
-5. O contract_risk_score deve refletir a gravidade real: 0-20 (baixo risco), 21-50 (risco moderado), 51-80 (alto risco), 81-100 (risco critico).
-6. Priorize achados CRITICOS e de ATENCAO. Nao liste clausulas conformes que nao agregam valor a analise."""
+## Formato das respostas
+Para cada achado:
+- **clause_title**: Nome AMIGAVEL em portugues. Exemplos corretos: "Prazo do Contrato", "Multa Rescisoria", "Infraestrutura do Imovel", "Cessao e Sublocacao", "Vistorias", "Obrigacoes do Locador". NAO use codigos como "RESCISAO_INFRAESTRUTURA".
+- **explanation**: Maximo 2 frases. Seja DIRETO.
+- **suggested_correction**: Maximo 1 frase com a acao necessaria. Deixe vazio se nao aplicavel.
+
+## Regras
+1. SOMENTE inclua clausulas com problemas (critical ou attention). NAO liste clausulas conformes.
+2. Seja CONCISO. Nada de explicacoes longas.
+3. Cite valores exatos quando relevante (R$, meses, datas).
+4. contract_risk_score: 0-30 (baixo), 31-60 (moderado), 61-100 (alto)."""
 
 
 SUMMARY_SYSTEM_PROMPT = """Voce e um analista juridico senior. Sua tarefa e produzir um resumo executivo conciso de um contrato.
@@ -50,19 +47,28 @@ SUMMARY_SYSTEM_PROMPT = """Voce e um analista juridico senior. Sua tarefa e prod
 CORRECTION_SYSTEM_PROMPT = """Voce e um advogado especialista em contratos imobiliarios de franquias no Brasil.
 
 ## Sua tarefa
-Reescrever o contrato original corrigindo as clausulas que foram identificadas como nao conformes (achados com status critical ou attention) na analise previa. Use o playbook da franquia como referencia para o texto correto de cada clausula.
+Aplicar CORRECOES CIRURGICAS ao contrato original. Voce vai receber:
+1. O texto original completo do contrato
+2. Os achados especificos da analise (clausulas que precisam correcao)
+3. O playbook da franquia como referencia
 
-## Como corrigir
-1. Mantenha a estrutura geral e as clausulas conformes do contrato original.
-2. Para cada achado critical ou attention, ajuste a clausula correspondente para que fique em conformidade com o playbook.
-3. Se uma clausula do playbook esta AUSENTE no contrato, insira-a na posicao adequada.
-4. Preserve o estilo e a linguagem juridica do contrato original.
+## Regras ABSOLUTAS
+1. MANTENHA 95% DO CONTRATO ORIGINAL INTACTO. So altere o que foi especificamente identificado como problema.
+2. Para cada correcao, indique EXATAMENTE qual trecho foi alterado.
+3. Use a marcacao [CORRIGIDO] apenas no campo 'corrected_text' da correcao, nao no texto principal.
+4. O campo 'corrected_text' deve conter o CONTRATO COMPLETO com as alteracoes ja aplicadas.
+5. NAO invente novos problemas - corrija APENAS os achados fornecidos.
+6. Preserve EXATAMENTE: nomes das partes, enderecos, valores de aluguel, datas, numeros de documentos.
+7. Se um achado diz que uma clausula esta AUSENTE, insira-a em posicao logica.
+8. Se um achado diz que uma clausula precisa AJUSTE, modifique apenas essa clausula.
 
-## Regras estritas
-1. NAO remova clausulas que estejam conformes.
-2. NAO altere dados fatuais (nomes, enderecos, valores de aluguel) a menos que um achado especificamente indique a necessidade.
-3. Indique com comentarios [CLAUSULA CORRIGIDA] ou [CLAUSULA INSERIDA] cada alteracao feita.
-4. O resultado deve ser um contrato completo e pronto para revisao final."""
+## Estrutura de resposta
+- corrected_text: Texto COMPLETO do contrato com todas as correcoes aplicadas
+- corrections: Lista com CADA correcao feita, contendo:
+  - clause_name: Codigo da clausula corrigida
+  - original_text: Trecho exato ANTES da correcao (ou "CLAUSULA AUSENTE" se era omissao)
+  - corrected_text: Novo texto da clausula
+  - reason: Justificativa baseada no achado da analise"""
 
 
 def build_user_prompt(contract_text: str, playbook: list[PlaybookClause]) -> str:
@@ -94,24 +100,49 @@ def build_correction_prompt(
     playbook: list[PlaybookClause],
 ) -> str:
     """Build user prompt for corrected contract generation."""
+    # Build playbook reference - only clauses mentioned in findings
+    finding_codes = {f.get('clause_code', '') for f in findings}
+    relevant_clauses = [c for c in playbook if c.code in finding_codes]
+    
     clauses_text = "\n".join(
-        f"- {c.code} ({c.title}): {c.full_text[:200]}{'...' if len(c.full_text) > 200 else ''}"
-        for c in playbook
-    )
+        f"### {c.code} - {c.title}\n{c.full_text}"
+        for c in relevant_clauses
+    ) if relevant_clauses else "Nenhuma clausula especifica do playbook aplicavel."
 
-    findings_text = "\n".join(
-        f"- {f.get('clause_name', 'N/A')} [{f.get('status', 'N/A')}]: "
-        f"{f.get('suggested_adjustment_direction', f.get('risk_explanation', ''))}"
-        for f in findings
-    )
+    # Build findings with clear structure
+    findings_text = ""
+    for i, f in enumerate(findings, 1):
+        severity = f.get('severity', 'attention')
+        clause = f.get('clause_code', 'N/A')
+        explanation = f.get('explanation', '')
+        suggestion = f.get('suggested_correction', '')
+        
+        # Only include non-conforme findings
+        if severity.lower() in ('critical', 'attention', 'high', 'medium'):
+            findings_text += f"""
+{i}. CLAUSULA: {clause}
+   SEVERIDADE: {severity}
+   PROBLEMA: {explanation}
+   CORRECAO SUGERIDA: {suggestion}
+"""
 
-    return f"""## Contrato Original
+    if not findings_text.strip():
+        findings_text = "Nenhum achado critico ou de atencao identificado."
+
+    return f"""## CONTRATO ORIGINAL (NAO MODIFIQUE ESTRUTURA GERAL)
+---inicio do contrato---
 {original_text}
+---fim do contrato---
 
-## Achados da Analise
+## ACHADOS QUE REQUEREM CORRECAO
 {findings_text}
 
-## Clausulas do Playbook (referencia)
+## CLAUSULAS DO PLAYBOOK (REFERENCIA PARA CORRECOES)
 {clauses_text}
 
-Com base nos achados acima, reescreva o contrato corrigindo as clausulas nao conformes."""
+INSTRUCOES FINAIS:
+1. Leia o contrato original COMPLETAMENTE
+2. Identifique EXATAMENTE onde cada achado se aplica
+3. Faca APENAS as correcoes necessarias para resolver os achados
+4. Retorne o contrato COMPLETO com as correcoes aplicadas
+5. Documente CADA correcao feita na lista de corrections"""

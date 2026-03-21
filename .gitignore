@@ -26,3 +26,9 @@ legaltech.db
 uploads/
 tmp/
 .worktrees/
+
+# Database files
+*.db
+backend/*.db
+backend/app.db
+backend/legalboard.db

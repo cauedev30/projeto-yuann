@@ -40,7 +40,13 @@ export default function LoginPage() {
     <div className={styles.container}>
       <div className={styles.card}>
         <div className={styles.brand}>
-          <span className={styles.brandMark}>LB</span>
+          <img
+            alt=""
+            className={styles.brandLogo}
+            height={60}
+            src="/logo.png"
+            width={60}
+          />
           <span className={styles.brandText}>LegalBoard</span>
         </div>
 

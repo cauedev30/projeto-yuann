@@ -154,20 +154,20 @@ class TestBuildUserPrompt:
 
 class TestBuildCorrectionPrompt:
     def test_contains_original_text(self, sample_playbook):
-        findings = [{"clause_name": "PRAZO", "status": "critical"}]
+        findings = [{"clause_code": "PRAZO", "severity": "critical"}]
         result = build_correction_prompt(SAMPLE_CONTRACT, findings, sample_playbook)
         assert SAMPLE_CONTRACT in result
 
     def test_contains_findings(self, sample_playbook):
-        findings = [{"clause_name": "PRAZO", "status": "critical", "suggested_adjustment_direction": "Ajustar prazo"}]
+        findings = [{"clause_code": "PRAZO", "severity": "critical", "explanation": "Prazo insuficiente", "suggested_correction": "Ajustar prazo"}]
         result = build_correction_prompt(SAMPLE_CONTRACT, findings, sample_playbook)
         assert "PRAZO" in result
         assert "critical" in result
 
     def test_contains_playbook_clauses(self, sample_playbook):
-        findings = [{"clause_name": "PRAZO", "status": "critical"}]
+        # Only clauses mentioned in findings are included now
+        findings = [{"clause_code": "PRAZO", "severity": "critical"}]
         result = build_correction_prompt(SAMPLE_CONTRACT, findings, sample_playbook)
-        assert "INFRAESTRUTURA" in result
         assert "PRAZO" in result
 
 

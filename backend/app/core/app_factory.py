@@ -3,7 +3,11 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
+from dotenv import load_dotenv
 from fastapi import FastAPI
+
+# Load .env file from backend directory
+load_dotenv(Path(__file__).resolve().parents[2] / ".env")
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session, sessionmaker
@@ -17,6 +21,7 @@ from app.api.routes.uploads import router as uploads_router
 from app.db.base import Base
 from app.db.models import Policy, PolicyRule
 from app.infrastructure.gemini_client import GeminiAnalysisClient
+from app.infrastructure.openai_client import OpenAIAnalysisClient
 from app.infrastructure.notifications import NoopEmailSender, SmtpEmailSender
 from app.infrastructure.ocr import NoopOcrClient
 from app.infrastructure.storage import LocalStorageService
@@ -83,8 +88,12 @@ def create_app(
     )
     app.state.ocr_client = NoopOcrClient()
 
+    openai_api_key = os.environ.get("OPENAI_API_KEY")
     google_api_key = os.environ.get("GOOGLE_API_KEY")
-    if google_api_key:
+    
+    if openai_api_key:
+        app.state.llm_client = OpenAIAnalysisClient(api_key=openai_api_key)
+    elif google_api_key:
         app.state.llm_client = GeminiAnalysisClient(api_key=google_api_key)
     else:
         app.state.llm_client = None

@@ -15,15 +15,15 @@ from pydantic import BaseModel, Field
 class AnalysisFindingItem(BaseModel):
     """A single finding from the contract analysis."""
 
-    clause_code: str = Field(description="Playbook clause code (e.g., EXCLUSIVIDADE, PRAZO)")
-    clause_title: str = Field(description="Human-readable clause title")
-    severity: Literal["critical", "attention", "conforme"] = Field(
-        description="Risk severity: critical=high risk, attention=medium risk, conforme=compliant"
+    clause_code: str = Field(description="Codigo interno da clausula (ex: EXCLUSIVIDADE, PRAZO)")
+    clause_title: str = Field(description="Nome amigavel da clausula em portugues (ex: 'Prazo do Contrato', 'Multa Rescisoria', 'Infraestrutura do Imovel')")
+    severity: Literal["critical", "attention"] = Field(
+        description="Severidade: critical=risco alto, attention=requer revisao"
     )
-    risk_score: int = Field(ge=0, le=100, description="Risk score 0-100 (100=highest risk)")
-    explanation: str = Field(description="Detailed explanation of the finding in Portuguese")
-    suggested_correction: str = Field(description="Suggested text adjustment or 'N/A' if compliant")
-    page_reference: str | None = Field(default=None, description="Page reference if available")
+    risk_score: int = Field(ge=0, le=100, description="Score de risco 0-100")
+    explanation: str = Field(description="Explicacao CONCISA do problema (max 2 frases)")
+    suggested_correction: str = Field(default="", description="Acao sugerida em 1 frase. Vazio se nao aplicavel.")
+    page_reference: str | None = Field(default=None, description="Referencia de pagina se disponivel")
 
 
 class ContractAnalysisResult(BaseModel):

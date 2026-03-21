@@ -26,19 +26,11 @@
   margin-bottom: var(--space-8);
 }
 
-.brandMark {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+.brandLogo {
   width: 2.5rem;
   height: 2.5rem;
-  border: 1px solid var(--brand-accent);
-  border-radius: 50%;
-  color: var(--brand-accent);
-  font-size: 1rem;
-  letter-spacing: 0.1em;
-  background: rgba(16, 185, 129, 0.1);
-  box-shadow: 0 0 10px var(--brand-glow), inset 0 0 10px var(--brand-glow);
+  object-fit: contain;
+  border-radius: var(--radius-input);
 }
 
 .brandText {

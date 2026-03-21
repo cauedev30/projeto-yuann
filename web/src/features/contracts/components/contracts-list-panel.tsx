@@ -24,9 +24,9 @@ type ContractsListPanelProps = {
 
 function getRiskVariant(score: number | null): "critical" | "attention" | "conforme" | "neutral" {
   if (score === null) return "neutral";
-  if (score >= 60) return "critical";
-  if (score >= 30) return "attention";
-  return "conforme";
+  if (score <= 40) return "critical";    // 0-40: vermelho (alto risco)
+  if (score <= 69) return "attention";   // 41-69: amarelo (atenção)
+  return "conforme";                      // 70-100: verde (baixo risco)
 }
 
 function buildStatusLabel(

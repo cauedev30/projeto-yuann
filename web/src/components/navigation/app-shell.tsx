@@ -50,9 +50,13 @@ export function AppShell({ children }: AppShellProps) {
       </a>
       <aside className={styles.sidebar}>
         <Link aria-label="LegalBoard" className={styles.brand} href="/">
-          <span aria-hidden="true" className={styles.brandMark}>
-            LB
-          </span>
+          <img
+            alt=""
+            className={styles.brandLogo}
+            height={40}
+            src="/logo.png"
+            width={40}
+          />
           <span className={styles.brandCopy}>
             <strong className={styles.brandName}>LegalBoard</strong>
             <span className={styles.brandMeta}>Governanca contratual</span>

@@ -179,27 +179,10 @@ textarea {
   gap: 0.8rem;
 }
 
-.marketingBrandMark {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+.marketingBrandLogo {
   width: 2.2rem;
   height: 2.2rem;
-  border: 1px solid var(--brand-accent);
-  border-radius: 50%;
-  color: var(--brand-accent);
-  font-family: var(--font-body);
-  font-size: 0.92rem;
-  letter-spacing: 0.1em;
-  background: rgba(16, 185, 129, 0.1);
-  box-shadow: 0 0 10px var(--brand-glow), inset 0 0 10px var(--brand-glow);
-  text-shadow: 0 0 5px var(--brand-accent);
-  animation: pulse-glow 3s infinite alternate;
-}
-
-@keyframes pulse-glow {
-  0% { box-shadow: 0 0 8px var(--brand-glow), inset 0 0 8px var(--brand-glow); }
-  100% { box-shadow: 0 0 16px var(--brand-glow), inset 0 0 16px var(--brand-glow); }
+  object-fit: contain;
 }
 
 .marketingBrandText {
@@ -515,7 +498,7 @@ textarea {
     transition: none;
   }
   
-  .marketingBrandMark {
+  .marketingBrandLogo {
     animation: none;
   }
 }

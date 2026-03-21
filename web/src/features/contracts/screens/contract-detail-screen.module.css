@@ -179,6 +179,51 @@
   padding: 0 var(--space-5) var(--space-5);
 }
 
+.actionRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+  margin-top: var(--space-4);
+}
+
+.primaryButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  padding: 0.7rem 1.5rem;
+  border: none;
+  border-radius: var(--radius-input);
+  background: var(--brand-cyan);
+  color: var(--ink-inverse);
+  font: inherit;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background var(--transition-fast), opacity var(--transition-fast);
+}
+
+.primaryButton:hover:not(:disabled) {
+  background: var(--brand-blue);
+}
+
+.primaryButton:focus-visible {
+  outline: 2px solid var(--brand-blue);
+  outline-offset: 2px;
+}
+
+.primaryButton:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
+.errorText {
+  color: var(--brand-red, #dc2626);
+  font-size: var(--text-sm);
+  margin: 0;
+}
+
 @media (max-width: 900px) {
   .statGrid,
   .detailGrid {

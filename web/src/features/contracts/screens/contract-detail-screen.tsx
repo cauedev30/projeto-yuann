@@ -10,7 +10,8 @@ import { PageHeader } from "../../../components/ui/page-header";
 import { StatCard } from "../../../components/ui/stat-card";
 import { SurfaceCard } from "../../../components/ui/surface-card";
 import type { ContractDetail } from "../../../entities/contracts/model";
-import { ContractsApiError, getContractDetail } from "../../../lib/api/contracts";
+import { ContractsApiError, getContractDetail, getDownloadCorrectedUrl } from "../../../lib/api/contracts";
+import { useGenerateCorrectedContract } from "../../../lib/hooks/use-contracts";
 import { EventTimeline } from "../components/event-timeline";
 import { ContractSummaryPanel } from "../components/contract-summary-panel";
 import { ExtractedTextPanel } from "../components/extracted-text-panel";
@@ -51,6 +52,10 @@ export function ContractDetailScreen({
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [refreshSuccess, setRefreshSuccess] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  const [correctedReady, setCorrectedReady] = useState(false);
+  
+  const generateCorrected = useGenerateCorrectedContract();
+  
   const liveMessage = isRefreshing
     ? "Atualizando detalhe do contrato..."
     : isLoading
@@ -289,6 +294,43 @@ export function ContractDetailScreen({
                   {detail.latestAnalysis.analysisStatus}.
                 </p>
                 <FindingsSection items={detail.latestAnalysis.findings} />
+                
+                {detail.latestAnalysis.analysisStatus === "completed" && (
+                  <div className={styles.actionRow}>
+                    {!correctedReady ? (
+                      <button
+                        className={styles.primaryButton}
+                        onClick={async () => {
+                          try {
+                            await generateCorrected.mutateAsync(contractId);
+                            setCorrectedReady(true);
+                          } catch {
+                            // Error is handled by mutation state
+                          }
+                        }}
+                        disabled={generateCorrected.isPending}
+                        type="button"
+                      >
+                        {generateCorrected.isPending
+                          ? "Gerando contrato corrigido..."
+                          : "Gerar Contrato Corrigido"}
+                      </button>
+                    ) : (
+                      <a
+                        className={styles.primaryButton}
+                        href={getDownloadCorrectedUrl(contractId)}
+                        download
+                      >
+                        Baixar Contrato Corrigido (.docx)
+                      </a>
+                    )}
+                    {generateCorrected.isError && (
+                      <p className={styles.errorText}>
+                        Erro ao gerar: {generateCorrected.error?.message}
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
             ) : (
               <p className={styles.inlineText}>Analise ainda nao disponivel.</p>

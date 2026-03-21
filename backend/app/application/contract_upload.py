@@ -39,7 +39,7 @@ def upload_contract_file(
 ) -> ContractUploadResult:
     contract = session.scalar(select(Contract).where(Contract.external_reference == external_reference))
     if contract is None:
-        contract = Contract(title=title, external_reference=external_reference, status="uploaded")
+        contract = Contract(title=title, external_reference=external_reference, status="enviado")
         session.add(contract)
     else:
         contract.title = title
