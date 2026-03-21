@@ -30,6 +30,10 @@ class ContractAnalysis(TimestampMixin, Base):
     )
     contract_risk_score: Mapped[float | None] = mapped_column(Numeric(5, 2))
     raw_payload: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    
+    # New fields for corrected contract storage
+    corrected_text: Mapped[str | None] = mapped_column(Text, nullable=True)
+    corrections_summary: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
 
     contract: Mapped["Contract"] = relationship(back_populates="analyses")
     findings: Mapped[list["ContractAnalysisFinding"]] = relationship(
