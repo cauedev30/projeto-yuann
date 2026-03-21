@@ -13,6 +13,12 @@ class TextExtractionError(Exception):
 
 
 @dataclass(slots=True)
+class PageText:
+    page: int
+    text: str
+
+
+@dataclass(slots=True)
 class TextExtractionResult:
     text: str
     used_ocr: bool
@@ -23,17 +29,47 @@ def _normalize_text(value: str) -> str:
     return " ".join(value.split())
 
 
+def extract_contract_pages(
+    pdf_path: Path,
+    *,
+    ocr_client: OCRClient | None = None,
+) -> list[PageText]:
+    """Extract text from each page of a PDF, returning per-page results.
+
+    Pages are 1-indexed.  When embedded text is insufficient and an
+    *ocr_client* is provided, OCR output is returned as a single
+    ``PageText`` entry (page=1) because the OCR client operates on the
+    whole document.
+    """
+    try:
+        with fitz.open(pdf_path) as document:
+            pages: list[PageText] = [
+                PageText(page=page_num + 1, text=_normalize_text(page.get_text("text")))
+                for page_num, page in enumerate(document)
+            ]
+    except fitz.FileDataError as exc:
+        raise TextExtractionError("Uploaded file is not a readable PDF") from exc
+
+    embedded_text = " ".join(p.text for p in pages)
+
+    if len(embedded_text) >= 10 or ocr_client is None:
+        return pages
+
+    ocr_text = _normalize_text(ocr_client.extract_text(pdf_path))
+    return [PageText(page=i + 1, text=part) for i, part in enumerate(ocr_text.split("\n"))] or [
+        PageText(page=1, text=ocr_text)
+    ]
+
+
 def extract_contract_text(
     pdf_path: Path,
     *,
     ocr_client: OCRClient | None = None,
     minimum_text_length: int = 10,
 ) -> TextExtractionResult:
-    try:
-        with fitz.open(pdf_path) as document:
-            embedded_text = _normalize_text(" ".join(page.get_text("text") for page in document))
-    except fitz.FileDataError as exc:
-        raise TextExtractionError("Uploaded file is not a readable PDF") from exc
+    # Extract per-page embedded text (no OCR yet)
+    embedded_pages = extract_contract_pages(pdf_path)
+    embedded_text = " ".join(p.text for p in embedded_pages)
 
     if len(embedded_text) >= minimum_text_length:
         return TextExtractionResult(
