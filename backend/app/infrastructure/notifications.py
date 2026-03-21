@@ -28,7 +28,7 @@ class SmtpEmailSender:
     def send_email(self, *, recipient: str, subject: str, body: str) -> bool:
         msg = MIMEText(body, "plain", "utf-8")
         msg["Subject"] = subject
-        msg["From"] = "alertas@yuann.legal"
+        msg["From"] = "alertas@legalboard.com.br"
         msg["To"] = recipient
 
         try:
@@ -59,7 +59,7 @@ def _build_enriched_body(notification: Notification, event: ContractEvent) -> st
         lines.append(f"Sequencia de notificacao: {metadata['notification_sequence']}")
 
     lines.append("")
-    lines.append("Este e um alerta automatico do sistema Yuann LegalTech.")
+    lines.append("Este e um alerta automatico do sistema LegalBoard.")
     return "\n".join(lines)
 
 

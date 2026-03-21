@@ -9,7 +9,7 @@ import json
 
 
 def hash_password(password: str) -> str:
-    salt = hashlib.sha256(password.encode() + b"yuann-salt").hexdigest()[:16]
+    salt = hashlib.sha256(password.encode() + b"legalboard-salt").hexdigest()[:16]
     hashed = hashlib.pbkdf2_hmac("sha256", password.encode(), salt.encode(), 100_000)
     return f"{salt}${hashed.hex()}"
 

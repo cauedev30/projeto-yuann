@@ -14,7 +14,7 @@ from app.db.session import create_session_factory
 from tests.support.dashboard_seed import reset_database, seed_dashboard_data
 
 
-DATABASE_URL = "sqlite:///./legaltech.db"
+DATABASE_URL = "sqlite:///./legalboard.db"
 
 
 def main() -> int:

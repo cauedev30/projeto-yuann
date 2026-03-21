@@ -1,7 +1,7 @@
 [project]
 name = "legalboard-backend"
 version = "0.1.0"
-description = "FastAPI backend for the LegalTech MVP"
+description = "FastAPI backend for the LegalBoard platform"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [

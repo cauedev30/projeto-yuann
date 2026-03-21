@@ -8,7 +8,7 @@ def test_settings_require_database_url() -> None:
     with pytest.raises(ValidationError):
         Settings(
             APP_ENV="development",
-            APP_NAME="legaltech-mvp",
+            APP_NAME="legalboard",
             REDIS_URL="redis://localhost:6379/0",
             S3_ENDPOINT="http://localhost:9000",
             S3_ACCESS_KEY="minio",
@@ -24,8 +24,8 @@ def test_settings_require_database_url() -> None:
 def test_settings_accept_complete_payload() -> None:
     settings = Settings(
         APP_ENV="development",
-        APP_NAME="legaltech-mvp",
-        DATABASE_URL="postgresql+psycopg://postgres:postgres@localhost:5432/legaltech",
+        APP_NAME="legalboard",
+        DATABASE_URL="postgresql+psycopg://postgres:postgres@localhost:5432/legalboard",
         REDIS_URL="redis://localhost:6379/0",
         S3_ENDPOINT="http://localhost:9000",
         S3_ACCESS_KEY="minio",
