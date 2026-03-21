@@ -15,15 +15,15 @@ from pydantic import BaseModel, Field
 class AnalysisFindingItem(BaseModel):
     """A single finding from the contract analysis."""
 
-    clause_name: str
-    status: Literal["critical", "attention", "conforme"]
-    severity: str
-    risk_score: int = Field(ge=0, le=100)
-    current_summary: str
-    policy_rule: str
-    risk_explanation: str
-    suggested_adjustment_direction: str
-    page_reference: str | None = None
+    clause_code: str = Field(description="Playbook clause code (e.g., EXCLUSIVIDADE, PRAZO)")
+    clause_title: str = Field(description="Human-readable clause title")
+    severity: Literal["critical", "attention", "conforme"] = Field(
+        description="Risk severity: critical=high risk, attention=medium risk, conforme=compliant"
+    )
+    risk_score: int = Field(ge=0, le=100, description="Risk score 0-100 (100=highest risk)")
+    explanation: str = Field(description="Detailed explanation of the finding in Portuguese")
+    suggested_correction: str = Field(description="Suggested text adjustment or 'N/A' if compliant")
+    page_reference: str | None = Field(default=None, description="Page reference if available")
 
 
 class ContractAnalysisResult(BaseModel):

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -10,6 +12,11 @@ from app.db.models.policy import Policy
 from app.domain.contract_analysis import evaluate_rules, extract_contract_facts
 from app.domain.contract_metadata import extract_contract_metadata
 from app.domain.events import build_contract_events
+from app.domain.playbook import PLAYBOOK_CLAUSES
+from app.infrastructure.contract_chunker import chunk_contract
+
+if TYPE_CHECKING:
+    from app.infrastructure.gemini_client import GeminiAnalysisClient
 
 
 def run_policy_analysis(
@@ -17,50 +24,86 @@ def run_policy_analysis(
     contract: Contract,
     contract_text: str,
     *,
-    llm_client: object | None = None,
+    llm_client: GeminiAnalysisClient | None = None,
 ) -> None:
-    """Run policy analysis only (no metadata/events). Use for signed contracts where archive already handled the rest."""
+    """Run policy analysis using Gemini + playbook.
+    
+    For contracts that need analysis against the franchise playbook.
+    Uses chunker to split text and Gemini for AI-powered analysis.
+    Falls back to rule-based evaluation if no LLM client provided.
+    """
     policy = session.scalar(select(Policy).order_by(Policy.created_at.desc()))
-    if not policy or not policy.rules:
+    if not policy:
         return
 
-    rules_dicts = [
-        {"code": r.code, "value": r.value, "description": r.description}
-        for r in policy.rules
-    ]
-    extracted_facts = extract_contract_facts(contract_text)
+    # Chunk the contract text
+    chunks = chunk_contract(contract_text)
+    chunk_texts = [c.content for c in chunks]
 
     if llm_client is not None:
-        from app.services.policy_analysis import analyze_contract_against_policy
-
-        analysis_result = analyze_contract_against_policy(
-            contract_text=contract_text,
-            policy_rules=rules_dicts,
-            llm_client=llm_client,
+        # Use Gemini with playbook-based analysis
+        analysis_result = llm_client.analyze_contract(
+            chunks=chunk_texts,
+            playbook=list(PLAYBOOK_CLAUSES),
+        )
+        
+        # Create analysis record with findings
+        analysis = ContractAnalysis(
+            contract_id=contract.id,
+            policy_version=policy.version if policy else "v1.0",
+            status=AnalysisStatus.completed,
+            contract_risk_score=analysis_result.contract_risk_score,
+            raw_payload={
+                "items": [item.model_dump() for item in analysis_result.items],
+                "summary": analysis_result.summary,
+            },
+            findings=[
+                ContractAnalysisFinding(
+                    clause_name=item.clause_code,
+                    status="evaluated",
+                    severity=item.severity,
+                    current_summary=item.explanation,
+                    policy_rule=item.clause_code,
+                    risk_explanation=item.explanation,
+                    suggested_adjustment_direction=item.suggested_correction,
+                    metadata_json={
+                        "risk_score": item.risk_score,
+                        "playbook_title": item.clause_title,
+                    },
+                )
+                for item in analysis_result.items
+            ],
         )
     else:
-        analysis_result = evaluate_rules(rules_dicts, extracted_facts)
+        # Fallback to rule-based evaluation
+        rules_dicts = [
+            {"code": r.code, "value": r.value, "description": r.description}
+            for r in (policy.rules if policy and policy.rules else [])
+        ]
+        extracted_facts = extract_contract_facts(contract_text)
+        fallback_result = evaluate_rules(rules_dicts, extracted_facts)
 
-    analysis = ContractAnalysis(
-        contract_id=contract.id,
-        policy_version=policy.version,
-        status=AnalysisStatus.completed,
-        contract_risk_score=analysis_result.contract_risk_score,
-        raw_payload=analysis_result.model_dump(),
-        findings=[
-            ContractAnalysisFinding(
-                clause_name=item.clause_name,
-                status=item.status,
-                severity=item.severity,
-                current_summary=item.current_summary,
-                policy_rule=item.policy_rule,
-                risk_explanation=item.risk_explanation,
-                suggested_adjustment_direction=item.suggested_adjustment_direction,
-                metadata_json=item.metadata,
-            )
-            for item in analysis_result.items
-        ],
-    )
+        analysis = ContractAnalysis(
+            contract_id=contract.id,
+            policy_version=policy.version if policy else "v1.0",
+            status=AnalysisStatus.completed,
+            contract_risk_score=fallback_result.contract_risk_score,
+            raw_payload=fallback_result.model_dump(),
+            findings=[
+                ContractAnalysisFinding(
+                    clause_name=item.clause_name,
+                    status=item.status,
+                    severity=item.severity,
+                    current_summary=item.current_summary,
+                    policy_rule=item.policy_rule,
+                    risk_explanation=item.risk_explanation,
+                    suggested_adjustment_direction=item.suggested_adjustment_direction,
+                    metadata_json=item.metadata,
+                )
+                for item in fallback_result.items
+            ],
+        )
+
     session.add(analysis)
     session.flush()
 
@@ -70,7 +113,7 @@ def run_contract_pipeline(
     contract: Contract,
     contract_version: ContractVersion,
     *,
-    llm_client: object | None = None,
+    llm_client: GeminiAnalysisClient | None = None,
 ) -> None:
     """Full pipeline: extract metadata, generate events, and run policy analysis.
 

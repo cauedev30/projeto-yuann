@@ -12,6 +12,7 @@
 - Fase 1: Pipeline de upload conectada — `contract_upload.py` agora chama `run_contract_pipeline` (metadata + events + analysis) para drafts, e `run_policy_analysis` para signed contracts (apos archive).
 - Fase 2: Regras de negocio — `MAX_TERM_MONTHS`, `MAX_VALUE`, `GRACE_PERIOD_DAYS` adicionadas a `evaluate_rules`; `extract_contract_facts` expandido com `contract_value` e `grace_period_days`; politica padrao seedada em `app_factory.py`.
 - Fase 3: Integracao OpenAI — `OpenAIAnalysisClient` em `infrastructure/openai_client.py` com prompts em `infrastructure/prompts.py`; fallback deterministico quando `OPENAI_API_KEY` ausente.
+- Task 1.7: `GeminiAnalysisClient` em `infrastructure/gemini_client.py` — wraps google.genai SDK, structured output com Pydantic, retry 1x, fallback tipado. 12 testes.
 - Fase 4: Notificacoes SMTP — `SmtpEmailSender` em `infrastructure/notifications.py`; eventos de notificacao em 10/9/8/7 meses antes do vencimento; corpo do email enriquecido.
 - Fase 5: Auth JWT — modelo `User`, rotas `/api/auth/register|login|me`, dependency `get_current_user`, migracao `0006`; frontend com `AuthProvider`, `AuthGuard`, pagina `/login` glassmorphic, headers `Authorization` em todos os API clients.
 - Fase 6 (Micro Ajustes): AI summary ativado passando `.env` para o uvicorn localmente. UI com titulo de achados alterado para "Principais Pontos". Duplicidade de visualizacao do Prazo de Vigencia resolvida limpando DB obsoleto via reanalise da API.

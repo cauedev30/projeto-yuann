@@ -41,14 +41,12 @@ VALID_ANALYSIS_JSON = """{
     "contract_risk_score": 45,
     "items": [
         {
-            "clause_name": "INFRAESTRUTURA",
-            "status": "attention",
-            "severity": "medium",
+            "clause_code": "INFRAESTRUTURA",
+            "clause_title": "Ciência da Infraestrutura",
+            "severity": "attention",
             "risk_score": 45,
-            "current_summary": "Clausula presente mas incompleta.",
-            "policy_rule": "Deve conter infraestrutura completa.",
-            "risk_explanation": "Falta menção a rede trifásica.",
-            "suggested_adjustment_direction": "Incluir rede trifásica.",
+            "explanation": "Clausula presente mas incompleta. Falta menção a rede trifásica.",
+            "suggested_correction": "Incluir referência à rede trifásica.",
             "page_reference": "p.2"
         }
     ],
@@ -104,8 +102,8 @@ class TestAnalyzeContract:
         assert isinstance(result, ContractAnalysisResult)
         assert result.contract_risk_score == 45
         assert len(result.items) == 1
-        assert result.items[0].clause_name == "INFRAESTRUTURA"
-        assert result.items[0].status == "attention"
+        assert result.items[0].clause_code == "INFRAESTRUTURA"
+        assert result.items[0].severity == "attention"
         assert result.summary == "Contrato com risco moderado."
         mock_client.models.generate_content.assert_called_once()
 

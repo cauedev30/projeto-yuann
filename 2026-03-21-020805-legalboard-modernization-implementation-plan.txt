@@ -1,0 +1,265 @@
+ ▐▛███▜▌   Claude Code v2.1.81
+▝▜█████▛▘  Sonnet 4.6 · Claude Pro
+  ▘▘ ▝▝    ~/projeto-yuann
+
+❯ LegalBoard Modernization — Implementation Plan                                
+                                                                                
+ ▎ For agentic workers: REQUIRED SUB-SKILL: Use                                 
+ superpowers:subagent-driven-development (recommended) or                       
+ superpowers:executing-plans to implement this plan task-by-task. Steps use     
+ checkbox (- [ ]) syntax for tracking.                                          
+ ▎ Frontend UI tasks MUST use superpowers:frontend-design skill.                
+                                                                                
+ Goal: Modernizar o projeto LegalTech/Yuann para LegalBoard — migrar para       
+Gemini                                                                          
+ 2.5 Flash, adicionar geração de contrato corrigido, SSE streaming, React       
+Query, e                                                                        
+ rebrand completo.                                                              
+                                                                                
+ Architecture: FastAPI + Next.js 15. LLM migra de OpenAI GPT-4o-mini para       
+Gemini                                                                          
+ 2.5 Flash com structured outputs (Pydantic). Playbook de cláusulas fixo no     
+código.                                                                         
+  Pipeline: Upload PDF → chunking por cláusula → análise com Gemini → relatório 
+ de                                                                             
+ risco → geração de contrato corrigido + resumo de alterações.                  
+                                                                                
+ Tech Stack: Python 3.12, FastAPI, SQLAlchemy, Gemini 2.5 Flash (google-genai), 
+ python-docx, Next.js 15, React 19, TanStack Query, SSE (EventSource).          
+                                                                                
+ Spec: docs/superpowers/specs/2026-03-21-legalboard-modernization-design.md     
+                                                                                
+ ---                                                                            
+ Context                                                                        
+                                                                                
+ O projeto é uma plataforma de governança contratual para a franquia Lavanderia 
+ 60                                                                             
+ Minutos. Atualmente usa OpenAI GPT-4o-mini com JSON parsing manual, análise    
+ síncrona sem feedback de progresso, e frontend com useState+fetch dispersos. A 
+ modernização visa: melhor qualidade de análise (Gemini + structured outputs),  
+nova                                                                            
+  funcionalidade de geração de contrato corrigido, UX com streaming de          
+progresso, e                                                                    
+  sustentabilidade do código com React Query.                                   
+                                                                                
+ ---                                                                            
+ FASE 1: Backend — Fundações                                                    
+                                                                                
+ Task 1.1: Setup de Dependências e Ambiente                                     
+                                                                                
+ Files:                                                                         
+ - Modify: backend/pyproject.toml                                               
+ - Modify: backend/app/main.py                                                  
+ - Create: backend/.env.local (gitignored)                                      
+ - Create: .env.example                                                         
+ - Substituir "openai>=1.50.0" por "google-genai>=1.0.0" no pyproject.toml      
+ - Adicionar "python-docx>=1.1.0" e "python-dotenv>=1.0.0" às deps              
+ - Mudar name para "legalboard-backend" no pyproject.toml                       
+ - Adicionar from dotenv import load_dotenv; load_dotenv(".env.local") no topo  
+de                                                                              
+ main.py                                                                        
+ - Criar .env.local com GOOGLE_API_KEY=AIzaSyBud1Wju8IjlegIxBAGMm48Al3bbRWUZro  
+e                                                                               
+ JWT_SECRET=dev-secret                                                          
+ - Criar .env.example com vars vazias como template                             
+ - Verificar .gitignore inclui .env.local                                       
+ - Run: cd backend && pip install -e ".[dev]" — deve instalar sem erro          
+ - Commit: chore: migrate dependencies from openai to google-genai              
+                                                                                
+ ---                                                                            
+ Task 1.2: Playbook de Cláusulas                                                
+                                                                                
+ Files:                                                                         
+ - Create: backend/app/domain/playbook.py                                       
+ - Create: backend/tests/domain/t                                               
+… +350 lines …                                                                  
+─────────────────────────────────────────────────────┬───────────────────────┐  
+ │                       Arquivo                       │         Papel          
+│                                                                               
+                                                                                
+├─────────────────────────────────────────────────────┼───────────────────────┤ 
+ │ backend/app/core/app_factory.py                     │ Composition root —     
+│                                                                               
+ │                                                     │ rewire OpenAI→Gemini   
+│                                                                               
+                                                                                
+├─────────────────────────────────────────────────────┼───────────────────────┤ 
+ │                                                     │ Orquestração —         
+│                                                                               
+ │ backend/app/application/contract_pipeline.py        │ reescrever para playb  
+│                                                                               
+ │                                                     │ ook+chunker+Gemini     
+│                                                                               
+                                                                                
+├─────────────────────────────────────────────────────┼───────────────────────┤ 
+ │ backend/app/api/routes/contracts.py                 │ API — 3 endpoints      
+│                                                                               
+ │                                                     │ novos + paginação      
+│                                                                               
+                                                                                
+├─────────────────────────────────────────────────────┼───────────────────────┤ 
+ │ backend/app/infrastructure/gemini_client.py         │ NOVO — client Gemini   
+│                                                                               
+ │                                                     │ com structured output  
+│                                                                               
+                                                                                
+├─────────────────────────────────────────────────────┼───────────────────────┤ 
+ │ backend/app/domain/playbook.py                      │ NOVO — cláusulas       
+│                                                                               
+ │                                                     │ fixas da franquia      
+│                                                                               
+                                                                                
+├─────────────────────────────────────────────────────┼───────────────────────┤ 
+ │ web/src/features/contracts/screens/contracts-screen │ Tela principal —       
+│                                                                               
+ │ .tsx                                                │ migrar para React      
+│                                                                               
+ │                                                     │ Query                  
+│                                                                               
+                                                                                
+├─────────────────────────────────────────────────────┼───────────────────────┤ 
+ │ web/src/components/navigation/app-shell.tsx         │ Shell — rebrand +      
+│                                                                               
+ │                                                     │ logo                   
+│                                                                               
+                                                                                
+└─────────────────────────────────────────────────────┴───────────────────────┘ 
+                                                                                
+ Verificação                                                                    
+                                                                                
+ 1. cd backend && .venv/bin/python -m pytest -v — todos os testes passam        
+ 2. cd web && npm run test — todos os testes passam                             
+ 3. cd web && npm run build — build sem erros                                   
+ 4. Fluxo manual: upload → análise SSE → findings → gerar corrigido → download  
+DOCX                                                                            
+ 5. grep -ri "legaltech\|yuann" backend/ web/src/ — zero ocorrências (exceto    
+git                                                                             
+ history) execute esse plano de implementação                                   
+
+● Skill(superpowers:subagent-driven-development)
+  ⎿  Successfully loaded skill
+
+● Vou executar o plano de modernização LegalBoard usando Subagent-Driven
+  Development. Primeiro, preciso entender o estado atual do projeto e preparar o
+   workspace.
+
+● Explore(Explore LegalBoard project structure)
+  ⎿  Done (5 tool uses · 52.5k tokens · 1m 14s)
+  (ctrl+o to expand)
+
+  Read 3 files (ctrl+o to expand)
+
+● Boa, tenho o panorama completo do projeto. Está em /home/dvdev/projeto-yuann,
+  sem git inicializado. Vou preparar o workspace e criar as tasks.
+
+● Bash(cd /home/dvdev/projeto-yuann && git status 2>&1 || echo "NOT_A_GIT_REPO")
+  ⎿  On branch main
+     Your branch is up to date with 'origin/main'.
+     … +8 lines (ctrl+o to expand)
+
+  Read 2 files (ctrl+o to expand)
+
+● Perfeito — git repo existe no main, spec e DOCX de cláusulas disponíveis. Vou
+  criar um branch de trabalho e as tasks.
+
+● Bash(git checkout -b feat/legalboard-modernization)
+  ⎿  Switched to a new branch 'feat/legalboard-modernization'
+
+● Agora vou criar todas as tasks do plano para rastrear o progresso.
+● 26 tasks criadas. Vou registrar o SHA base e começar a execução pela Task 1.1.
+
+● Bash(git rev-parse HEAD)
+  ⎿  72fd32d45a2357752a0def05d5553156c673eb0f
+● Dispatching implementer subagent for Task 1.1.
+
+● Agent(Implement Task 1.1: Dependencies setup)
+  ⎿  Done (19 tool uses · 18.5k tokens · 2m 57s)
+  (ctrl+o to expand)
+
+● Task 1.1 implementada. Vou verificar o .env.example e fazer spec review
+  rápido, depois seguir.
+  ⎿  Loaded CLAUDE.md
+
+  Read 3 files (ctrl+o to expand)
+
+● Task 1.1 spec-compliant. Vou marcar como concluída e partir para 1.2. Preciso
+  primeiro extrair as cláusulas do DOCX.
+
+● Agent(Extract clauses from DOCX file)
+  ⎿  Done (6 tool uses · 21.5k tokens · 1m 40s)
+  (ctrl+o to expand)
+
+✻ Cooked for 8m 48s
+
+❯ continue                                                                      
+
+● Tenho as 9 cláusulas extraídas do DOCX. O plano mencionava 8 códigos mas o
+  documento real tem 9. Vou usar o conteúdo real do DOCX como fonte de verdade.
+  Dispatching Task 1.2.
+
+● Agent(Implement Task 1.2: Playbook clauses)
+  ⎿  Done (18 tool uses · 22.3k tokens · 4m 6s)
+  (ctrl+o to expand)
+
+● Task 1.2 done. Marking complete and moving to 1.3.
+
+● Now I need the current pdf_text.py content to provide context to the subagent.
+
+  Read 1 file (ctrl+o to expand)
+
+● Agent(Implement Task 1.3: PDF page metadata)
+  ⎿  Done (22 tool uses · 25.5k tokens · 4m 48s)
+  (ctrl+o to expand)
+
+● Task 1.3 done (8 tests passing). Dispatching Task 1.4: Contract Chunker.
+
+● Agent(Implement Task 1.4: Contract chunker)
+  ⎿  Done (16 tool uses · 22.7k tokens · 4m 51s)
+  (ctrl+o to expand)
+
+❯ /permissions                                                                  
+● Task 1.4 done (15 tests passing). /permissions is a built-in CLI command — it
+  should have opened directly in your terminal. If you need to adjust
+  permissions for tool calls, you can use it interactively.
+
+  Continuing execution. Tasks 1.5 and 1.6 are independent — dispatching in
+  parallel.
+
+● Agent(Implement Task 1.5: Pydantic models)
+  ⎿  Done (5 tool uses · 12.6k tokens · 1m 21s)
+  (ctrl+o to expand)
+
+● Task 1.5 done. Now Task 1.6: Prompts para Gemini. Need current prompts.py
+  content.
+
+  Read 1 file (ctrl+o to expand)
+
+● Agent(Implement Task 1.6: Gemini prompts)
+  ⎿  Done (25 tool uses · 31.8k tokens · 5m 54s)
+  (ctrl+o to expand)
+
+● Fase 1 progredindo bem — 6/8 tasks completas. Dispatching Task 1.7: Gemini
+  Client.
+
+● Agent(Implement Task 1.7: Gemini client)
+  ⎿  Done (37 tool uses · 43.1k tokens · 9m 50s)
+  (ctrl+o to expand)
+
+● Task 1.7 done (12 tests). Now Task 1.8: Rewire App Factory — need current
+  files.
+
+  Read 3 files (ctrl+o to expand)
+
+● Agent(Implement Task 1.8: Rewire app factory)
+  ⎿  Done (15 tool uses · 0 tokens · 1m 15s)
+  (ctrl+o to expand)
+  ⎿  You've hit your limit · resets Mar 22, 10pm (America/Fortaleza)
+     /upgrade or /extra-usage to finish what you’re working on.
+
+✻ Cogitated for 29m 5s
+
+❯ /export                                                                       
+  ⎿  Conversation copied to clipboard
+
+❯ /export                                                                       
+  ⎿  Conversation copied to clipboard

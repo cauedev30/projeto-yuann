@@ -1,5 +1,24 @@
 # Session Log
 
+- Data: 2026-03-21
+  - tarefa: Task 1.7 — Gemini Client (TDD)
+  - resultado: Criado GeminiAnalysisClient com analyze_contract, summarize_contract, generate_corrected_contract. Usa google.genai SDK com response_schema Pydantic. Retry 1x com backoff 1s. Nunca retorna {} — sempre resultado tipado com mensagem de erro. 12 testes mockados.
+  - arquivos criados: backend/app/infrastructure/gemini_client.py, backend/tests/infrastructure/test_gemini_client.py
+  - commit: feat: add Gemini 2.5 Flash client with structured output
+
+- Data: 2026-03-21
+  - tarefa: Task 1.6 — Prompts para Gemini (TDD)
+  - resultado: Reescrito SYSTEM_PROMPT com referencia a playbook (sem clausulas hardcoded). Removidas instrucoes de formato JSON (Gemini usa structured output). Adicionados CORRECTION_SYSTEM_PROMPT e build_correction_prompt. Assinatura build_user_prompt alterada de policy_rules dict para PlaybookClause list. 22 testes, 107 total passando.
+  - arquivos modificados: backend/app/infrastructure/prompts.py
+  - arquivos criados: backend/tests/infrastructure/test_prompts.py
+  - commit: feat: rewrite prompts for Gemini + playbook-based analysis
+
+- Data: 2026-03-21
+  - tarefa: Task 1.4 — Contract Chunker (TDD)
+  - resultado: Implementado ContractChunk dataclass e chunk_contract() com splitting por CLAUSULA, Art. e fallback de ~2000 chars com overlap de 200. 15 testes passando.
+  - arquivos criados: backend/app/infrastructure/contract_chunker.py, backend/tests/infrastructure/test_contract_chunker.py
+  - commit: feat: add contract text chunker with clause-aware splitting
+
 - Data: 2026-03-18 23:50:00 -0300
   - tarefa: corrigir fallback da IA por falta de `.env` carregado no uvicorn, alterar titulo de achados na UI para "Principais Pontos", resolver duplicidade de visualizacao no banco de "Prazo de vigencia".
   - resultado: backend reiniciado localmente com `--env-file .env`; titulo alterado no `findings-section.tsx` e teste respectivo; reanalise disparada via API para o contrato, atualizando o DB de analise para remover a visualizacao "Prazo maximo de vigencia" duplicada. Publicacao na branch main.
