@@ -15,7 +15,8 @@ from app.api.routes.notifications import router as notifications_router
 from app.api.routes.policies import router as policies_router
 from app.api.routes.uploads import router as uploads_router
 from app.db.base import Base
-from app.db.models.policy import Policy, PolicyRule
+from app.db.models import Policy, PolicyRule
+from app.infrastructure.gemini_client import GeminiAnalysisClient
 from app.infrastructure.notifications import NoopEmailSender, SmtpEmailSender
 from app.infrastructure.ocr import NoopOcrClient
 from app.infrastructure.storage import LocalStorageService
@@ -26,7 +27,7 @@ def _seed_default_policy(session: Session) -> None:
     if existing is not None:
         return
 
-    policy = Policy(name="Politica Padrao Yuann", version="v1.0")
+    policy = Policy(name="Politica Padrao LegalBoard", version="v1.0")
     session.add(policy)
     session.flush()
 
@@ -43,10 +44,10 @@ def _seed_default_policy(session: Session) -> None:
 
 def create_app(
     *,
-    database_url: str = "sqlite:///./legaltech.db",
+    database_url: str = "sqlite:///./legalboard.db",
     storage_directory: Path | None = None,
 ) -> FastAPI:
-    app = FastAPI(title="LegalTech MVP API")
+    app = FastAPI(title="LegalBoard API")
     app.add_middleware(
         CORSMiddleware,
         allow_origin_regex=r"http://(127\.0\.0\.1|localhost):\d+",
@@ -82,11 +83,9 @@ def create_app(
     )
     app.state.ocr_client = NoopOcrClient()
 
-    openai_api_key = os.environ.get("OPENAI_API_KEY")
-    if openai_api_key:
-        from app.infrastructure.openai_client import OpenAIAnalysisClient
-
-        app.state.llm_client = OpenAIAnalysisClient(api_key=openai_api_key)
+    google_api_key = os.environ.get("GOOGLE_API_KEY")
+    if google_api_key:
+        app.state.llm_client = GeminiAnalysisClient(api_key=google_api_key)
     else:
         app.state.llm_client = None
 
