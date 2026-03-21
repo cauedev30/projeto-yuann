@@ -51,7 +51,7 @@ function mapUser(payload: UserPayload): AuthUser {
 
 export function getStoredToken(): string | null {
   if (typeof window === "undefined") return null;
-  return localStorage.getItem("yuann_token");
+  return localStorage.getItem("legalboard_token");
 }
 
 export function getAuthHeaders(): Record<string, string> {

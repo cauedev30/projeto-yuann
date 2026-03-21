@@ -40,8 +40,8 @@ export default function LoginPage() {
     <div className={styles.container}>
       <div className={styles.card}>
         <div className={styles.brand}>
-          <span className={styles.brandMark}>LT</span>
-          <span className={styles.brandText}>LegalTech</span>
+          <span className={styles.brandMark}>LB</span>
+          <span className={styles.brandText}>LegalBoard</span>
         </div>
 
         <h1 className={styles.title}>

@@ -4,11 +4,11 @@ import Link from "next/link";
 export function MarketingTopbar() {
   return (
     <header className="marketingTopbar">
-      <Link aria-label="LegalTech" className="marketingBrand" href="/">
+      <Link aria-label="LegalBoard" className="marketingBrand" href="/">
         <span aria-hidden="true" className="marketingBrandMark">
-          LT
+          LB
         </span>
-        <span className="marketingBrandText">LegalTech</span>
+        <span className="marketingBrandText">LegalBoard</span>
       </Link>
       <nav aria-label="Navegacao institucional" className="marketingNav">
         <Link href="#fluxo">Fluxo</Link>

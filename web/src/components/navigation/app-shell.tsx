@@ -49,12 +49,12 @@ export function AppShell({ children }: AppShellProps) {
         Pular para o conteudo principal
       </a>
       <aside className={styles.sidebar}>
-        <Link aria-label="LegalTech" className={styles.brand} href="/">
+        <Link aria-label="LegalBoard" className={styles.brand} href="/">
           <span aria-hidden="true" className={styles.brandMark}>
-            LT
+            LB
           </span>
           <span className={styles.brandCopy}>
-            <strong className={styles.brandName}>LegalTech</strong>
+            <strong className={styles.brandName}>LegalBoard</strong>
             <span className={styles.brandMeta}>Governanca contratual</span>
           </span>
         </Link>

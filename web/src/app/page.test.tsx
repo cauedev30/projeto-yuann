@@ -14,7 +14,7 @@ describe("HomePage", () => {
   it("renders the commercial hero, value sections and workspace CTAs", () => {
     render(<HomePage />);
 
-    expect(screen.getByText("LegalTech")).toBeInTheDocument();
+    expect(screen.getByText("LegalBoard")).toBeInTheDocument();
     expect(screen.getByText("Gestao contratual simplificada.")).toBeInTheDocument();
     expect(
       screen.getByText(

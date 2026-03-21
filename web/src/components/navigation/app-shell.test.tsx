@@ -30,7 +30,7 @@ describe("AppShell", () => {
     ).toHaveAttribute("href", "#main-content");
     expect(navigation).toBeInTheDocument();
     expect(contentRegion).toHaveAttribute("id", "main-content");
-    expect(screen.getByRole("link", { name: "LegalTech" })).toHaveAttribute("href", "/");
+    expect(screen.getByRole("link", { name: "LegalBoard" })).toHaveAttribute("href", "/");
     expect(within(navigation).getByRole("link", { name: "Dashboard" })).toHaveAttribute(
       "href",
       "/dashboard",

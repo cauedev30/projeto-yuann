@@ -33,11 +33,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [token, setToken] = useState<string | null>(() => {
     if (typeof window === "undefined") return null;
-    return localStorage.getItem("yuann_token");
+    return localStorage.getItem("legalboard_token");
   });
   const [isLoading, setIsLoading] = useState(() => {
     if (typeof window === "undefined") return false;
-    return localStorage.getItem("yuann_token") !== null;
+    return localStorage.getItem("legalboard_token") !== null;
   });
 
   useEffect(() => {
@@ -47,7 +47,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .then((u) => { if (!cancelled) setUser(u); })
       .catch(() => {
         if (cancelled) return;
-        localStorage.removeItem("yuann_token");
+        localStorage.removeItem("legalboard_token");
         setToken(null);
       })
       .finally(() => { if (!cancelled) setIsLoading(false); });
@@ -55,7 +55,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [token]);
 
   const handleAuthSuccess = useCallback((res: AuthResponse) => {
-    localStorage.setItem("yuann_token", res.accessToken);
+    localStorage.setItem("legalboard_token", res.accessToken);
     setToken(res.accessToken);
     setUser({
       id: res.userId,
@@ -82,7 +82,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const logout = useCallback(() => {
-    localStorage.removeItem("yuann_token");
+    localStorage.removeItem("legalboard_token");
     setToken(null);
     setUser(null);
   }, []);
