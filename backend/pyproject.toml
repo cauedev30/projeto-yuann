@@ -1,5 +1,5 @@
 [project]
-name = "legaltech-backend"
+name = "legalboard-backend"
 version = "0.1.0"
 description = "FastAPI backend for the LegalTech MVP"
 readme = "README.md"
@@ -11,7 +11,9 @@ dependencies = [
     "pydantic[email]>=2.9.0",
     "uvicorn>=0.30.0",
     "python-multipart>=0.0.12",
-    "openai>=1.50.0",
+    "google-genai>=1.0.0",
+    "python-docx>=1.1.0",
+    "python-dotenv>=1.0.0",
 ]
 
 [project.optional-dependencies]
