@@ -69,7 +69,11 @@ def test_list_contracts_returns_empty_collection(client) -> None:
     response = client.get("/api/contracts")
 
     assert response.status_code == 200
-    assert response.json() == {"items": []}
+    data = response.json()
+    assert data["items"] == []
+    assert data["page"] == 1
+    assert data["per_page"] == 20
+    assert data["total"] == 0
 
 
 def test_list_contracts_returns_enriched_summary_fields(client) -> None:

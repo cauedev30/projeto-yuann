@@ -94,3 +94,26 @@ class ContractDetailResponse(BaseModel):
 class ContractSummaryResponse(BaseModel):
     summary: str
     key_points: list[str] = Field(default_factory=list)
+
+
+class PaginatedContractListResponse(BaseModel):
+    """Paginated contract list response."""
+    items: list[ContractListItem]
+    page: int
+    per_page: int
+    total: int
+    total_pages: int
+
+
+class CorrectionItemResponse(BaseModel):
+    """A single correction applied to a contract."""
+    clause_name: str
+    original_text: str
+    corrected_text: str
+    reason: str
+
+
+class CorrectedContractResponse(BaseModel):
+    """Response for contract correction generation."""
+    corrected_text: str
+    corrections: list[CorrectionItemResponse] = Field(default_factory=list)
