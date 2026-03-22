@@ -1,4 +1,4 @@
-from app.core.app_factory import create_app
+from app.core.app_factory import _get_database_url, create_app
 
 
 def test_create_app_wires_runtime_dependencies(monkeypatch, workspace_tmp_path) -> None:
@@ -32,6 +32,15 @@ def test_create_app_reads_database_url_and_upload_dir_from_environment(
     engine = app.state.session_factory.kw["bind"]
     assert engine.url.database == str(database_path)
     assert app.state.storage_service.root == upload_path
+
+
+def test_database_url_is_normalized_for_railway_postgres_urls() -> None:
+    assert _get_database_url("postgresql://user:pass@db.example.com/legalboard").startswith(
+        "postgresql+psycopg://"
+    )
+    assert _get_database_url("postgres://user:pass@db.example.com/legalboard").startswith(
+        "postgresql+psycopg://"
+    )
 
 
 def test_create_app_allows_explicit_cors_origins_from_environment(

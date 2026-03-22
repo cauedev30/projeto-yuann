@@ -12,6 +12,12 @@
   - arquivos alterados: `backend/nixpacks.toml`, `backend/pyproject.toml`, `backend/requirements.txt`, `backend/tests/core/test_packaging.py`, `.codex-memory/current-state.md`, `.codex-memory/session-log.md`
   - proximos passos: publicar o fix na `main` e redeployar o backend no Railway.
 
+- Data: 2026-03-22 00:24:00 -0300
+  - tarefa: corrigir incompatibilidade entre `DATABASE_URL` injetada pelo Railway e o driver Postgres instalado no backend.
+  - resultado: `backend/app/core/app_factory.py` passou a normalizar `postgres://` e `postgresql://` para `postgresql+psycopg://`; teste novo trava esse contrato; verificacao fresca com `7` testes backend focados passando.
+  - arquivos alterados: `backend/app/core/app_factory.py`, `backend/tests/core/test_app_factory.py`, `.codex-memory/current-state.md`, `.codex-memory/session-log.md`
+  - proximos passos: publicar o fix na `main` e redeployar o backend no Railway.
+
 - Data: 2026-03-21
   - tarefa: Task 1.7 — Gemini Client (TDD)
   - resultado: Criado GeminiAnalysisClient com analyze_contract, summarize_contract, generate_corrected_contract. Usa google.genai SDK com response_schema Pydantic. Retry 1x com backoff 1s. Nunca retorna {} — sempre resultado tipado com mensagem de erro. 12 testes mockados.

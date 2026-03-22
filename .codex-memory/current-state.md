@@ -10,6 +10,7 @@
 - Base anterior: `19dab0b feat: prepare f5-b product release [F5-B]` / `main` (`0c09517`)
 - Hardening de deploy (2026-03-22): `backend/app/core/app_factory.py` agora aceita `DATABASE_URL`, `UPLOAD_DIR` e `CORS_ORIGINS` por env com fallback local; `backend/pyproject.toml` e `backend/requirements.txt` passaram a incluir `psycopg[binary]` e `pydantic-settings`; `.env.example` e `DEPLOY_GUIDE.md` foram reescritos para o fluxo `Railway + Postgres + volume` no backend e `Vercel` no frontend.
 - Fix de runtime Railway (2026-03-22): `backend/nixpacks.toml` passou a usar o provider Python padrao e os manifests do backend agora declaram `PyMuPDF`, corrigindo a falha `ModuleNotFoundError: No module named 'fitz'` durante o boot do container.
+- Fix de DATABASE_URL Railway (2026-03-22): `_get_database_url` agora normaliza URLs `postgres://` e `postgresql://` para `postgresql+psycopg://`, evitando que o SQLAlchemy tente usar `psycopg2` quando o ambiente do Railway injeta a URL padrao do Postgres.
 - Pos-release implementado (2026-03-18): 5 fases do plano pos-MVP concluidas sobre a base publicada.
 - Fase 1: Pipeline de upload conectada — `contract_upload.py` agora chama `run_contract_pipeline` (metadata + events + analysis) para drafts, e `run_policy_analysis` para signed contracts (apos archive).
 - Fase 2: Regras de negocio — `MAX_TERM_MONTHS`, `MAX_VALUE`, `GRACE_PERIOD_DAYS` adicionadas a `evaluate_rules`; `extract_contract_facts` expandido com `contract_value` e `grace_period_days`; politica padrao seedada em `app_factory.py`.
@@ -29,6 +30,7 @@
 ## Evidencia operacional mais recente
 - Backend focado em deploy: `5 passed in 1.45s` (`backend/tests/core/test_app_factory.py` + `backend/tests/core/test_config.py`)
 - Packaging/backend deploy: `6 passed in 1.38s` incluindo `backend/tests/core/test_packaging.py`
+- Bootstrap/backend deploy: `7 passed in 1.47s` incluindo normalizacao da `DATABASE_URL` do Railway
 - Frontend build: `npm run build` verde em 2026-03-22
 - Observacao: o build do frontend segue com warnings de ESLint/Next pre-existentes sobre `<img>` e variaveis nao usadas, mas sem bloquear a compilacao.
 

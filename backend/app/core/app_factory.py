@@ -28,7 +28,18 @@ from app.infrastructure.storage import LocalStorageService
 
 
 def _get_database_url(database_url: str | None) -> str:
-    return database_url or os.environ.get("DATABASE_URL", "sqlite:///./legalboard.db")
+    resolved_database_url = database_url or os.environ.get(
+        "DATABASE_URL",
+        "sqlite:///./legalboard.db",
+    )
+
+    if resolved_database_url.startswith("postgresql://"):
+        return resolved_database_url.replace("postgresql://", "postgresql+psycopg://", 1)
+
+    if resolved_database_url.startswith("postgres://"):
+        return resolved_database_url.replace("postgres://", "postgresql+psycopg://", 1)
+
+    return resolved_database_url
 
 
 def _get_storage_directory(storage_directory: Path | None) -> Path:
