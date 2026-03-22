@@ -1,5 +1,11 @@
 # Session Log
 
+- Data: 2026-03-22 00:09:00 -0300
+  - tarefa: hardening de deploy para `Railway + Vercel`, corrigindo bootstrap/config do backend e documentacao operacional.
+  - resultado: `backend/app/core/app_factory.py` passou a respeitar `DATABASE_URL`, `UPLOAD_DIR` e `CORS_ORIGINS` por env; dependencias de deploy ganharam `psycopg[binary]` e `pydantic-settings`; `.env.example` e `DEPLOY_GUIDE.md` foram alinhados ao fluxo com `Postgres + volume` no Railway; verificacao fresca com `5` testes backend focados e `npm run build` verde no frontend.
+  - arquivos alterados: `backend/app/core/app_factory.py`, `backend/tests/core/test_app_factory.py`, `backend/pyproject.toml`, `backend/requirements.txt`, `.env.example`, `DEPLOY_GUIDE.md`, `.codex-memory/current-state.md`, `.codex-memory/session-log.md`
+  - proximos passos: configurar os servicos reais no Railway/Vercel, preencher envs de producao e validar `GET /health` no backend publicado.
+
 - Data: 2026-03-21
   - tarefa: Task 1.7 — Gemini Client (TDD)
   - resultado: Criado GeminiAnalysisClient com analyze_contract, summarize_contract, generate_corrected_contract. Usa google.genai SDK com response_schema Pydantic. Retry 1x com backoff 1s. Nunca retorna {} — sempre resultado tipado com mensagem de erro. 12 testes mockados.

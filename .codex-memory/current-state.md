@@ -8,6 +8,7 @@
 
 ## Snapshot verificado
 - Base anterior: `19dab0b feat: prepare f5-b product release [F5-B]` / `main` (`0c09517`)
+- Hardening de deploy (2026-03-22): `backend/app/core/app_factory.py` agora aceita `DATABASE_URL`, `UPLOAD_DIR` e `CORS_ORIGINS` por env com fallback local; `backend/pyproject.toml` e `backend/requirements.txt` passaram a incluir `psycopg[binary]` e `pydantic-settings`; `.env.example` e `DEPLOY_GUIDE.md` foram reescritos para o fluxo `Railway + Postgres + volume` no backend e `Vercel` no frontend.
 - Pos-release implementado (2026-03-18): 5 fases do plano pos-MVP concluidas sobre a base publicada.
 - Fase 1: Pipeline de upload conectada — `contract_upload.py` agora chama `run_contract_pipeline` (metadata + events + analysis) para drafts, e `run_policy_analysis` para signed contracts (apos archive).
 - Fase 2: Regras de negocio — `MAX_TERM_MONTHS`, `MAX_VALUE`, `GRACE_PERIOD_DAYS` adicionadas a `evaluate_rules`; `extract_contract_facts` expandido com `contract_value` e `grace_period_days`; politica padrao seedada em `app_factory.py`.
@@ -25,13 +26,14 @@
 - Fase 5 (Contratos e IA): substituicao de "Texto extraido" por `ContractSummaryPanel`; remocao de botoes falhos de atualizar; correcao do erro de "Hydration failed" no `AuthGuard`; otimizacao em `evaluate_rules` para agrupar limites de `Prazo de vigencia` e fix do parser regex de entidades locais; estilizacao premium com glassmorphism no `AppShell` da sidebar.
 
 ## Evidencia operacional mais recente
-- Backend: `55 passed in 1.62s`
-- Frontend unitario: `19` arquivos e `81` testes passando
-- TypeScript/Build: limpo (`npm run build` sem erros)
-- ESLint: limpo (apenas warning pre-existente em dashboard)
+- Backend focado em deploy: `5 passed in 1.45s` (`backend/tests/core/test_app_factory.py` + `backend/tests/core/test_config.py`)
+- Frontend build: `npm run build` verde em 2026-03-22
+- Observacao: o build do frontend segue com warnings de ESLint/Next pre-existentes sobre `<img>` e variaveis nao usadas, mas sem bloquear a compilacao.
 
 ## Riscos / pendencias
-- `backend/pyproject.toml` continua declarando `requires-python = ">=3.13"`, mas a verificacao local usou `Python 3.12.3`.
+- O deploy real ainda depende de configurar `DATABASE_URL`, `UPLOAD_DIR`, `CORS_ORIGINS`, `JWT_SECRET` e `NEXT_PUBLIC_API_URL` na plataforma.
+- O backend continua usando storage local; em producao isso exige volume persistente no Railway montado em `/data`.
+- `backend/pyproject.toml` continua declarando `requires-python = ">=3.12"`; a verificacao local usou `Python 3.12.3`.
 - Testes E2E Playwright nao foram re-executados nesta sessao (podem precisar de ajustes para o auth guard + traducoes).
 - A `OPENAI_API_KEY` deve ser configurada via `.env` apenas; nunca hardcoded.
 - `JWT_SECRET` padrao e `dev-secret-change-in-production` — deve ser substituido em producao.
@@ -39,9 +41,10 @@
 - Cleanup de `.worktrees/`, `tmp/`, uploads legados permanece fora do escopo.
 
 ## Proximo passo recomendado
-- Configurar cron job para chamar `POST /api/notifications/process-due` diariamente.
-- Rodar testes E2E e ajustar para auth guard + traducoes.
-- Deploy em ambiente de staging para validacao integrada.
+- Criar o servico `backend` no Railway com `Root Directory=backend`.
+- Adicionar `Postgres` e um `Volume` no Railway, configurando `UPLOAD_DIR=/data/uploads`.
+- Publicar o frontend na Vercel com `Root Directory=web` e `NEXT_PUBLIC_API_URL` apontando para o backend.
+- Atualizar `CORS_ORIGINS` no Railway com a URL final do frontend e validar `GET /health`.
 
 ## Ultima atualizacao
-- 2026-03-18
+- 2026-03-22

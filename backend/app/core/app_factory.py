@@ -27,6 +27,29 @@ from app.infrastructure.ocr import NoopOcrClient
 from app.infrastructure.storage import LocalStorageService
 
 
+def _get_database_url(database_url: str | None) -> str:
+    return database_url or os.environ.get("DATABASE_URL", "sqlite:///./legalboard.db")
+
+
+def _get_storage_directory(storage_directory: Path | None) -> Path:
+    if storage_directory is not None:
+        return storage_directory
+
+    upload_dir = os.environ.get("UPLOAD_DIR")
+    if upload_dir:
+        return Path(upload_dir)
+
+    return Path(__file__).resolve().parents[2] / "uploads"
+
+
+def _get_cors_origins(cors_origins: list[str] | None) -> list[str]:
+    if cors_origins is not None:
+        return cors_origins
+
+    configured_origins = os.environ.get("CORS_ORIGINS", "")
+    return [origin.strip() for origin in configured_origins.split(",") if origin.strip()]
+
+
 def _seed_default_policy(session: Session) -> None:
     existing = session.scalar(select(Policy).where(Policy.version == "v1.0"))
     if existing is not None:
@@ -49,21 +72,29 @@ def _seed_default_policy(session: Session) -> None:
 
 def create_app(
     *,
-    database_url: str = "sqlite:///./legalboard.db",
+    database_url: str | None = None,
     storage_directory: Path | None = None,
+    cors_origins: list[str] | None = None,
 ) -> FastAPI:
+    resolved_database_url = _get_database_url(database_url)
+    resolved_storage_directory = _get_storage_directory(storage_directory)
+    resolved_cors_origins = _get_cors_origins(cors_origins)
+
     app = FastAPI(title="LegalBoard API")
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origin_regex=r"http://(127\.0\.0\.1|localhost):\d+",
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
+    cors_kwargs: dict[str, object] = {
+        "allow_credentials": True,
+        "allow_methods": ["*"],
+        "allow_headers": ["*"],
+    }
+    if resolved_cors_origins:
+        cors_kwargs["allow_origins"] = resolved_cors_origins
+    else:
+        cors_kwargs["allow_origin_regex"] = r"http://(127\.0\.0\.1|localhost):\d+"
+    app.add_middleware(CORSMiddleware, **cors_kwargs)
 
     engine = create_engine(
-        database_url,
-        connect_args={"check_same_thread": False} if database_url.startswith("sqlite") else {},
+        resolved_database_url,
+        connect_args={"check_same_thread": False} if resolved_database_url.startswith("sqlite") else {},
     )
     app.state.session_factory = sessionmaker(
         bind=engine,
@@ -83,9 +114,7 @@ def create_app(
     app.include_router(uploads_router)
     app.include_router(notifications_router)
     app.include_router(dashboard_router)
-    app.state.storage_service = LocalStorageService(
-        storage_directory or Path(__file__).resolve().parents[2] / "uploads",
-    )
+    app.state.storage_service = LocalStorageService(resolved_storage_directory)
     app.state.ocr_client = NoopOcrClient()
 
     openai_api_key = os.environ.get("OPENAI_API_KEY")
