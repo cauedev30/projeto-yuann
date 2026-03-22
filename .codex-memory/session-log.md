@@ -6,6 +6,12 @@
   - arquivos alterados: `backend/app/core/app_factory.py`, `backend/tests/core/test_app_factory.py`, `backend/pyproject.toml`, `backend/requirements.txt`, `.env.example`, `DEPLOY_GUIDE.md`, `.codex-memory/current-state.md`, `.codex-memory/session-log.md`
   - proximos passos: configurar os servicos reais no Railway/Vercel, preencher envs de producao e validar `GET /health` no backend publicado.
 
+- Data: 2026-03-22 00:18:00 -0300
+  - tarefa: corrigir falha de runtime no Railway apos o build, causada por dependencia ausente para import `fitz`.
+  - resultado: `backend/nixpacks.toml` foi simplificado para o provider Python padrao e os manifests do backend passaram a declarar `PyMuPDF`; novo teste de packaging trava essa dependencia; verificacao fresca com `6` testes backend focados passando.
+  - arquivos alterados: `backend/nixpacks.toml`, `backend/pyproject.toml`, `backend/requirements.txt`, `backend/tests/core/test_packaging.py`, `.codex-memory/current-state.md`, `.codex-memory/session-log.md`
+  - proximos passos: publicar o fix na `main` e redeployar o backend no Railway.
+
 - Data: 2026-03-21
   - tarefa: Task 1.7 — Gemini Client (TDD)
   - resultado: Criado GeminiAnalysisClient com analyze_contract, summarize_contract, generate_corrected_contract. Usa google.genai SDK com response_schema Pydantic. Retry 1x com backoff 1s. Nunca retorna {} — sempre resultado tipado com mensagem de erro. 12 testes mockados.
