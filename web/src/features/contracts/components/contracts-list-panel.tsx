@@ -20,6 +20,12 @@ type ContractsListPanelProps = {
   error: string | null;
   onRefresh: () => Promise<void> | void;
   navigateToContract?: (contractId: string) => void;
+  eyebrow?: string;
+  title?: string;
+  emptyTitle?: string;
+  emptyBody?: string;
+  renderRowActions?: (item: ContractListItemSummary) => React.ReactNode;
+  renderExtraMeta?: (item: ContractListItemSummary) => React.ReactNode;
 };
 
 function getRiskVariant(score: number | null): "critical" | "attention" | "conforme" | "neutral" {
@@ -54,13 +60,19 @@ export function ContractsListPanel({
   error,
   onRefresh,
   navigateToContract,
+  eyebrow = "Lista",
+  title = "Contratos monitorados",
+  emptyTitle = "Nenhum contrato persistido",
+  emptyBody = "Envie um PDF na area de upload para iniciar a lista de contratos monitorados.",
+  renderRowActions,
+  renderExtraMeta,
 }: ContractsListPanelProps) {
   return (
     <section className={`${styles.panel} ${styles.listPanel}`}>
       <div className={styles.sectionHeader}>
         <div>
-          <p className={styles.panelEyebrow}>Portfólio</p>
-          <h2 className={styles.sectionTitle}>Contratos monitorados</h2>
+          <p className={styles.panelEyebrow}>{eyebrow}</p>
+          <h2 className={styles.sectionTitle}>{title}</h2>
         </div>
       </div>
 
@@ -71,15 +83,15 @@ export function ContractsListPanel({
         </div>
       ) : error ? (
         <div className={styles.listStateBlock}>
-          <p className={styles.listState}>Nao foi possivel atualizar o portfolio.</p>
+          <p className={styles.listState}>Não foi possível atualizar a lista.</p>
           <p className={styles.listAlert} role="alert">
             {error}
           </p>
         </div>
       ) : items.length === 0 ? (
         <EmptyState
-          title="Nenhum contrato persistido"
-          body="Envie um PDF na area de upload para iniciar o portfólio de contratos monitorados."
+          title={emptyTitle}
+          body={emptyBody}
         />
       ) : (
         <ul className={styles.contractsList}>
@@ -112,8 +124,10 @@ export function ContractsListPanel({
                   <span>
                     Origem: {item.latestVersionSource ? (SOURCE_LABELS[item.latestVersionSource] ?? item.latestVersionSource) : "a confirmar"}
                   </span>
+                  {renderExtraMeta && renderExtraMeta(item)}
                 </div>
               </Link>
+              {renderRowActions && renderRowActions(item)}
             </li>
           ))}
         </ul>

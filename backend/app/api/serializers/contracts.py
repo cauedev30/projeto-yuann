@@ -104,6 +104,10 @@ def serialize_contract_list_item(contract: Contract) -> ContractListItem:
         start_date=contract.start_date,
         end_date=contract.end_date,
         term_months=contract.term_months,
+        is_active=contract.is_active,
+        activated_at=contract.activated_at,
+        last_accessed_at=contract.last_accessed_at,
+        last_analyzed_at=contract.last_analyzed_at,
         latest_analysis_status=latest_analysis.status.value if latest_analysis is not None else None,
         latest_contract_risk_score=float(latest_analysis.contract_risk_score)
         if latest_analysis is not None and latest_analysis.contract_risk_score is not None
@@ -123,6 +127,10 @@ def serialize_contract_detail(contract: Contract) -> ContractDetailResponse:
             start_date=contract.start_date,
             end_date=contract.end_date,
             term_months=contract.term_months,
+            is_active=contract.is_active,
+            activated_at=contract.activated_at,
+            last_accessed_at=contract.last_accessed_at,
+            last_analyzed_at=contract.last_analyzed_at,
             parties=contract.parties,
             financial_terms=contract.financial_terms,
             field_confidence=_extract_field_confidence(contract),

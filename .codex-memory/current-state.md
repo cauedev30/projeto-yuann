@@ -19,6 +19,7 @@
 - Fase 4: Notificacoes SMTP — `SmtpEmailSender` em `infrastructure/notifications.py`; eventos de notificacao em 10/9/8/7 meses antes do vencimento; corpo do email enriquecido.
 - Fase 5: Auth JWT — modelo `User`, rotas `/api/auth/register|login|me`, dependency `get_current_user`, migracao `0006`; frontend com `AuthProvider`, `AuthGuard`, pagina `/login` glassmorphic, headers `Authorization` em todos os API clients.
 - Fase 6 (Micro Ajustes): AI summary ativado passando `.env` para o uvicorn localmente. UI com titulo de achados alterado para "Principais Pontos". Duplicidade de visualizacao do Prazo de Vigencia resolvida limpando DB obsoleto via reanalise da API.
+- Fase 7: F6-B (Acervo e Histórico) — Rotas segregadas no frontend separando o workflow operacional (Acervo/Histórico) do fluxo de ingestão (contracts upload).
 
 ## Plano de melhorias (2026-03-18) — 4 fases concluidas
 - Fase 1 (Correcoes rapidas frontend): data hardcoded na timeline corrigida para `new Date()`; traducoes "Contracts"→"Contratos", "Findings principais"→"Achados principais", "Findings criticos"→"Achados criticos"; labels de origem traduzidos; botao "Sair" na sidebar e mobile nav; StatCards com variante compact.
@@ -28,6 +29,7 @@
 - Fase 5 (Contratos e IA): substituicao de "Texto extraido" por `ContractSummaryPanel`; remocao de botoes falhos de atualizar; correcao do erro de "Hydration failed" no `AuthGuard`; otimizacao em `evaluate_rules` para agrupar limites de `Prazo de vigencia` e fix do parser regex de entidades locais; estilizacao premium com glassmorphism no `AppShell` da sidebar.
 
 ## Evidencia operacional mais recente
+- UI Acervo/Histórico: testes unitários web (23 testes) passando em 2026-03-25.
 - Backend focado em deploy: `5 passed in 1.45s` (`backend/tests/core/test_app_factory.py` + `backend/tests/core/test_config.py`)
 - Packaging/backend deploy: `6 passed in 1.38s` incluindo `backend/tests/core/test_packaging.py`
 - Bootstrap/backend deploy: `7 passed in 1.47s` incluindo normalizacao da `DATABASE_URL` do Railway
@@ -51,4 +53,4 @@
 - Atualizar `CORS_ORIGINS` no Railway com a URL final do frontend e validar `GET /health`.
 
 ## Ultima atualizacao
-- 2026-03-22
+- 2026-03-25

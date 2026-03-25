@@ -1,6 +1,11 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { getContractDetail, listContracts, uploadContract } from "./contracts";
+import {
+  getContractDetail,
+  listContracts,
+  updateContract,
+  uploadContract,
+} from "./contracts";
 
 const input = {
   title: "Loja Centro",
@@ -54,6 +59,10 @@ describe("uploadContract", () => {
               start_date: null,
               end_date: null,
               term_months: 36,
+              is_active: true,
+              activated_at: "2026-03-10T12:00:00Z",
+              last_accessed_at: "2026-03-20T12:00:00Z",
+              last_analyzed_at: "2026-03-18T12:00:00Z",
               latest_analysis_status: "completed",
               latest_contract_risk_score: 80,
               latest_version_source: "third_party_draft",
@@ -70,6 +79,7 @@ describe("uploadContract", () => {
 
     expect(result.items[0].title).toBe("Loja Centro");
     expect(result.items[0].latestRiskScore).toBe(80);
+    expect(result.items[0].isActive).toBe(true);
   });
 
   it("maps contract detail payloads from the API", async () => {
@@ -86,6 +96,10 @@ describe("uploadContract", () => {
             start_date: null,
             end_date: null,
             term_months: 36,
+            is_active: false,
+            activated_at: null,
+            last_accessed_at: "2026-03-22T12:00:00Z",
+            last_analyzed_at: "2026-03-21T12:00:00Z",
             parties: { tenant: "Loja Centro" },
             financial_terms: { monthly_rent: 12000 },
             field_confidence: {},
@@ -127,8 +141,86 @@ describe("uploadContract", () => {
     const result = await getContractDetail("ctr-1", fetchImpl);
 
     expect(result.contract.externalReference).toBe("LOC-001");
+    expect(result.contract.lastAccessedAt).toBe("2026-03-22T12:00:00Z");
     expect(result.latestVersion?.originalFilename).toBe("contract.pdf");
     expect(result.latestAnalysis?.findings[0].clauseName).toBe("Prazo de vigencia");
+  });
+
+  it("appends the requested scope to the contracts list URL", async () => {
+    vi.stubEnv("NEXT_PUBLIC_API_URL", "http://127.0.0.1:8000");
+    const fetchImpl = vi.fn<typeof fetch>(async () =>
+      new Response(JSON.stringify({ items: [] }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
+
+    await listContracts("active", fetchImpl);
+    await listContracts("history", fetchImpl);
+
+    expect(fetchImpl).toHaveBeenNthCalledWith(
+      1,
+      "http://127.0.0.1:8000/api/contracts?scope=active",
+      expect.objectContaining({
+        headers: expect.any(Object),
+        cache: "no-store",
+      }),
+    );
+    expect(fetchImpl).toHaveBeenNthCalledWith(
+      2,
+      "http://127.0.0.1:8000/api/contracts?scope=history",
+      expect.objectContaining({
+        headers: expect.any(Object),
+        cache: "no-store",
+      }),
+    );
+  });
+
+  it("sends is_active when updating a contract lifecycle flag", async () => {
+    vi.stubEnv("NEXT_PUBLIC_API_URL", "http://127.0.0.1:8000");
+    const fetchImpl = vi.fn<typeof fetch>(async () =>
+      new Response(
+        JSON.stringify({
+          contract: {
+            id: "ctr-1",
+            title: "Loja Centro",
+            external_reference: "LOC-001",
+            status: "uploaded",
+            signature_date: null,
+            start_date: null,
+            end_date: null,
+            term_months: 36,
+            is_active: true,
+            activated_at: "2026-03-10T12:00:00Z",
+            last_accessed_at: null,
+            last_analyzed_at: null,
+            parties: null,
+            financial_terms: null,
+            field_confidence: {},
+          },
+          latest_version: null,
+          latest_analysis: null,
+          events: [],
+        }),
+        {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        },
+      ),
+    );
+
+    await updateContract("ctr-1", { isActive: true }, fetchImpl);
+
+    expect(fetchImpl).toHaveBeenCalledWith(
+      "http://127.0.0.1:8000/api/contracts/ctr-1",
+      expect.objectContaining({
+        method: "PATCH",
+        headers: expect.objectContaining({
+          "Content-Type": "application/json",
+        }),
+        body: JSON.stringify({ is_active: true }),
+      }),
+    );
   });
 
   it("falls back to a generic contracts error when list/detail responses are unusable", async () => {

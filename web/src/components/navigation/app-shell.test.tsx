@@ -35,6 +35,14 @@ describe("AppShell", () => {
       "href",
       "/dashboard",
     );
+    expect(within(navigation).getByRole("link", { name: "Acervo" })).toHaveAttribute(
+      "href",
+      "/acervo",
+    );
+    expect(within(navigation).getByRole("link", { name: "Histórico" })).toHaveAttribute(
+      "href",
+      "/historico",
+    );
     expect(within(navigation).getByRole("link", { name: "Contratos" })).toHaveAttribute(
       "href",
       "/contracts",

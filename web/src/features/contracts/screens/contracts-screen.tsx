@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React from "react";
 import { useCallback, useEffect, useState } from "react";
@@ -189,7 +190,7 @@ export function ContractsScreen({
 
       {showSuccessBanner && (
         <div className={styles.successBanner} role="status">
-          Triagem concluida com sucesso — contrato adicionado ao portfólio.
+          Triagem concluida com sucesso — contrato adicionado ao acervo.
         </div>
       )}
 
@@ -255,14 +256,46 @@ export function ContractsScreen({
         </section>
       )}
 
-      <ContractsListPanel
-        error={contractsError}
-        isLoading={isLoadingContracts}
-        isRefreshing={isRefreshingContracts}
-        items={contracts}
-        navigateToContract={openContract}
-        onRefresh={refreshPersistedContracts}
-      />
+      <section className={`${styles.panel} ${styles.emptyPanel}`}>
+        <div className={styles.sectionHeader}>
+          <div>
+            <p className={styles.panelEyebrow}>Navegacao</p>
+            <h2 className={styles.sectionTitle}>Acessar Acervo</h2>
+          </div>
+        </div>
+        <p className={styles.emptyCopy} style={{ marginBottom: "1.5rem" }}>
+          Contratos ativos e o histórico operacional foram movidos para rotas dedicadas.
+        </p>
+        <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
+          <Link
+            href="/acervo"
+            style={{
+              backgroundColor: "var(--brand-main, #0070f3)",
+              color: "#fff",
+              padding: "0.5rem 1rem",
+              borderRadius: "4px",
+              textDecoration: "none",
+              fontWeight: 500
+            }}
+          >
+            Abrir Acervo
+          </Link>
+          <Link
+            href="/historico"
+            style={{
+              backgroundColor: "var(--surface-sunken, #f1f5f9)",
+              color: "var(--text-main, #0f172a)",
+              border: "1px solid var(--border-subtle, #e2e8f0)",
+              padding: "0.5rem 1rem",
+              borderRadius: "4px",
+              textDecoration: "none",
+              fontWeight: 500
+            }}
+          >
+            Abrir Histórico
+          </Link>
+        </div>
+      </section>
     </main>
   );
 }

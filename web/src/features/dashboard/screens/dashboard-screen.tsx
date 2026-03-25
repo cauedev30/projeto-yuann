@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import React from "react";
 import { useEffect, useState } from "react";
 
@@ -12,7 +13,6 @@ import { NotificationHistory } from "../../notifications/components/notification
 import { ContractsSummary } from "../components/contracts-summary";
 import { EmptyDashboardState } from "../components/empty-dashboard-state";
 import { EventsTimeline } from "../components/events-timeline";
-import { ManageContractsPanel } from "../components/manage-contracts-panel";
 import styles from "./dashboard-screen.module.css";
 
 type DashboardScreenProps = {
@@ -30,7 +30,6 @@ export function DashboardScreen({
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<Error | null>(null);
-  const [showManagePanel, setShowManagePanel] = useState(false);
 
   useEffect(() => {
     let isActive = true;
@@ -90,8 +89,8 @@ export function DashboardScreen({
       </div>
       <PageHeader
         eyebrow="Dashboard"
-        title="Resumo do portfolio"
-        description="Visao geral dos contratos, eventos e notificacoes."
+        title="Visão geral"
+        description="Resumo dos contratos, eventos e notificacoes."
       />
 
       {isLoading ? (
@@ -118,23 +117,15 @@ export function DashboardScreen({
       ) : snapshot ? (
         <div className={styles.stack}>
           <div className={styles.refreshRow}>
-            <button
-              className={styles.manageButton}
-              onClick={() => setShowManagePanel((prev) => !prev)}
-              type="button"
-            >
-              {showManagePanel ? "Ocultar portfolio" : "Gerenciar portfolio"}
-            </button>
+            <Link className={styles.manageButton} href="/acervo">
+              Abrir Acervo
+            </Link>
+            <Link className={styles.manageButton} href="/historico" style={{ marginLeft: "1rem" }}>
+              Abrir Histórico
+            </Link>
           </div>
 
-          {showManagePanel && (
-            <ManageContractsPanel 
-              onClose={() => setShowManagePanel(false)}
-              onRefresh={() => void handleRefresh()} 
-            />
-          )}
-
-          <SurfaceCard title="Resumo do portifolio">
+          <SurfaceCard title="Resumo geral">
             <ContractsSummary summary={snapshot.summary} />
           </SurfaceCard>
 

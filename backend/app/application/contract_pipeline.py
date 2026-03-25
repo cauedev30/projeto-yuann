@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.application.analysis import mark_contract_analysis_completed
 from app.db.models.analysis import AnalysisStatus, ContractAnalysis, ContractAnalysisFinding
 from app.db.models.contract import Contract, ContractVersion
 from app.db.models.event import ContractEvent
@@ -112,6 +113,7 @@ def run_policy_analysis(
         )
 
     session.add(analysis)
+    mark_contract_analysis_completed(contract)
     session.flush()
 
 

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, datetime
 from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -15,6 +15,10 @@ class ContractListItem(BaseModel):
     start_date: date | None = None
     end_date: date | None = None
     term_months: int | None = None
+    is_active: bool
+    activated_at: datetime | None = None
+    last_accessed_at: datetime | None = None
+    last_analyzed_at: datetime | None = None
     latest_analysis_status: str | None = None
     latest_contract_risk_score: float | None = None
     latest_version_source: str | None = None
@@ -30,6 +34,7 @@ class ContractUpdateInput(BaseModel):
     start_date: date | None = None
     end_date: date | None = None
     term_months: int | None = None
+    is_active: bool | None = None
 
 
 class ContractEventSummary(BaseModel):
@@ -49,6 +54,10 @@ class ContractDetailSummary(BaseModel):
     start_date: date | None = None
     end_date: date | None = None
     term_months: int | None = None
+    is_active: bool
+    activated_at: datetime | None = None
+    last_accessed_at: datetime | None = None
+    last_analyzed_at: datetime | None = None
     parties: dict[str, Any] | None = None
     financial_terms: dict[str, Any] | None = None
     field_confidence: dict[str, float] = Field(default_factory=dict)

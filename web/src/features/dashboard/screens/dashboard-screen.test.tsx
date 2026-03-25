@@ -11,7 +11,7 @@ describe("DashboardScreen", () => {
 
     expect(screen.getByText("Dashboard")).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: "Resumo do portfolio" }),
+      screen.getByRole("heading", { name: "Visão geral" }),
     ).toBeInTheDocument();
     expect(screen.getByLabelText("Carregando conteudo")).toBeInTheDocument();
     expect(screen.getByText("Carregando dashboard operacional...")).toBeInTheDocument();
@@ -38,7 +38,7 @@ describe("DashboardScreen", () => {
   it("renders summary, timeline and notification blocks when a snapshot exists", async () => {
     render(<DashboardScreen loadDashboardSnapshot={async () => buildDashboardSnapshotFixture()} />);
 
-    expect(await screen.findByText("Resumo do portifolio")).toBeInTheDocument();
+    expect(await screen.findByText("Resumo geral")).toBeInTheDocument();
     expect(screen.getByText("Timeline de eventos")).toBeInTheDocument();
     expect(screen.getByText("Historico de notificacoes")).toBeInTheDocument();
   });

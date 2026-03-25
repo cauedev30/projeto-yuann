@@ -1,9 +1,20 @@
 from __future__ import annotations
 
+from datetime import datetime, timezone
+
 from sqlalchemy.orm import Session
 
 from app.db.models.analysis import AnalysisStatus, ContractAnalysis, ContractAnalysisFinding
+from app.db.models.contract import Contract
 from app.schemas.analysis import ContractAnalysisResult
+
+
+def mark_contract_analysis_completed(
+    contract: Contract,
+    *,
+    analyzed_at: datetime | None = None,
+) -> None:
+    contract.last_analyzed_at = analyzed_at or datetime.now(timezone.utc)
 
 
 def persist_contract_analysis(
@@ -35,6 +46,9 @@ def persist_contract_analysis(
     )
 
     session.add(analysis)
+    contract = session.get(Contract, contract_id)
+    if contract is not None:
+        mark_contract_analysis_completed(contract)
     session.commit()
     session.refresh(analysis)
     return analysis

@@ -70,6 +70,10 @@ function buildContractsListResult() {
         latestAnalysisStatus: "completed",
         latestRiskScore: 80,
         latestVersionSource: "third_party_draft" as const,
+        isActive: true,
+        activatedAt: null,
+        lastAccessedAt: null,
+        lastAnalyzedAt: null,
       },
     ],
   };
@@ -96,7 +100,7 @@ describe("ContractsScreen", () => {
     expect(scope.getByText("Contratos")).toBeInTheDocument();
     expect(scope.getByText("Analise de contratos")).toBeInTheDocument();
     expect(scope.getByText("Nenhuma triagem foi executada nesta sessao.")).toBeInTheDocument();
-    expect(scope.getByText("Nenhum contrato persistido")).toBeInTheDocument();
+    expect(scope.getByRole("link", { name: "Abrir Acervo" })).toBeInTheDocument();
   });
 
   it("shows processing feedback while the upload is pending", async () => {
@@ -207,17 +211,7 @@ describe("ContractsScreen", () => {
     render(<ContractsScreen submitContract={vi.fn()} loadContracts={loadContracts} />);
     const scope = getScreenScope();
 
-    expect(scope.getByLabelText("Carregando lista")).toBeInTheDocument();
     expect(scope.getAllByText("Carregando contratos...").length).toBeGreaterThan(0);
-  });
-
-  it("shows a contextual error when the persisted contracts list fails", async () => {
-    const loadContracts = vi.fn().mockRejectedValue(new Error("Falha ao carregar contratos"));
-
-    render(<ContractsScreen submitContract={vi.fn()} loadContracts={loadContracts} />);
-    const scope = getScreenScope();
-
-    expect(await scope.findByRole("alert")).toHaveTextContent("Falha ao carregar contratos");
   });
 
 
@@ -237,43 +231,9 @@ describe("ContractsScreen", () => {
     );
     const scope = getScreenScope();
 
-    expect(await scope.findByText("Nenhum contrato persistido")).toBeInTheDocument();
+    expect(await scope.findByRole("link", { name: "Abrir Acervo" })).toBeInTheDocument();
     await user.click(scope.getByRole("button", { name: "Enviar contrato" }));
 
     await waitFor(() => expect(loadContracts).toHaveBeenCalledTimes(2));
-    expect(await scope.findByText("Loja Centro")).toBeInTheDocument();
-  });
-
-  it("navigates to the canonical contract detail route from the persisted list", async () => {
-    const user = userEvent.setup();
-    const loadContracts = vi.fn().mockResolvedValue(buildContractsListResult());
-    const navigateToContract = vi.fn();
-
-    render(
-      <ContractsScreen
-        submitContract={vi.fn()}
-        loadContracts={loadContracts}
-        navigateToContract={navigateToContract}
-      />,
-    );
-    const scope = getScreenScope();
-
-    const contractLink = await scope.findByRole("link", { name: /Loja Centro/i });
-    await user.click(contractLink);
-
-    expect(navigateToContract).toHaveBeenCalledWith("ctr-1");
-  });
-
-  it("uses the app router fallback when no navigation callback is injected", async () => {
-    const user = userEvent.setup();
-    const loadContracts = vi.fn().mockResolvedValue(buildContractsListResult());
-
-    render(<ContractsScreen submitContract={vi.fn()} loadContracts={loadContracts} />);
-    const scope = getScreenScope();
-
-    const contractLink = await scope.findByRole("link", { name: /Loja Centro/i });
-    await user.click(contractLink);
-
-    expect(pushMock).toHaveBeenCalledWith("/contracts/ctr-1");
   });
 });

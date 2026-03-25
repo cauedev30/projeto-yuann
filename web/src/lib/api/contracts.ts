@@ -5,6 +5,7 @@ import {
   type ContractDetailResponsePayload,
   type ContractListResponse,
   type ContractListResponsePayload,
+  type ContractScope,
   type ContractUploadInput,
   type ContractUploadResponsePayload,
   type ContractUploadResult,
@@ -94,10 +95,22 @@ export async function uploadContract(
 }
 
 export async function listContracts(
+  scopeOrFetchImpl?: ContractScope | typeof fetch,
   fetchImpl: typeof fetch = fetch,
 ): Promise<ContractListResponse> {
   const { NEXT_PUBLIC_API_URL } = getClientEnv();
-  const response = await fetchImpl(`${NEXT_PUBLIC_API_URL}/api/contracts`, {
+  const scope =
+    typeof scopeOrFetchImpl === "function" || scopeOrFetchImpl === undefined
+      ? undefined
+      : scopeOrFetchImpl;
+  const resolvedFetchImpl =
+    typeof scopeOrFetchImpl === "function" ? scopeOrFetchImpl : fetchImpl;
+  const url = new URL(`${NEXT_PUBLIC_API_URL}/api/contracts`);
+  if (scope !== undefined) {
+    url.searchParams.set("scope", scope);
+  }
+
+  const response = await resolvedFetchImpl(url.toString(), {
     headers: getAuthHeaders(),
     cache: "no-store",
   });
@@ -151,6 +164,7 @@ export async function updateContract(
     startDate?: string | null;
     endDate?: string | null;
     termMonths?: number | null;
+    isActive?: boolean;
   },
   fetchImpl: typeof fetch = fetch,
 ): Promise<ContractDetail> {
@@ -163,6 +177,7 @@ export async function updateContract(
   if (updates.startDate !== undefined) payload.start_date = updates.startDate;
   if (updates.endDate !== undefined) payload.end_date = updates.endDate;
   if (updates.termMonths !== undefined) payload.term_months = updates.termMonths;
+  if (updates.isActive !== undefined) payload.is_active = updates.isActive;
 
   const response = await fetchImpl(`${NEXT_PUBLIC_API_URL}/api/contracts/${contractId}`, {
     method: "PATCH",

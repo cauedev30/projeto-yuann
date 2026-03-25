@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import asyncio
 import json
-from typing import AsyncGenerator
+from datetime import datetime, timezone
+from typing import AsyncGenerator, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
 from fastapi.responses import StreamingResponse
@@ -11,6 +12,7 @@ from sqlalchemy.orm import Session, selectinload
 
 from app.api.dependencies import get_session
 from app.api.serializers.contracts import serialize_contract_detail, serialize_contract_list_item
+from app.application.analysis import mark_contract_analysis_completed
 from app.application.contract_pipeline import run_contract_pipeline
 from app.db.models.analysis import ContractAnalysis
 from app.db.models.contract import Contract
@@ -27,6 +29,11 @@ from app.schemas.contract import (
 )
 
 router = APIRouter(prefix="/api/contracts", tags=["contracts"])
+ContractScope = Literal["all", "active", "history"]
+
+
+def _utcnow() -> datetime:
+    return datetime.now(timezone.utc)
 
 
 def _contract_query():
@@ -37,26 +44,50 @@ def _contract_query():
     )
 
 
+def _contract_scope_filters(scope: ContractScope):
+    if scope == "active":
+        return (Contract.is_active.is_(True),)
+    if scope == "history":
+        return (
+            Contract.is_active.is_(False),
+            Contract.last_analyzed_at.is_not(None),
+        )
+    return ()
+
+
+def _contract_scope_order_by(scope: ContractScope):
+    if scope == "active":
+        return (Contract.updated_at.desc(), Contract.created_at.desc())
+    if scope == "history":
+        return (Contract.last_analyzed_at.desc(), Contract.created_at.desc())
+    return (Contract.created_at.desc(),)
+
+
 @router.get("", response_model=PaginatedContractListResponse)
 def list_contracts(
     page: int = Query(1, ge=1, description="Page number"),
     per_page: int = Query(20, ge=1, le=100, description="Items per page"),
+    scope: ContractScope = Query("all", description="Contract scope filter"),
     session: Session = Depends(get_session),
 ) -> PaginatedContractListResponse:
     """List contracts with pagination."""
-    total = session.scalar(select(func.count()).select_from(Contract))
-    
+    filters = _contract_scope_filters(scope)
+    total = session.scalar(
+        select(func.count()).select_from(Contract).where(*filters)
+    )
+
     offset = (page - 1) * per_page
     contracts = session.scalars(
         _contract_query()
-        .order_by(Contract.created_at.desc())
+        .where(*filters)
+        .order_by(*_contract_scope_order_by(scope))
         .offset(offset)
         .limit(per_page)
     ).all()
-    
+
     items = [serialize_contract_list_item(contract) for contract in contracts]
     total_pages = (total + per_page - 1) // per_page if total else 1
-    
+
     return PaginatedContractListResponse(
         items=items,
         page=page,
@@ -75,6 +106,9 @@ def get_contract_detail(
     if contract is None:
         raise HTTPException(status_code=404, detail="Contract not found")
 
+    contract.last_accessed_at = _utcnow()
+    session.commit()
+    contract = session.scalar(_contract_query().where(Contract.id == contract_id))
     return serialize_contract_detail(contract)
 
 
@@ -103,11 +137,24 @@ def update_contract(
         raise HTTPException(status_code=404, detail="Contract not found")
 
     update_data = payload.model_dump(exclude_unset=True)
+    did_update = False
+
+    if "is_active" in update_data:
+        requested_is_active = update_data.pop("is_active")
+        if requested_is_active is not None and requested_is_active != contract.is_active:
+            if not contract.is_active and requested_is_active:
+                contract.activated_at = _utcnow()
+            contract.is_active = requested_is_active
+            did_update = True
+
     if update_data:
         for key, value in update_data.items():
             setattr(contract, key, value)
+        did_update = True
+
+    if did_update:
         session.commit()
-        
+
     contract = session.scalar(_contract_query().where(Contract.id == contract_id))
     return serialize_contract_detail(contract)
 
@@ -234,6 +281,7 @@ async def _analysis_stream(
                     ],
                 )
                 session.add(analysis)
+                mark_contract_analysis_completed(contract)
                 contract.status = "analisado"
                 session.commit()
         

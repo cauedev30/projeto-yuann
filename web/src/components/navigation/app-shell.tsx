@@ -30,6 +30,14 @@ function getTopbarContext(pathname: string): TopbarContext {
     return { title: "Dashboard", subtitle: "Governanca contratual" };
   }
 
+  if (pathname.startsWith("/acervo")) {
+    return { title: "Acervo", subtitle: "Contratos ativos" };
+  }
+
+  if (pathname.startsWith("/historico")) {
+    return { title: "Histórico", subtitle: "Contratos analisados" };
+  }
+
   return { title: "Espaço de trabalho", subtitle: "Governanca contratual" };
 }
 
@@ -67,7 +75,19 @@ export function AppShell({ children }: AppShellProps) {
           <Link aria-label="Dashboard" className={navLinkClass("/dashboard")} href="/dashboard">
             <span className={styles.navTitle}>Dashboard</span>
             <small aria-hidden="true" className={styles.navMeta}>
-              Portfolio, eventos e notificacoes
+              Resumo, eventos e notificações
+            </small>
+          </Link>
+          <Link aria-label="Acervo" className={navLinkClass("/acervo")} href="/acervo">
+            <span className={styles.navTitle}>Acervo</span>
+            <small aria-hidden="true" className={styles.navMeta}>
+              Contratos ativos
+            </small>
+          </Link>
+          <Link aria-label="Histórico" className={navLinkClass("/historico")} href="/historico">
+            <span className={styles.navTitle}>Histórico</span>
+            <small aria-hidden="true" className={styles.navMeta}>
+              Contratos analisados
             </small>
           </Link>
           <Link aria-label="Contratos" className={navLinkClass("/contracts")} href="/contracts">
@@ -100,7 +120,19 @@ export function AppShell({ children }: AppShellProps) {
               <Link aria-label="Dashboard" className={navLinkClass("/dashboard")} href="/dashboard">
                 <span className={styles.navTitle}>Dashboard</span>
                 <small aria-hidden="true" className={styles.navMeta}>
-                  Portfolio, eventos e notificacoes
+                  Resumo, eventos e notificações
+                </small>
+              </Link>
+              <Link aria-label="Acervo" className={navLinkClass("/acervo")} href="/acervo">
+                <span className={styles.navTitle}>Acervo</span>
+                <small aria-hidden="true" className={styles.navMeta}>
+                  Contratos ativos
+                </small>
+              </Link>
+              <Link aria-label="Histórico" className={navLinkClass("/historico")} href="/historico">
+                <span className={styles.navTitle}>Histórico</span>
+                <small aria-hidden="true" className={styles.navMeta}>
+                  Contratos analisados
                 </small>
               </Link>
               <Link aria-label="Contratos" className={navLinkClass("/contracts")} href="/contracts">

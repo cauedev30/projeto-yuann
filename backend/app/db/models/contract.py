@@ -4,9 +4,9 @@ import enum
 from typing import Any
 from uuid import uuid4
 
-from datetime import date
+from datetime import date, datetime
 
-from sqlalchemy import Date, Enum, ForeignKey, Integer, String, Text
+from sqlalchemy import Boolean, Date, DateTime, Enum, ForeignKey, Integer, String, Text
 from sqlalchemy.dialects.sqlite import JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -31,6 +31,10 @@ class Contract(TimestampMixin, Base):
     term_months: Mapped[int | None] = mapped_column(Integer)
     parties: Mapped[dict[str, Any] | None] = mapped_column(JSON)
     financial_terms: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    activated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    last_accessed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    last_analyzed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     versions: Mapped[list["ContractVersion"]] = relationship(
         back_populates="contract",

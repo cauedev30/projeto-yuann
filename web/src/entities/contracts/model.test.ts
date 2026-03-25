@@ -32,6 +32,10 @@ describe("contracts entity mapping", () => {
           start_date: null,
           end_date: null,
           term_months: 36,
+          is_active: true,
+          activated_at: "2026-03-10T12:00:00Z",
+          last_accessed_at: "2026-03-20T12:00:00Z",
+          last_analyzed_at: "2026-03-18T12:00:00Z",
           latest_analysis_status: "completed",
           latest_contract_risk_score: 80,
           latest_version_source: "third_party_draft",
@@ -42,6 +46,10 @@ describe("contracts entity mapping", () => {
     expect(result.items[0].externalReference).toBe("LOC-001");
     expect(result.items[0].latestRiskScore).toBe(80);
     expect(result.items[0].latestVersionSource).toBe("third_party_draft");
+    expect(result.items[0].isActive).toBe(true);
+    expect(result.items[0].activatedAt).toBe("2026-03-10T12:00:00Z");
+    expect(result.items[0].lastAccessedAt).toBe("2026-03-20T12:00:00Z");
+    expect(result.items[0].lastAnalyzedAt).toBe("2026-03-18T12:00:00Z");
   });
 
   it("maps contract detail payloads and preserves null derived sections", () => {
@@ -55,6 +63,10 @@ describe("contracts entity mapping", () => {
         start_date: null,
         end_date: null,
         term_months: 36,
+        is_active: false,
+        activated_at: null,
+        last_accessed_at: "2026-03-22T12:00:00Z",
+        last_analyzed_at: "2026-03-21T12:00:00Z",
         parties: null,
         financial_terms: null,
         field_confidence: {},
@@ -66,6 +78,9 @@ describe("contracts entity mapping", () => {
 
     expect(result.contract.externalReference).toBe("LOC-001");
     expect(result.contract.termMonths).toBe(36);
+    expect(result.contract.isActive).toBe(false);
+    expect(result.contract.lastAccessedAt).toBe("2026-03-22T12:00:00Z");
+    expect(result.contract.lastAnalyzedAt).toBe("2026-03-21T12:00:00Z");
     expect(result.latestVersion).toBeNull();
     expect(result.latestAnalysis).toBeNull();
   });

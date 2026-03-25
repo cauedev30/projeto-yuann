@@ -1,5 +1,11 @@
 # Session Log
 
+- Data: 2026-03-25 15:53:00 -0300
+  - tarefa: implementar F6-B (Acervo e Histórico UI) segregando a listagem e finalizando os detalhes operacionais no Trello.
+  - resultado: rotas `/acervo` e `/historico` criadas; fluxos antigos de dashboard focados em 'portfolio' corrigidos; testes dedicados implementados; suíte atualizada do frontend rodando limpa (`23` testes passando).
+  - arquivos alterados: `web/src/components/navigation/app-shell.tsx`, `web/src/features/dashboard/screens/dashboard-screen.tsx`, `web/src/features/contracts/screens/contracts-screen.tsx`, `web/src/features/contracts/components/contracts-list-panel.tsx`, `web/src/app/(app)/acervo/page.tsx`, `web/src/app/(app)/historico/page.tsx`, `web/src/features/contracts/screens/acervo-screen.tsx`, `web/src/features/contracts/screens/historico-screen.tsx`, `web/src/components/navigation/app-shell.test.tsx`, `web/src/features/dashboard/screens/dashboard-screen.test.tsx`, `web/src/features/contracts/screens/contracts-screen.test.tsx`, `web/src/features/contracts/screens/acervo-screen.test.tsx`, `web/src/features/contracts/screens/historico-screen.test.tsx`
+  - proximos passos: publicar no git e validar interacoes F6-B finais com backend operante.
+
 - Data: 2026-03-22 00:09:00 -0300
   - tarefa: hardening de deploy para `Railway + Vercel`, corrigindo bootstrap/config do backend e documentacao operacional.
   - resultado: `backend/app/core/app_factory.py` passou a respeitar `DATABASE_URL`, `UPLOAD_DIR` e `CORS_ORIGINS` por env; dependencias de deploy ganharam `psycopg[binary]` e `pydantic-settings`; `.env.example` e `DEPLOY_GUIDE.md` foram alinhados ao fluxo com `Postgres + volume` no Railway; verificacao fresca com `5` testes backend focados e `npm run build` verde no frontend.

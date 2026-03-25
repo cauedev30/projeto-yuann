@@ -1,4 +1,5 @@
 export type ContractSource = "third_party_draft" | "signed_contract";
+export type ContractScope = "all" | "active" | "history";
 
 export type ContractEventType = "renewal" | "expiration" | "readjustment" | "grace_period_end";
 
@@ -27,6 +28,10 @@ export type ContractListItemSummary = {
   startDate: string | null;
   endDate: string | null;
   termMonths: number | null;
+  isActive: boolean;
+  activatedAt: string | null;
+  lastAccessedAt: string | null;
+  lastAnalyzedAt: string | null;
   latestAnalysisStatus: string | null;
   latestRiskScore: number | null;
   latestVersionSource: ContractSource | null;
@@ -45,6 +50,10 @@ export type ContractListItemPayload = {
   start_date: string | null;
   end_date: string | null;
   term_months: number | null;
+  is_active: boolean;
+  activated_at: string | null;
+  last_accessed_at: string | null;
+  last_analyzed_at: string | null;
   latest_analysis_status: string | null;
   latest_contract_risk_score: number | null;
   latest_version_source: ContractSource | null;
@@ -98,6 +107,10 @@ export type ContractDetailSummary = {
   startDate: string | null;
   endDate: string | null;
   termMonths: number | null;
+  isActive: boolean;
+  activatedAt: string | null;
+  lastAccessedAt: string | null;
+  lastAnalyzedAt: string | null;
   parties: Record<string, unknown> | null;
   financialTerms: Record<string, unknown> | null;
   fieldConfidence: Record<string, number>;
@@ -135,6 +148,10 @@ export type ContractDetailSummaryPayload = {
   start_date: string | null;
   end_date: string | null;
   term_months: number | null;
+  is_active: boolean;
+  activated_at: string | null;
+  last_accessed_at: string | null;
+  last_analyzed_at: string | null;
   parties: Record<string, unknown> | null;
   financial_terms: Record<string, unknown> | null;
   field_confidence: Record<string, number>;
@@ -214,6 +231,10 @@ export function mapContractListResponse(
       startDate: item.start_date,
       endDate: item.end_date,
       termMonths: item.term_months,
+      isActive: item.is_active,
+      activatedAt: item.activated_at,
+      lastAccessedAt: item.last_accessed_at,
+      lastAnalyzedAt: item.last_analyzed_at,
       latestAnalysisStatus: item.latest_analysis_status,
       latestRiskScore: item.latest_contract_risk_score,
       latestVersionSource: item.latest_version_source,
@@ -234,6 +255,10 @@ export function mapContractDetailResponse(
       startDate: payload.contract.start_date,
       endDate: payload.contract.end_date,
       termMonths: payload.contract.term_months,
+      isActive: payload.contract.is_active,
+      activatedAt: payload.contract.activated_at,
+      lastAccessedAt: payload.contract.last_accessed_at,
+      lastAnalyzedAt: payload.contract.last_analyzed_at,
       parties: payload.contract.parties,
       financialTerms: payload.contract.financial_terms,
       fieldConfidence: payload.contract.field_confidence,
