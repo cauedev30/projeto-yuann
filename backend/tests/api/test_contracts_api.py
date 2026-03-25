@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta, timezone
+from types import SimpleNamespace
 
 from app.application.analysis import persist_contract_analysis
 from app.db.models.contract import Contract, ContractSource, ContractVersion
@@ -25,18 +26,51 @@ def upload_contract(client, *, external_reference: str = "LOC-001") -> dict:
     )
 
     assert response.status_code == 201
+    payload = response.json()
+    assert payload["version_number"] == 1
+    return payload
+
+
+def upload_contract_version(
+    client,
+    *,
+    contract_id: str,
+    filename: str,
+    contract_text: str,
+    source: str = "third_party_draft",
+) -> dict:
+    response = client.post(
+        f"/api/contracts/{contract_id}/versions",
+        data={"source": source},
+        files={
+            "file": (
+                filename,
+                build_pdf_with_text(contract_text),
+                "application/pdf",
+            )
+        },
+    )
+
+    assert response.status_code == 201
     return response.json()
 
 
-def persist_contract_analysis_for(client, *, contract_id: str) -> None:
+def persist_contract_analysis_for(
+    client,
+    *,
+    contract_id: str,
+    contract_version_id: str | None = None,
+    contract_risk_score: float = 80,
+) -> None:
     session = client.app.state.session_factory()
     try:
         persist_contract_analysis(
             session,
             contract_id=contract_id,
+            contract_version_id=contract_version_id,
             policy_version="v1",
             analysis_result=ContractAnalysisResult(
-                contract_risk_score=80,
+                contract_risk_score=contract_risk_score,
                 items=[
                     AnalysisItem(
                         clause_name="Prazo de vigencia",
@@ -277,6 +311,8 @@ def test_get_contract_detail_returns_contract_version_and_analysis(client) -> No
     assert isinstance(contract["field_confidence"], dict)
 
     assert data["latest_version"]["contract_version_id"] == upload_payload["contract_version_id"]
+    assert data["latest_version"]["version_number"] == 1
+    assert data["latest_version"]["created_at"] is not None
     assert data["latest_version"]["source"] == "third_party_draft"
     assert data["latest_version"]["text"] == "Prazo de vigencia 36 meses"
 
@@ -302,12 +338,214 @@ def test_get_contract_detail_returns_null_analysis_when_not_available(client) ->
     assert response.json()["contract"]["last_analyzed_at"] is None
     assert response.json()["latest_version"] == {
         "contract_version_id": upload_payload["contract_version_id"],
+        "version_number": 1,
+        "created_at": response.json()["latest_version"]["created_at"],
         "source": "third_party_draft",
         "original_filename": "contract.pdf",
         "used_ocr": False,
         "text": "Prazo de vigencia 36 meses",
     }
     assert response.json()["latest_analysis"] is None
+
+
+def test_post_contract_version_creates_new_version_for_existing_contract(client) -> None:
+    first_upload = upload_contract(client)
+    second_upload = upload_contract_version(
+        client,
+        contract_id=first_upload["contract_id"],
+        filename="contract-v2.pdf",
+        contract_text="Prazo de vigencia 24 meses",
+    )
+
+    assert second_upload["contract_id"] == first_upload["contract_id"]
+    assert second_upload["contract_version_id"] != first_upload["contract_version_id"]
+    assert second_upload["version_number"] == 2
+
+    session = client.app.state.session_factory()
+    try:
+        assert session.query(Contract).count() == 1
+        versions = (
+            session.query(ContractVersion)
+            .filter_by(contract_id=first_upload["contract_id"])
+            .order_by(ContractVersion.version_number.asc())
+            .all()
+        )
+        assert [version.version_number for version in versions] == [1, 2]
+    finally:
+        session.close()
+
+
+def test_get_contract_detail_uses_analysis_from_latest_version_instead_of_latest_global_analysis(client) -> None:
+    first_upload = upload_contract(client, external_reference="LOC-100")
+    second_upload = upload_contract_version(
+        client,
+        contract_id=first_upload["contract_id"],
+        filename="contract-v2.pdf",
+        contract_text="Prazo de vigencia 24 meses",
+    )
+
+    persist_contract_analysis_for(
+        client,
+        contract_id=first_upload["contract_id"],
+        contract_version_id=second_upload["contract_version_id"],
+        contract_risk_score=15,
+    )
+    persist_contract_analysis_for(
+        client,
+        contract_id=first_upload["contract_id"],
+        contract_version_id=first_upload["contract_version_id"],
+        contract_risk_score=95,
+    )
+
+    response = client.get(f"/api/contracts/{first_upload['contract_id']}")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["latest_version"]["contract_version_id"] == second_upload["contract_version_id"]
+    assert data["latest_version"]["version_number"] == 2
+    assert data["latest_analysis"]["contract_risk_score"] == 15.0
+
+
+def test_list_contract_versions_returns_descending_history_with_current_marker(client) -> None:
+    first_upload = upload_contract(client, external_reference="LOC-110")
+    second_upload = upload_contract_version(
+        client,
+        contract_id=first_upload["contract_id"],
+        filename="contract-v2.pdf",
+        contract_text="Prazo de vigencia 24 meses",
+    )
+    persist_contract_analysis_for(
+        client,
+        contract_id=first_upload["contract_id"],
+        contract_version_id=second_upload["contract_version_id"],
+        contract_risk_score=42,
+    )
+
+    response = client.get(f"/api/contracts/{first_upload['contract_id']}/versions")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert [item["version_number"] for item in data["items"]] == [2, 1]
+    assert [item["contract_version_id"] for item in data["items"]] == [
+        second_upload["contract_version_id"],
+        first_upload["contract_version_id"],
+    ]
+    assert data["items"][0]["is_current"] is True
+    assert data["items"][0]["analysis_status"] == "completed"
+    assert data["items"][0]["contract_risk_score"] == 42.0
+    assert data["items"][0]["created_at"] is not None
+    assert data["items"][1]["is_current"] is False
+    assert data["items"][1]["analysis_status"] is None
+
+
+def test_get_contract_version_detail_returns_snapshot_for_requested_version(client) -> None:
+    first_response = client.post(
+        "/api/uploads/contracts",
+        data={
+            "title": "Loja Centro",
+            "external_reference": "LOC-120",
+            "source": "signed_contract",
+        },
+        files={
+            "file": (
+                "signed-v1.pdf",
+                build_pdf_with_text(
+                    "Data de assinatura: 01/03/2026\n"
+                    "Inicio de vigencia: 01/04/2026\n"
+                    "Prazo de vigencia: 60 meses\n"
+                    "Locataria: Franquia XPTO LTDA\n"
+                    "Carencia de 3 meses\n"
+                    "Reajuste anual"
+                ),
+                "application/pdf",
+            )
+        },
+    )
+    assert first_response.status_code == 201
+    first_upload = first_response.json()
+    assert first_upload["version_number"] == 1
+
+    second_upload = upload_contract_version(
+        client,
+        contract_id=first_upload["contract_id"],
+        filename="signed-v2.pdf",
+        source="signed_contract",
+        contract_text=(
+            "Data de assinatura: 01/03/2027\n"
+            "Inicio de vigencia: 01/05/2027\n"
+            "Prazo de vigencia: 24 meses\n"
+            "Locataria: Franquia XPTO LTDA"
+        ),
+    )
+    persist_contract_analysis_for(
+        client,
+        contract_id=first_upload["contract_id"],
+        contract_version_id=first_upload["contract_version_id"],
+    )
+
+    response = client.get(
+        f"/api/contracts/{first_upload['contract_id']}/versions/{first_upload['contract_version_id']}"
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["is_current"] is False
+    assert data["selected_version"]["contract_version_id"] == first_upload["contract_version_id"]
+    assert data["selected_version"]["version_number"] == 1
+    assert data["latest_version"]["contract_version_id"] == second_upload["contract_version_id"]
+    assert data["contract"]["signature_date"] == "2026-03-01"
+    assert data["contract"]["start_date"] == "2026-04-01"
+    assert data["contract"]["end_date"] == "2031-03-31"
+    assert data["contract"]["term_months"] == 60
+    assert data["contract"]["parties"] == {"entities": ["Franquia XPTO LTDA"]}
+    assert data["selected_analysis"]["analysis_status"] == "completed"
+    assert {event["metadata"]["source_contract_version_id"] for event in data["events"]} == {
+        first_upload["contract_version_id"]
+    }
+
+
+def test_get_contract_version_detail_returns_404_when_version_is_not_owned_by_contract(client) -> None:
+    first_upload = upload_contract(client, external_reference="LOC-130")
+    other_upload = upload_contract(client, external_reference="LOC-131")
+
+    response = client.get(
+        f"/api/contracts/{first_upload['contract_id']}/versions/{other_upload['contract_version_id']}"
+    )
+
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Contract version not found"}
+
+
+def test_get_contract_summary_uses_requested_version_text(client) -> None:
+    first_upload = upload_contract(client, external_reference="LOC-140")
+    second_upload = upload_contract_version(
+        client,
+        contract_id=first_upload["contract_id"],
+        filename="contract-v2.pdf",
+        contract_text="Prazo de vigencia 24 meses",
+    )
+
+    summary_client = SimpleNamespace(
+        summarize_contract=lambda text: SimpleNamespace(
+            summary=f"Resumo: {text}",
+            key_points=[text],
+        )
+    )
+    previous_llm_client = getattr(client.app.state, "llm_client", None)
+    client.app.state.llm_client = summary_client
+    try:
+        response = client.get(
+            f"/api/contracts/{first_upload['contract_id']}/summary?version_id={first_upload['contract_version_id']}"
+        )
+    finally:
+        client.app.state.llm_client = previous_llm_client
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "summary": "Resumo: Prazo de vigencia 36 meses",
+        "key_points": ["Prazo de vigencia 36 meses"],
+    }
+    assert second_upload["version_number"] == 2
 
 
 def test_get_contract_detail_returns_404_when_contract_does_not_exist(client) -> None:
@@ -341,6 +579,7 @@ def test_get_contract_detail_returns_events_when_populated(client) -> None:
             "locataria: Empresa XYZ Ltda."
         )
         version = ContractVersion(
+            version_number=1,
             source=ContractSource.signed_contract,
             original_filename="contrato.pdf",
             storage_key="uploads/contrato.pdf",
@@ -385,6 +624,7 @@ def test_get_contract_detail_returns_field_confidence(client) -> None:
             "locataria: Empresa XYZ Ltda."
         )
         version = ContractVersion(
+            version_number=1,
             source=ContractSource.signed_contract,
             original_filename="contrato.pdf",
             storage_key="uploads/contrato.pdf",

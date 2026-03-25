@@ -6,6 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.application.contract_pipeline import run_contract_pipeline, run_policy_analysis
+from app.application.contract_versions import next_contract_version_number
 from app.db.models.contract import Contract, ContractSource, ContractVersion
 from app.infrastructure.pdf_text import TextExtractionError
 from app.infrastructure.ocr import OCRClient
@@ -23,6 +24,72 @@ class ContractUploadResult:
     contract: Contract
     contract_version: ContractVersion
     extraction: TextExtractionResult
+
+
+def upload_contract_version_file(
+    *,
+    session: Session,
+    contract: Contract,
+    source: ContractSource,
+    filename: str,
+    content: bytes,
+    storage_service: LocalStorageService,
+    ocr_client: OCRClient | None = None,
+    llm_client: object | None = None,
+) -> ContractUploadResult:
+    storage_key = storage_service.store_bytes(filename, content)
+    contract_version = ContractVersion(
+        contract=contract,
+        version_number=next_contract_version_number(session, contract),
+        source=source,
+        original_filename=filename,
+        storage_key=storage_key,
+    )
+    session.add(contract_version)
+
+    try:
+        session.flush()
+        extraction = ingest_contract_version(
+            session,
+            contract_version,
+            storage_service=storage_service,
+            ocr_client=ocr_client,
+        )
+
+        if contract_version.source == ContractSource.signed_contract:
+            process_signed_contract_archive(session, contract_version=contract_version)
+            run_policy_analysis(
+                session,
+                contract,
+                contract_version.text_content or "",
+                contract_version=contract_version,
+                llm_client=llm_client,
+            )
+        else:
+            run_contract_pipeline(
+                session,
+                contract,
+                contract_version,
+                llm_client=llm_client,
+            )
+        session.commit()
+    except TextExtractionError as exc:
+        session.rollback()
+        storage_service.delete(storage_key)
+        raise ContractUploadError("Uploaded file is not a readable PDF") from exc
+    except Exception:
+        session.rollback()
+        storage_service.delete(storage_key)
+        raise
+
+    session.refresh(contract)
+    session.refresh(contract_version)
+
+    return ContractUploadResult(
+        contract=contract,
+        contract_version=contract_version,
+        extraction=extraction,
+    )
 
 
 def upload_contract_file(
@@ -44,49 +111,13 @@ def upload_contract_file(
     else:
         contract.title = title
 
-    storage_key = storage_service.store_bytes(filename, content)
-    contract_version = ContractVersion(
+    return upload_contract_version_file(
+        session=session,
         contract=contract,
         source=source,
-        original_filename=filename,
-        storage_key=storage_key,
-    )
-    session.add(contract_version)
-
-    try:
-        session.flush()
-        extraction = ingest_contract_version(
-            session,
-            contract_version,
-            storage_service=storage_service,
-            ocr_client=ocr_client,
-        )
-
-        if contract_version.source == ContractSource.signed_contract:
-            process_signed_contract_archive(session, contract_version=contract_version)
-            run_policy_analysis(
-                session, contract, contract_version.text_content or "",
-                llm_client=llm_client,
-            )
-        else:
-            run_contract_pipeline(
-                session, contract, contract_version, llm_client=llm_client,
-            )
-        session.commit()
-    except TextExtractionError as exc:
-        session.rollback()
-        storage_service.delete(storage_key)
-        raise ContractUploadError("Uploaded file is not a readable PDF") from exc
-    except Exception:
-        session.rollback()
-        storage_service.delete(storage_key)
-        raise
-
-    session.refresh(contract)
-    session.refresh(contract_version)
-
-    return ContractUploadResult(
-        contract=contract,
-        contract_version=contract_version,
-        extraction=extraction,
+        filename=filename,
+        content=content,
+        storage_service=storage_service,
+        ocr_client=ocr_client,
+        llm_client=llm_client,
     )

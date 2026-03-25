@@ -5,31 +5,51 @@ import json
 from datetime import datetime, timezone
 from typing import AsyncGenerator, Literal
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, Request, Response, UploadFile, status
 from fastapi.responses import StreamingResponse
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session, selectinload
+from pydantic import BaseModel
 
 from app.api.dependencies import get_session
-from app.api.serializers.contracts import serialize_contract_detail, serialize_contract_list_item
+from app.api.serializers.contracts import (
+    latest_contract_version,
+    latest_version_analysis,
+    serialize_contract_detail,
+    serialize_contract_list_item,
+    serialize_contract_version_detail,
+    serialize_contract_version_list,
+)
 from app.application.analysis import mark_contract_analysis_completed
+from app.application.contract_upload import ContractUploadError, upload_contract_version_file
 from app.application.contract_pipeline import run_contract_pipeline
 from app.db.models.analysis import ContractAnalysis
-from app.db.models.contract import Contract
+from app.db.models.contract import Contract, ContractSource, ContractVersion
 from app.domain.playbook import PLAYBOOK_CLAUSES
 from app.infrastructure.contract_chunker import chunk_contract
 from app.infrastructure.docx_generator import generate_corrected_contract_docx
+from app.infrastructure.storage import LocalStorageService
 from app.schemas.contract import (
     ContractDetailResponse,
-    ContractListResponse,
     ContractSummaryResponse,
     ContractUpdateInput,
     CorrectedContractResponse,
+    ContractVersionDetailResponse,
+    ContractVersionListResponse,
     PaginatedContractListResponse,
 )
 
 router = APIRouter(prefix="/api/contracts", tags=["contracts"])
 ContractScope = Literal["all", "active", "history"]
+
+
+class UploadContractResponse(BaseModel):
+    contract_id: str
+    contract_version_id: str
+    version_number: int
+    source: str
+    used_ocr: bool
+    text: str
 
 
 def _utcnow() -> datetime:
@@ -38,10 +58,25 @@ def _utcnow() -> datetime:
 
 def _contract_query():
     return select(Contract).options(
-        selectinload(Contract.versions),
-        selectinload(Contract.analyses).selectinload(ContractAnalysis.findings),
+        selectinload(Contract.versions)
+        .selectinload(ContractVersion.analyses)
+        .selectinload(ContractAnalysis.findings),
         selectinload(Contract.events),
     )
+
+
+def _get_contract_or_404(session: Session, contract_id: str) -> Contract:
+    contract = session.scalar(_contract_query().where(Contract.id == contract_id))
+    if contract is None:
+        raise HTTPException(status_code=404, detail="Contract not found")
+    return contract
+
+
+def _get_contract_version_or_404(contract: Contract, contract_version_id: str) -> ContractVersion:
+    for version in contract.versions:
+        if version.id == contract_version_id:
+            return version
+    raise HTTPException(status_code=404, detail="Contract version not found")
 
 
 def _contract_scope_filters(scope: ContractScope):
@@ -97,18 +132,95 @@ def list_contracts(
     )
 
 
+@router.post(
+    "/{contract_id}/versions",
+    response_model=UploadContractResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def upload_contract_version(
+    contract_id: str,
+    request: Request,
+    source: str = Form(...),
+    file: UploadFile = File(...),
+    session: Session = Depends(get_session),
+) -> UploadContractResponse:
+    contract = _get_contract_or_404(session, contract_id)
+    storage_service = getattr(request.app.state, "storage_service", None)
+    if storage_service is None or not isinstance(storage_service, LocalStorageService):
+        raise HTTPException(status_code=500, detail="Storage service not configured")
+
+    try:
+        source_enum = ContractSource(source)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail="Invalid contract source") from exc
+
+    content = await file.read()
+    ocr_client = getattr(request.app.state, "ocr_client", None)
+    llm_client = getattr(request.app.state, "llm_client", None)
+
+    try:
+        result = upload_contract_version_file(
+            session=session,
+            contract=contract,
+            source=source_enum,
+            filename=file.filename or "contract.pdf",
+            content=content,
+            storage_service=storage_service,
+            ocr_client=ocr_client,
+            llm_client=llm_client,
+        )
+    except ContractUploadError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+    return UploadContractResponse(
+        contract_id=result.contract.id,
+        contract_version_id=result.contract_version.id,
+        version_number=result.contract_version.version_number,
+        source=result.contract_version.source.value,
+        used_ocr=result.extraction.used_ocr,
+        text=result.extraction.text,
+    )
+
+
+@router.get("/{contract_id}/versions", response_model=ContractVersionListResponse)
+def list_contract_versions(
+    contract_id: str,
+    session: Session = Depends(get_session),
+) -> ContractVersionListResponse:
+    contract = _get_contract_or_404(session, contract_id)
+    return serialize_contract_version_list(contract)
+
+
+@router.get(
+    "/{contract_id}/versions/{contract_version_id}",
+    response_model=ContractVersionDetailResponse,
+)
+def get_contract_version_detail(
+    contract_id: str,
+    contract_version_id: str,
+    session: Session = Depends(get_session),
+) -> ContractVersionDetailResponse:
+    contract = _get_contract_or_404(session, contract_id)
+    contract_version = _get_contract_version_or_404(contract, contract_version_id)
+
+    contract.last_accessed_at = _utcnow()
+    session.commit()
+
+    contract = _get_contract_or_404(session, contract_id)
+    contract_version = _get_contract_version_or_404(contract, contract_version_id)
+    return serialize_contract_version_detail(contract, contract_version)
+
+
 @router.get("/{contract_id}", response_model=ContractDetailResponse)
 def get_contract_detail(
     contract_id: str,
     session: Session = Depends(get_session),
 ) -> ContractDetailResponse:
-    contract = session.scalar(_contract_query().where(Contract.id == contract_id))
-    if contract is None:
-        raise HTTPException(status_code=404, detail="Contract not found")
+    contract = _get_contract_or_404(session, contract_id)
 
     contract.last_accessed_at = _utcnow()
     session.commit()
-    contract = session.scalar(_contract_query().where(Contract.id == contract_id))
+    contract = _get_contract_or_404(session, contract_id)
     return serialize_contract_detail(contract)
 
 
@@ -165,15 +277,8 @@ def analyze_contract(
     request: Request,
     session: Session = Depends(get_session),
 ) -> ContractDetailResponse:
-    contract = session.scalar(_contract_query().where(Contract.id == contract_id))
-    if contract is None:
-        raise HTTPException(status_code=404, detail="Contract not found")
-
-    latest_version = (
-        max(contract.versions, key=lambda v: (v.created_at, v.id))
-        if contract.versions
-        else None
-    )
+    contract = _get_contract_or_404(session, contract_id)
+    latest_version = latest_contract_version(contract)
     if latest_version is None or not latest_version.text_content:
         raise HTTPException(status_code=422, detail="No text content available for analysis")
 
@@ -181,7 +286,7 @@ def analyze_contract(
     run_contract_pipeline(session, contract, latest_version, llm_client=llm_client)
     session.commit()
 
-    contract = session.scalar(_contract_query().where(Contract.id == contract_id))
+    contract = _get_contract_or_404(session, contract_id)
     return serialize_contract_detail(contract)
 
 
@@ -189,18 +294,16 @@ def analyze_contract(
 def get_contract_summary(
     contract_id: str,
     request: Request,
+    version_id: str | None = Query(default=None),
     session: Session = Depends(get_session),
 ) -> ContractSummaryResponse:
-    contract = session.scalar(_contract_query().where(Contract.id == contract_id))
-    if contract is None:
-        raise HTTPException(status_code=404, detail="Contract not found")
-
-    latest_version = (
-        max(contract.versions, key=lambda v: (v.created_at, v.id))
-        if contract.versions
-        else None
+    contract = _get_contract_or_404(session, contract_id)
+    selected_version = (
+        _get_contract_version_or_404(contract, version_id)
+        if version_id is not None
+        else latest_contract_version(contract)
     )
-    if latest_version is None or not latest_version.text_content:
+    if selected_version is None or not selected_version.text_content:
         raise HTTPException(status_code=422, detail="No text content available for summary")
 
     llm_client = getattr(request.app.state, "llm_client", None)
@@ -210,7 +313,7 @@ def get_contract_summary(
             key_points=[],
         )
 
-    result = llm_client.summarize_contract(text=latest_version.text_content)
+    result = llm_client.summarize_contract(text=selected_version.text_content)
     return ContractSummaryResponse(
         summary=result.summary,
         key_points=result.key_points,
@@ -219,6 +322,7 @@ def get_contract_summary(
 
 async def _analysis_stream(
     contract_id: str,
+    contract_version_id: str,
     contract_text: str,
     llm_client,
     session_factory,
@@ -256,6 +360,7 @@ async def _analysis_stream(
             if contract:
                 analysis = ContractAnalysis(
                     contract_id=contract.id,
+                    contract_version_id=contract_version_id,
                     policy_version=policy.version if policy else "v1.0",
                     status=AnalysisStatus.completed,
                     contract_risk_score=result.contract_risk_score,
@@ -298,15 +403,8 @@ async def analyze_contract_stream(
     session: Session = Depends(get_session),
 ):
     """Analyze contract with SSE streaming progress updates."""
-    contract = session.scalar(_contract_query().where(Contract.id == contract_id))
-    if contract is None:
-        raise HTTPException(status_code=404, detail="Contract not found")
-
-    latest_version = (
-        max(contract.versions, key=lambda v: (v.created_at, v.id))
-        if contract.versions
-        else None
-    )
+    contract = _get_contract_or_404(session, contract_id)
+    latest_version = latest_contract_version(contract)
     if latest_version is None or not latest_version.text_content:
         raise HTTPException(status_code=422, detail="No text content available for analysis")
 
@@ -317,6 +415,7 @@ async def analyze_contract_stream(
     return StreamingResponse(
         _analysis_stream(
             contract_id=contract_id,
+            contract_version_id=latest_version.id,
             contract_text=latest_version.text_content,
             llm_client=llm_client,
             session_factory=request.app.state.session_factory,
@@ -339,24 +438,12 @@ def generate_corrected_contract(
     
     Saves the result to the database for fast download later.
     """
-    contract = session.scalar(_contract_query().where(Contract.id == contract_id))
-    if contract is None:
-        raise HTTPException(status_code=404, detail="Contract not found")
-
-    latest_version = (
-        max(contract.versions, key=lambda v: (v.created_at, v.id))
-        if contract.versions
-        else None
-    )
+    contract = _get_contract_or_404(session, contract_id)
+    latest_version = latest_contract_version(contract)
     if latest_version is None or not latest_version.text_content:
         raise HTTPException(status_code=422, detail="No text content available")
 
-    # Get latest analysis
-    latest_analysis = (
-        max(contract.analyses, key=lambda a: (a.created_at, a.id))
-        if contract.analyses
-        else None
-    )
+    latest_analysis = latest_version_analysis(latest_version)
     if latest_analysis is None:
         raise HTTPException(status_code=422, detail="No analysis available. Run analysis first.")
 
@@ -428,15 +515,8 @@ def download_corrected_contract_docx(
     Requires generate-corrected to be called first. Downloads are instant
     since the corrected text is retrieved from the database.
     """
-    contract = session.scalar(_contract_query().where(Contract.id == contract_id))
-    if contract is None:
-        raise HTTPException(status_code=404, detail="Contract not found")
-
-    latest_analysis = (
-        max(contract.analyses, key=lambda a: (a.created_at, a.id))
-        if contract.analyses
-        else None
-    )
+    contract = _get_contract_or_404(session, contract_id)
+    latest_analysis = latest_version_analysis(latest_contract_version(contract))
     if latest_analysis is None:
         raise HTTPException(status_code=422, detail="No analysis available. Run analysis first.")
 

@@ -6,7 +6,72 @@ import { describe, expect, it, vi } from "vitest";
 import { ContractsApiError } from "../../../lib/api/contracts";
 import { ContractDetailScreen } from "./contract-detail-screen";
 
-function buildContractDetail() {
+vi.mock("../../../lib/hooks/use-contracts", () => ({
+  useGenerateCorrectedContract: () => ({
+    mutateAsync: vi.fn(),
+    isPending: false,
+    isError: false,
+    error: null,
+  }),
+}));
+
+vi.mock("../components/contract-summary-panel", () => ({
+  ContractSummaryPanel: ({
+    contractId,
+    versionId,
+  }: {
+    contractId: string;
+    versionId?: string | null;
+  }) => <div>Resumo {contractId} {versionId ?? "current"}</div>,
+}));
+
+vi.mock("../components/event-timeline", () => ({
+  EventTimeline: ({ events }: { events: Array<{ eventType: string }> }) => (
+    <div>{events.length > 0 ? "Renovação" : "Nenhum evento identificado"}</div>
+  ),
+}));
+
+vi.mock("../components/findings-section", () => ({
+  FindingsSection: ({ items }: { items: Array<{ clauseName: string }> }) => (
+    <div>{items.map((item) => item.clauseName).join(", ")}</div>
+  ),
+}));
+
+vi.mock("../components/metadata-section", () => ({
+  MetadataSection: () => <div>Metadados renderizados</div>,
+}));
+
+vi.mock("../components/extracted-text-panel", () => ({
+  ExtractedTextPanel: ({ text }: { text: string }) => <div>{text}</div>,
+}));
+
+function buildContractDetail({
+  isHistoricalView = false,
+  correctedReady = false,
+}: {
+  isHistoricalView?: boolean;
+  correctedReady?: boolean;
+} = {}) {
+  const selectedVersion = isHistoricalView
+    ? {
+        contractVersionId: "ver-1",
+        versionNumber: 1,
+        createdAt: "2026-03-20T12:00:00Z",
+        source: "third_party_draft" as const,
+        originalFilename: "contract-v1.pdf",
+        usedOcr: false,
+        text: "Texto da versao 1",
+      }
+    : {
+        contractVersionId: "ver-2",
+        versionNumber: 2,
+        createdAt: "2026-03-21T12:00:00Z",
+        source: "third_party_draft" as const,
+        originalFilename: "contract-v2.pdf",
+        usedOcr: false,
+        text: "Texto da versao 2",
+      };
+
   return {
     contract: {
       id: "ctr-1",
@@ -17,18 +82,25 @@ function buildContractDetail() {
       startDate: null,
       endDate: null,
       termMonths: 36,
+      isActive: false,
+      activatedAt: null,
+      lastAccessedAt: "2026-03-22T12:00:00Z",
+      lastAnalyzedAt: "2026-03-21T12:00:00Z",
       parties: { entities: ["Loja Centro"] },
       financialTerms: { monthlyRent: 12000 },
       fieldConfidence: { signature_date: 0.95, parties: 0.87 },
     },
+    selectedVersion,
     latestVersion: {
-      contractVersionId: "ver-1",
+      contractVersionId: "ver-2",
+      versionNumber: 2,
+      createdAt: "2026-03-21T12:00:00Z",
       source: "third_party_draft" as const,
-      originalFilename: "contract.pdf",
+      originalFilename: "contract-v2.pdf",
       usedOcr: false,
-      text: "Prazo de vigencia 36 meses",
+      text: "Texto da versao 2",
     },
-    latestAnalysis: {
+    selectedAnalysis: {
       analysisId: "ana-1",
       analysisStatus: "completed",
       policyVersion: "v1",
@@ -46,6 +118,7 @@ function buildContractDetail() {
           metadata: {},
         },
       ],
+      correctedReady,
     },
     events: [
       {
@@ -56,35 +129,66 @@ function buildContractDetail() {
         metadata: {},
       },
     ],
+    isCurrent: !isHistoricalView,
+    isHistoricalView,
   };
 }
 
 describe("ContractDetailScreen", () => {
   it("shows a loading skeleton while detail data is pending", () => {
     render(
-      <ContractDetailScreen contractId="ctr-1" loadContractDetail={() => new Promise(() => undefined)} />,
+      <ContractDetailScreen
+        contractId="ctr-1"
+        loadContractDetail={() => new Promise(() => undefined)}
+      />,
     );
 
     expect(screen.getByLabelText("Carregando conteudo")).toBeInTheDocument();
     expect(screen.getByText("Carregando contrato...")).toBeInTheDocument();
   });
 
-  it("renders the latest analysis findings when available", async () => {
+  it("uses the canonical detail loader when no versionId is provided", async () => {
     const loadContractDetail = vi.fn().mockResolvedValue(buildContractDetail());
+    const loadContractVersionDetail = vi.fn();
 
     render(
-      <ContractDetailScreen contractId="ctr-1" loadContractDetail={loadContractDetail} />,
+      <ContractDetailScreen
+        contractId="ctr-1"
+        loadContractDetail={loadContractDetail}
+        loadContractVersionDetail={loadContractVersionDetail}
+      />,
     );
 
     expect(await screen.findByRole("heading", { name: "Loja Centro" })).toBeInTheDocument();
-    expect(screen.getByText("Prazo de vigencia")).toBeInTheDocument();
-    expect(screen.getByText("contract.pdf")).toBeInTheDocument();
+    expect(loadContractDetail).toHaveBeenCalledWith("ctr-1");
+    expect(loadContractVersionDetail).not.toHaveBeenCalled();
+    expect(screen.getByRole("button", { name: "Gerar Contrato Corrigido" })).toBeInTheDocument();
   });
 
-  it("shows an honest partial state when no latest analysis is available", async () => {
+  it("uses the version detail loader when versionId is provided", async () => {
+    const loadContractDetail = vi.fn();
+    const loadContractVersionDetail = vi
+      .fn()
+      .mockResolvedValue(buildContractDetail({ isHistoricalView: true }));
+
+    render(
+      <ContractDetailScreen
+        contractId="ctr-1"
+        versionId="ver-1"
+        loadContractDetail={loadContractDetail}
+        loadContractVersionDetail={loadContractVersionDetail}
+      />,
+    );
+
+    expect(await screen.findByText("Versao historica")).toBeInTheDocument();
+    expect(loadContractVersionDetail).toHaveBeenCalledWith("ctr-1", "ver-1");
+    expect(loadContractDetail).not.toHaveBeenCalled();
+  });
+
+  it("shows an honest partial state when no selected analysis is available", async () => {
     const loadContractDetail = vi.fn().mockResolvedValue({
       ...buildContractDetail(),
-      latestAnalysis: null,
+      selectedAnalysis: null,
     });
 
     render(
@@ -94,9 +198,10 @@ describe("ContractDetailScreen", () => {
     expect(await screen.findByText("Analise ainda nao disponivel.")).toBeInTheDocument();
   });
 
-  it("shows an honest partial state when no latest version is available", async () => {
+  it("shows an honest partial state when no selected version is available", async () => {
     const loadContractDetail = vi.fn().mockResolvedValue({
       ...buildContractDetail(),
+      selectedVersion: null,
       latestVersion: null,
     });
 
@@ -105,6 +210,27 @@ describe("ContractDetailScreen", () => {
     );
 
     expect(await screen.findByText("Versao ainda nao disponivel.")).toBeInTheDocument();
+  });
+
+  it("shows a historical state explicitly and hides mutable actions", async () => {
+    const loadContractVersionDetail = vi
+      .fn()
+      .mockResolvedValue(buildContractDetail({ isHistoricalView: true }));
+
+    render(
+      <ContractDetailScreen
+        contractId="ctr-1"
+        versionId="ver-1"
+        loadContractVersionDetail={loadContractVersionDetail}
+      />,
+    );
+
+    expect(await screen.findByText("Versao historica")).toBeInTheDocument();
+    expect(screen.getByText("Voce esta vendo a versao 1. A atual e a versao 2.")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Gerar Contrato Corrigido" })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: "Baixar Contrato Corrigido (.docx)" }),
+    ).not.toBeInTheDocument();
   });
 
   it("shows a not-found state when the backend returns 404", async () => {
@@ -198,20 +324,7 @@ describe("ContractDetailScreen", () => {
     expect(loadContractDetail).toHaveBeenCalledTimes(3);
   });
 
-  it("renderiza metadados formatados ao invés de JSON bruto", async () => {
-    const loadContractDetail = vi.fn().mockResolvedValue(buildContractDetail());
-
-    const { queryByText } = render(
-      <ContractDetailScreen contractId="ctr-1" loadContractDetail={loadContractDetail} />,
-    );
-
-    await screen.findByRole("heading", { name: "Loja Centro" });
-
-    expect(screen.getAllByText("Loja Centro").length).toBeGreaterThan(0);
-    expect(queryByText('{"tenant":"Loja Centro"}')).not.toBeInTheDocument();
-  });
-
-  it("renderiza a timeline de eventos quando disponível", async () => {
+  it("renderiza metadados, eventos, resumo e texto da versao selecionada", async () => {
     const loadContractDetail = vi.fn().mockResolvedValue(buildContractDetail());
 
     render(
@@ -220,19 +333,9 @@ describe("ContractDetailScreen", () => {
 
     await screen.findByRole("heading", { name: "Loja Centro" });
 
+    expect(screen.getByText("Metadados renderizados")).toBeInTheDocument();
     expect(screen.getByText("Renovação")).toBeInTheDocument();
-  });
-
-  it("exibe estado vazio quando não há eventos", async () => {
-    const loadContractDetail = vi.fn().mockResolvedValue({
-      ...buildContractDetail(),
-      events: [],
-    });
-
-    render(
-      <ContractDetailScreen contractId="ctr-1" loadContractDetail={loadContractDetail} />,
-    );
-
-    expect(await screen.findByText("Nenhum evento identificado")).toBeInTheDocument();
+    expect(screen.getByText("Resumo ctr-1 current")).toBeInTheDocument();
+    expect(screen.getByText("Texto da versao 2")).toBeInTheDocument();
   });
 });

@@ -6,7 +6,7 @@ from uuid import uuid4
 
 from datetime import date, datetime
 
-from sqlalchemy import Boolean, Date, DateTime, Enum, ForeignKey, Integer, String, Text
+from sqlalchemy import Boolean, Date, DateTime, Enum, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.dialects.sqlite import JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -52,9 +52,11 @@ class Contract(TimestampMixin, Base):
 
 class ContractVersion(TimestampMixin, Base):
     __tablename__ = "contract_versions"
+    __table_args__ = (UniqueConstraint("contract_id", "version_number"),)
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid4()))
     contract_id: Mapped[str] = mapped_column(ForeignKey("contracts.id", ondelete="CASCADE"), nullable=False)
+    version_number: Mapped[int] = mapped_column(Integer, nullable=False)
     source: Mapped[ContractSource] = mapped_column(
         Enum(ContractSource, name="contract_source"),
         nullable=False,
@@ -65,3 +67,4 @@ class ContractVersion(TimestampMixin, Base):
     extraction_metadata: Mapped[dict[str, Any] | None] = mapped_column(JSON)
 
     contract: Mapped[Contract] = relationship(back_populates="versions")
+    analyses: Mapped[list["ContractAnalysis"]] = relationship(back_populates="contract_version")

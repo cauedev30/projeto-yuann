@@ -1,7 +1,9 @@
 import pytest
 
+from app.db.models.analysis import ContractAnalysis
 from app.db.models.contract import Contract, ContractSource, ContractVersion
 from app.db.models.event import ContractEvent
+from app.db.models.policy import Policy
 from app.services.storage import LocalStorageService
 from tests.support.pdf_factory import build_pdf_with_text
 
@@ -26,7 +28,28 @@ def test_upload_contract_file_persists_version_and_extraction(
 
     assert result.contract.title == "Loja Centro"
     assert result.contract_version.source == ContractSource.third_party_draft
+    assert result.contract_version.version_number == 1
     assert result.extraction.text == "Prazo de vigencia 60 meses"
+    assert result.contract_version.extraction_metadata["version_snapshot"]["contract"] == {
+        "signature_date": None,
+        "start_date": None,
+        "end_date": None,
+        "term_months": None,
+        "parties": None,
+        "financial_terms": None,
+        "field_confidence": {
+            "signature_date": 0.0,
+            "start_date": 0.0,
+            "term_months": 0.0,
+            "end_date": 0.0,
+            "parties": 0.0,
+            "grace_period_months": 0.0,
+            "readjustment_type": 0.0,
+            "monthly_rent": 0.0,
+            "penalty_months": 0.0,
+        },
+    }
+    assert result.contract_version.extraction_metadata["version_snapshot"]["events"] == []
 
 
 def test_upload_contract_file_rolls_back_state_when_pdf_is_invalid(
@@ -78,6 +101,7 @@ def test_upload_signed_contract_persists_snapshot_and_rebuilds_events(
     contract = session.query(Contract).filter_by(external_reference="LOC-001").one()
     version = session.query(ContractVersion).filter_by(contract_id=contract.id).one()
     events = session.query(ContractEvent).filter_by(contract_id=contract.id).all()
+    version_snapshot = version.extraction_metadata["version_snapshot"]
 
     assert contract.signature_date.isoformat() == "2026-03-01"
     assert contract.start_date.isoformat() == "2026-04-01"
@@ -88,42 +112,52 @@ def test_upload_signed_contract_persists_snapshot_and_rebuilds_events(
         "grace_period_months": 3,
         "readjustment_type": "annual",
     }
-    assert version.extraction_metadata == {
-        "embedded_text_length": len(result.extraction.text),
-        "ocr_attempted": False,
-        "signed_contract_snapshot": {
-            "fields": {
-                "signature_date": "2026-03-01",
-                "start_date": "2026-04-01",
-                "end_date": "2031-03-31",
-                "term_months": 60,
-                "parties": ["Franquia XPTO LTDA"],
-                "financial_terms": {
-                    "grace_period_months": 3,
-                    "readjustment_type": "annual",
-                },
+    assert version.version_number == 1
+    assert version.extraction_metadata["embedded_text_length"] == len(result.extraction.text)
+    assert version.extraction_metadata["ocr_attempted"] is False
+    assert version.extraction_metadata["signed_contract_snapshot"] == {
+        "fields": {
+            "signature_date": "2026-03-01",
+            "start_date": "2026-04-01",
+            "end_date": "2031-03-31",
+            "term_months": 60,
+            "parties": ["Franquia XPTO LTDA"],
+            "financial_terms": {
+                "grace_period_months": 3,
+                "readjustment_type": "annual",
             },
-            "field_confidence": {
-                "signature_date": 1.0,
-                "start_date": 1.0,
-                "term_months": 1.0,
-                "end_date": 1.0,
-                "parties": 1.0,
-                "grace_period_months": 1.0,
-                "readjustment_type": 1.0,
-                "monthly_rent": 0.0,
-                "penalty_months": 0.0,
-            },
-            "match_labels": {
-                "signature_date": "data de assinatura",
-                "start_date": "inicio de vigencia",
-                "end_date": "prazo de vigencia",
-                "term_months": "prazo de vigencia",
-                "parties": "locataria",
-                "grace_period_months": "carencia de",
-                "readjustment_type": "reajuste anual",
-            },
-            "ready_for_event_generation": True,
+        },
+        "field_confidence": {
+            "signature_date": 1.0,
+            "start_date": 1.0,
+            "term_months": 1.0,
+            "end_date": 1.0,
+            "parties": 1.0,
+            "grace_period_months": 1.0,
+            "readjustment_type": 1.0,
+            "monthly_rent": 0.0,
+            "penalty_months": 0.0,
+        },
+        "match_labels": {
+            "signature_date": "data de assinatura",
+            "start_date": "inicio de vigencia",
+            "end_date": "prazo de vigencia",
+            "term_months": "prazo de vigencia",
+            "parties": "locataria",
+            "grace_period_months": "carencia de",
+            "readjustment_type": "reajuste anual",
+        },
+        "ready_for_event_generation": True,
+    }
+    assert version_snapshot["contract"] == {
+        "signature_date": "2026-03-01",
+        "start_date": "2026-04-01",
+        "end_date": "2031-03-31",
+        "term_months": 60,
+        "parties": {"entities": ["Franquia XPTO LTDA"]},
+        "financial_terms": {
+            "grace_period_months": 3,
+            "readjustment_type": "annual",
         },
         "field_confidence": {
             "signature_date": 1.0,
@@ -137,6 +171,7 @@ def test_upload_signed_contract_persists_snapshot_and_rebuilds_events(
             "penalty_months": 0.0,
         },
     }
+    assert len(version_snapshot["events"]) == len(events)
     event_types_sorted = sorted(event.event_type.value for event in events)
     assert event_types_sorted.count("renewal") == 1
     assert event_types_sorted.count("readjustment") == 1
@@ -172,6 +207,16 @@ def test_upload_signed_contract_persists_snapshot_and_rebuilds_events(
         if (event.metadata_json or {}).get("notification_sequence")
     ]
     assert len(notification_events) == 4
+    assert {
+        item["event_type"]: item["metadata"]["source_contract_version_id"]
+        for item in version_snapshot["events"]
+        if item["event_type"] != "expiration" or "notification_sequence" not in item["metadata"]
+    } == {
+        "renewal": version.id,
+        "expiration": version.id,
+        "readjustment": version.id,
+        "grace_period_end": version.id,
+    }
 
 
 def test_upload_signed_contract_replaces_existing_schedule_with_latest_version(
@@ -213,7 +258,7 @@ def test_upload_signed_contract_replaces_existing_schedule_with_latest_version(
     versions = (
         session.query(ContractVersion)
         .filter_by(contract_id=contract.id)
-        .order_by(ContractVersion.created_at.asc(), ContractVersion.id.asc())
+        .order_by(ContractVersion.version_number.asc())
         .all()
     )
 
@@ -221,10 +266,14 @@ def test_upload_signed_contract_replaces_existing_schedule_with_latest_version(
         first_result.contract_version.id,
         second_result.contract_version.id,
     }
+    assert [version.version_number for version in versions] == [1, 2]
+    assert session.query(Contract).count() == 1
     assert contract.signature_date.isoformat() == "2027-03-01"
     assert contract.start_date.isoformat() == "2027-05-01"
     assert contract.end_date.isoformat() == "2029-04-30"
     assert contract.term_months == 24
+    assert versions[0].extraction_metadata["version_snapshot"]["contract"]["term_months"] == 60
+    assert versions[1].extraction_metadata["version_snapshot"]["contract"]["term_months"] == 24
     base_events = [e for e in events if not (e.metadata_json or {}).get("notification_sequence")]
     notification_events = [e for e in events if (e.metadata_json or {}).get("notification_sequence")]
     assert sorted(e.event_type.value for e in base_events) == ["expiration", "renewal"]
@@ -240,3 +289,44 @@ def test_upload_signed_contract_replaces_existing_schedule_with_latest_version(
         "expiration": second_result.contract_version.id,
     }
     assert len(notification_events) == 4
+
+
+def test_upload_contract_file_links_new_analysis_to_uploaded_version(
+    session,
+    workspace_tmp_path,
+) -> None:
+    storage_service = LocalStorageService(workspace_tmp_path / "uploads")
+    session.add(Policy(name="Politica padrao", version="v1"))
+    session.commit()
+
+    first_result = upload_contract_file(
+        session=session,
+        title="Loja Centro",
+        external_reference="LOC-001",
+        source=ContractSource.third_party_draft,
+        filename="contract-v1.pdf",
+        content=build_pdf_with_text("Prazo de vigencia 60 meses"),
+        storage_service=storage_service,
+    )
+    second_result = upload_contract_file(
+        session=session,
+        title="Loja Centro",
+        external_reference="LOC-001",
+        source=ContractSource.third_party_draft,
+        filename="contract-v2.pdf",
+        content=build_pdf_with_text("Prazo de vigencia 24 meses"),
+        storage_service=storage_service,
+    )
+
+    analyses = (
+        session.query(ContractAnalysis)
+        .filter_by(contract_id=first_result.contract.id)
+        .order_by(ContractAnalysis.created_at.asc(), ContractAnalysis.id.asc())
+        .all()
+    )
+
+    assert len(analyses) == 2
+    assert {analysis.contract_version_id for analysis in analyses} == {
+        first_result.contract_version.id,
+        second_result.contract_version.id,
+    }

@@ -1,7 +1,11 @@
 export type ContractSource = "third_party_draft" | "signed_contract";
 export type ContractScope = "all" | "active" | "history";
 
-export type ContractEventType = "renewal" | "expiration" | "readjustment" | "grace_period_end";
+export type ContractEventType =
+  | "renewal"
+  | "expiration"
+  | "readjustment"
+  | "grace_period_end";
 
 export type ContractEventSummary = {
   id: string;
@@ -70,9 +74,15 @@ export type ContractUploadInput = {
   file: File;
 };
 
+export type ContractVersionUploadInput = {
+  source: ContractSource;
+  file: File;
+};
+
 export type ContractUploadResult = {
   contractId: string;
   contractVersionId: string;
+  versionNumber: number;
   source: ContractSource;
   usedOcr: boolean;
   text: string;
@@ -81,6 +91,7 @@ export type ContractUploadResult = {
 export type ContractUploadResponsePayload = {
   contract_id: string;
   contract_version_id: string;
+  version_number: number;
   source: ContractSource;
   used_ocr: boolean;
   text: string;
@@ -118,10 +129,28 @@ export type ContractDetailSummary = {
 
 export type ContractVersionSummary = {
   contractVersionId: string;
+  versionNumber: number;
+  createdAt: string;
   source: ContractSource;
   originalFilename: string;
   usedOcr: boolean;
   text: string | null;
+};
+
+export type ContractVersionListItem = {
+  contractVersionId: string;
+  versionNumber: number;
+  createdAt: string;
+  source: ContractSource;
+  originalFilename: string;
+  usedOcr: boolean;
+  analysisStatus: string | null;
+  contractRiskScore: number | null;
+  isCurrent: boolean;
+};
+
+export type ContractVersionListResponse = {
+  items: ContractVersionListItem[];
 };
 
 export type ContractLatestAnalysisSummary = {
@@ -134,9 +163,12 @@ export type ContractLatestAnalysisSummary = {
 
 export type ContractDetail = {
   contract: ContractDetailSummary;
+  selectedVersion: ContractVersionSummary | null;
   latestVersion: ContractVersionSummary | null;
-  latestAnalysis: ContractLatestAnalysisSummary | null;
+  selectedAnalysis: ContractLatestAnalysisSummary | null;
   events: ContractEventSummary[];
+  isCurrent: boolean;
+  isHistoricalView: boolean;
 };
 
 export type ContractDetailSummaryPayload = {
@@ -159,10 +191,28 @@ export type ContractDetailSummaryPayload = {
 
 export type ContractVersionSummaryPayload = {
   contract_version_id: string;
+  version_number: number;
+  created_at: string;
   source: ContractSource;
   original_filename: string;
   used_ocr: boolean;
   text: string | null;
+};
+
+export type ContractVersionListItemPayload = {
+  contract_version_id: string;
+  version_number: number;
+  created_at: string;
+  source: ContractSource;
+  original_filename: string;
+  used_ocr: boolean;
+  analysis_status: string | null;
+  contract_risk_score: number | null;
+  is_current: boolean;
+};
+
+export type ContractVersionListResponsePayload = {
+  items: ContractVersionListItemPayload[];
 };
 
 export type ContractAnalysisFindingSummaryPayload = {
@@ -192,6 +242,15 @@ export type ContractDetailResponsePayload = {
   events: ContractEventSummaryPayload[];
 };
 
+export type ContractVersionDetailResponsePayload = {
+  contract: ContractDetailSummaryPayload;
+  selected_version: ContractVersionSummaryPayload | null;
+  latest_version: ContractVersionSummaryPayload | null;
+  selected_analysis: ContractLatestAnalysisSummaryPayload | null;
+  events: ContractEventSummaryPayload[];
+  is_current: boolean;
+};
+
 function mapContractEvent(payload: ContractEventSummaryPayload): ContractEventSummary {
   return {
     id: payload.id,
@@ -215,6 +274,62 @@ function mapContractFinding(
     riskExplanation: payload.risk_explanation,
     suggestedAdjustmentDirection: payload.suggested_adjustment_direction,
     metadata: payload.metadata,
+  };
+}
+
+function mapContractSummary(
+  payload: ContractDetailSummaryPayload,
+): ContractDetailSummary {
+  return {
+    id: payload.id,
+    title: payload.title,
+    externalReference: payload.external_reference,
+    status: payload.status,
+    signatureDate: payload.signature_date,
+    startDate: payload.start_date,
+    endDate: payload.end_date,
+    termMonths: payload.term_months,
+    isActive: payload.is_active,
+    activatedAt: payload.activated_at,
+    lastAccessedAt: payload.last_accessed_at,
+    lastAnalyzedAt: payload.last_analyzed_at,
+    parties: payload.parties,
+    financialTerms: payload.financial_terms,
+    fieldConfidence: payload.field_confidence,
+  };
+}
+
+function mapContractVersionSummary(
+  payload: ContractVersionSummaryPayload | null,
+): ContractVersionSummary | null {
+  if (!payload) {
+    return null;
+  }
+
+  return {
+    contractVersionId: payload.contract_version_id,
+    versionNumber: payload.version_number,
+    createdAt: payload.created_at,
+    source: payload.source,
+    originalFilename: payload.original_filename,
+    usedOcr: payload.used_ocr,
+    text: payload.text,
+  };
+}
+
+function mapContractAnalysisSummary(
+  payload: ContractLatestAnalysisSummaryPayload | null,
+): ContractLatestAnalysisSummary | null {
+  if (!payload) {
+    return null;
+  }
+
+  return {
+    analysisId: payload.analysis_id,
+    analysisStatus: payload.analysis_status,
+    policyVersion: payload.policy_version,
+    contractRiskScore: payload.contract_risk_score,
+    findings: payload.findings.map(mapContractFinding),
   };
 }
 
@@ -245,43 +360,49 @@ export function mapContractListResponse(
 export function mapContractDetailResponse(
   payload: ContractDetailResponsePayload,
 ): ContractDetail {
+  const latestVersion = mapContractVersionSummary(payload.latest_version);
+  const selectedAnalysis = mapContractAnalysisSummary(payload.latest_analysis);
+
   return {
-    contract: {
-      id: payload.contract.id,
-      title: payload.contract.title,
-      externalReference: payload.contract.external_reference,
-      status: payload.contract.status,
-      signatureDate: payload.contract.signature_date,
-      startDate: payload.contract.start_date,
-      endDate: payload.contract.end_date,
-      termMonths: payload.contract.term_months,
-      isActive: payload.contract.is_active,
-      activatedAt: payload.contract.activated_at,
-      lastAccessedAt: payload.contract.last_accessed_at,
-      lastAnalyzedAt: payload.contract.last_analyzed_at,
-      parties: payload.contract.parties,
-      financialTerms: payload.contract.financial_terms,
-      fieldConfidence: payload.contract.field_confidence,
-    },
-    latestVersion: payload.latest_version
-      ? {
-          contractVersionId: payload.latest_version.contract_version_id,
-          source: payload.latest_version.source,
-          originalFilename: payload.latest_version.original_filename,
-          usedOcr: payload.latest_version.used_ocr,
-          text: payload.latest_version.text,
-        }
-      : null,
-    latestAnalysis: payload.latest_analysis
-      ? {
-          analysisId: payload.latest_analysis.analysis_id,
-          analysisStatus: payload.latest_analysis.analysis_status,
-          policyVersion: payload.latest_analysis.policy_version,
-          contractRiskScore: payload.latest_analysis.contract_risk_score,
-          findings: payload.latest_analysis.findings.map(mapContractFinding),
-        }
-      : null,
+    contract: mapContractSummary(payload.contract),
+    selectedVersion: latestVersion,
+    latestVersion,
+    selectedAnalysis,
     events: payload.events.map(mapContractEvent),
+    isCurrent: true,
+    isHistoricalView: false,
+  };
+}
+
+export function mapContractVersionDetailResponse(
+  payload: ContractVersionDetailResponsePayload,
+): ContractDetail {
+  return {
+    contract: mapContractSummary(payload.contract),
+    selectedVersion: mapContractVersionSummary(payload.selected_version),
+    latestVersion: mapContractVersionSummary(payload.latest_version),
+    selectedAnalysis: mapContractAnalysisSummary(payload.selected_analysis),
+    events: payload.events.map(mapContractEvent),
+    isCurrent: payload.is_current,
+    isHistoricalView: !payload.is_current,
+  };
+}
+
+export function mapContractVersionListResponse(
+  payload: ContractVersionListResponsePayload,
+): ContractVersionListResponse {
+  return {
+    items: payload.items.map((item) => ({
+      contractVersionId: item.contract_version_id,
+      versionNumber: item.version_number,
+      createdAt: item.created_at,
+      source: item.source,
+      originalFilename: item.original_filename,
+      usedOcr: item.used_ocr,
+      analysisStatus: item.analysis_status,
+      contractRiskScore: item.contract_risk_score,
+      isCurrent: item.is_current,
+    })),
   };
 }
 
@@ -291,6 +412,7 @@ export function mapUploadResponseToContractUploadResult(
   return {
     contractId: payload.contract_id,
     contractVersionId: payload.contract_version_id,
+    versionNumber: payload.version_number,
     source: payload.source,
     usedOcr: payload.used_ocr,
     text: payload.text,

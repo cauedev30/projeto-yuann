@@ -15,6 +15,7 @@ router = APIRouter(prefix="/api/uploads", tags=["uploads"])
 class UploadContractResponse(BaseModel):
     contract_id: str
     contract_version_id: str
+    version_number: int
     source: str
     used_ocr: bool
     text: str
@@ -59,6 +60,7 @@ async def upload_contract(
     return UploadContractResponse(
         contract_id=result.contract.id,
         contract_version_id=result.contract_version.id,
+        version_number=result.contract_version.version_number,
         source=result.contract_version.source.value,
         used_ocr=result.extraction.used_ocr,
         text=result.extraction.text,

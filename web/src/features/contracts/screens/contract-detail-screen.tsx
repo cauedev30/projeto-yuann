@@ -10,10 +10,15 @@ import { PageHeader } from "../../../components/ui/page-header";
 import { StatCard } from "../../../components/ui/stat-card";
 import { SurfaceCard } from "../../../components/ui/surface-card";
 import type { ContractDetail } from "../../../entities/contracts/model";
-import { ContractsApiError, getContractDetail, getDownloadCorrectedUrl } from "../../../lib/api/contracts";
+import {
+  ContractsApiError,
+  getContractDetail,
+  getContractVersionDetail,
+  getDownloadCorrectedUrl,
+} from "../../../lib/api/contracts";
 import { useGenerateCorrectedContract } from "../../../lib/hooks/use-contracts";
-import { EventTimeline } from "../components/event-timeline";
 import { ContractSummaryPanel } from "../components/contract-summary-panel";
+import { EventTimeline } from "../components/event-timeline";
 import { ExtractedTextPanel } from "../components/extracted-text-panel";
 import { FindingsSection } from "../components/findings-section";
 import { MetadataSection } from "../components/metadata-section";
@@ -26,11 +31,17 @@ const SOURCE_LABELS: Record<string, string> = {
 
 type ContractDetailScreenProps = {
   contractId: string;
+  versionId?: string | null;
   loadContractDetail?: (contractId: string) => Promise<ContractDetail>;
+  loadContractVersionDetail?: (contractId: string, versionId: string) => Promise<ContractDetail>;
 };
 
 function buildContractDescription(detail: ContractDetail): string {
-  return `Referencia ${detail.contract.externalReference} com leitura persistida, versao mais recente e analise canonica.`;
+  if (detail.isHistoricalView && detail.selectedVersion && detail.latestVersion) {
+    return `Referencia ${detail.contract.externalReference} em leitura historica da versao ${detail.selectedVersion.versionNumber}. A versao atual e a ${detail.latestVersion.versionNumber}.`;
+  }
+
+  return `Referencia ${detail.contract.externalReference} com leitura da versao atual.`;
 }
 
 function isNotFoundError(error: unknown): error is ContractsApiError {
@@ -43,9 +54,19 @@ function normalizeDetailError(detailError: unknown): Error {
     : new Error("Nao foi possivel carregar o contrato.");
 }
 
+function formatSelectedVersionTimestamp(detail: ContractDetail): string {
+  if (!detail.selectedVersion) {
+    return "";
+  }
+
+  return detail.selectedVersion.createdAt;
+}
+
 export function ContractDetailScreen({
   contractId,
+  versionId,
   loadContractDetail = getContractDetail,
+  loadContractVersionDetail = getContractVersionDetail,
 }: ContractDetailScreenProps) {
   const [detail, setDetail] = useState<ContractDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -53,9 +74,9 @@ export function ContractDetailScreen({
   const [refreshSuccess, setRefreshSuccess] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [correctedReady, setCorrectedReady] = useState(false);
-  
+
   const generateCorrected = useGenerateCorrectedContract();
-  
+
   const liveMessage = isRefreshing
     ? "Atualizando detalhe do contrato..."
     : isLoading
@@ -69,6 +90,10 @@ export function ContractDetailScreen({
   }, [refreshSuccess]);
 
   useEffect(() => {
+    setCorrectedReady(false);
+  }, [contractId, versionId]);
+
+  useEffect(() => {
     let isActive = true;
 
     async function load() {
@@ -76,7 +101,9 @@ export function ContractDetailScreen({
       setError(null);
 
       try {
-        const response = await loadContractDetail(contractId);
+        const response = versionId
+          ? await loadContractVersionDetail(contractId, versionId)
+          : await loadContractDetail(contractId);
         if (!isActive) {
           return;
         }
@@ -101,14 +128,20 @@ export function ContractDetailScreen({
     return () => {
       isActive = false;
     };
-  }, [contractId, loadContractDetail]);
+  }, [contractId, versionId, loadContractDetail, loadContractVersionDetail]);
+
+  async function loadCurrentSelection() {
+    return versionId
+      ? loadContractVersionDetail(contractId, versionId)
+      : loadContractDetail(contractId);
+  }
 
   async function handleRefresh() {
     setIsRefreshing(true);
     setError(null);
 
     try {
-      const response = await loadContractDetail(contractId);
+      const response = await loadCurrentSelection();
       setDetail(response);
       setRefreshSuccess(true);
     } catch (detailError) {
@@ -124,7 +157,7 @@ export function ContractDetailScreen({
     setError(null);
 
     try {
-      const response = await loadContractDetail(contractId);
+      const response = await loadCurrentSelection();
       setDetail(response);
     } catch (detailError) {
       setDetail(null);
@@ -202,6 +235,9 @@ export function ContractDetailScreen({
     );
   }
 
+  const selectedVersion = detail.selectedVersion;
+  const selectedAnalysis = detail.selectedAnalysis;
+
   return (
     <section className={styles.page}>
       <div aria-atomic="true" aria-live="polite" className="sr-only">
@@ -218,9 +254,31 @@ export function ContractDetailScreen({
         description={buildContractDescription(detail)}
       />
 
-
+      <div className={styles.refreshRow}>
+        <button
+          className={styles.refreshButton}
+          disabled={isRefreshing}
+          onClick={() => void handleRefresh()}
+          type="button"
+        >
+          {isRefreshing ? "Atualizando..." : "Atualizar detalhe"}
+        </button>
+      </div>
 
       <div className={styles.stack}>
+        {refreshSuccess ? (
+          <p className={styles.successText}>Detalhe atualizado.</p>
+        ) : null}
+
+        {detail.isHistoricalView && detail.selectedVersion && detail.latestVersion ? (
+          <SurfaceCard title="Versao historica">
+            <p className={styles.inlineText}>
+              Voce esta vendo a versao {detail.selectedVersion.versionNumber}. A atual e a versao{" "}
+              {detail.latestVersion.versionNumber}.
+            </p>
+          </SurfaceCard>
+        ) : null}
+
         <div className={styles.statGrid}>
           <StatCard compact label="Status" value={detail.contract.status} />
           <StatCard
@@ -235,7 +293,7 @@ export function ContractDetailScreen({
           <StatCard
             compact
             label="Score"
-            value={detail.latestAnalysis?.contractRiskScore ?? "a confirmar"}
+            value={selectedAnalysis?.contractRiskScore ?? "a confirmar"}
           />
         </div>
 
@@ -249,20 +307,28 @@ export function ContractDetailScreen({
             endDate={detail.contract.endDate}
           />
 
-          <SurfaceCard title="Ultima versao">
-            {detail.latestVersion ? (
+          <SurfaceCard title="Versao em visualizacao">
+            {selectedVersion ? (
               <dl className={styles.summaryList}>
                 <div className={styles.summaryRow}>
+                  <dt>Versao</dt>
+                  <dd>{selectedVersion.versionNumber}</dd>
+                </div>
+                <div className={styles.summaryRow}>
                   <dt>Arquivo</dt>
-                  <dd>{detail.latestVersion.originalFilename}</dd>
+                  <dd>{selectedVersion.originalFilename}</dd>
                 </div>
                 <div className={styles.summaryRow}>
                   <dt>Origem</dt>
-                  <dd>{SOURCE_LABELS[detail.latestVersion.source] ?? detail.latestVersion.source}</dd>
+                  <dd>{SOURCE_LABELS[selectedVersion.source] ?? selectedVersion.source}</dd>
                 </div>
                 <div className={styles.summaryRow}>
                   <dt>Processamento</dt>
-                  <dd>{detail.latestVersion.usedOcr ? "OCR" : "Texto direto"}</dd>
+                  <dd>{selectedVersion.usedOcr ? "OCR" : "Texto direto"}</dd>
+                </div>
+                <div className={styles.summaryRow}>
+                  <dt>Registrada em</dt>
+                  <dd>{formatSelectedVersionTimestamp(detail)}</dd>
                 </div>
               </dl>
             ) : (
@@ -283,19 +349,19 @@ export function ContractDetailScreen({
 
         <details className={styles.collapsible} open>
           <summary className={styles.collapsibleSummary}>
-            <span className={styles.collapsibleTitle}>Ultima analise</span>
+            <span className={styles.collapsibleTitle}>Analise da versao</span>
             <span className={styles.collapsibleChevron} aria-hidden="true" />
           </summary>
           <div className={styles.collapsibleContent}>
-            {detail.latestAnalysis ? (
+            {selectedAnalysis ? (
               <div className={styles.stack}>
                 <p className={styles.inlineText}>
-                  Politica {detail.latestAnalysis.policyVersion} com status{" "}
-                  {detail.latestAnalysis.analysisStatus}.
+                  Politica {selectedAnalysis.policyVersion} com status{" "}
+                  {selectedAnalysis.analysisStatus}.
                 </p>
-                <FindingsSection items={detail.latestAnalysis.findings} />
-                
-                {detail.latestAnalysis.analysisStatus === "completed" && (
+                <FindingsSection items={selectedAnalysis.findings} />
+
+                {!detail.isHistoricalView && selectedAnalysis.analysisStatus === "completed" ? (
                   <div className={styles.actionRow}>
                     {!correctedReady ? (
                       <button
@@ -305,7 +371,7 @@ export function ContractDetailScreen({
                             await generateCorrected.mutateAsync(contractId);
                             setCorrectedReady(true);
                           } catch {
-                            // Error is handled by mutation state
+                            // error handled by mutation state
                           }
                         }}
                         disabled={generateCorrected.isPending}
@@ -324,13 +390,13 @@ export function ContractDetailScreen({
                         Baixar Contrato Corrigido (.docx)
                       </a>
                     )}
-                    {generateCorrected.isError && (
+                    {generateCorrected.isError ? (
                       <p className={styles.errorText}>
                         Erro ao gerar: {generateCorrected.error?.message}
                       </p>
-                    )}
+                    ) : null}
                   </div>
-                )}
+                ) : null}
               </div>
             ) : (
               <p className={styles.inlineText}>Analise ainda nao disponivel.</p>
@@ -344,18 +410,18 @@ export function ContractDetailScreen({
             <span className={styles.collapsibleChevron} aria-hidden="true" />
           </summary>
           <div className={styles.collapsibleContent}>
-            <ContractSummaryPanel contractId={contractId} />
+            <ContractSummaryPanel contractId={contractId} versionId={versionId} />
           </div>
         </details>
 
-        {detail.latestVersion?.text ? (
+        {selectedVersion?.text ? (
           <details className={styles.collapsible}>
             <summary className={styles.collapsibleSummary}>
               <span className={styles.collapsibleTitle}>Texto extraido</span>
               <span className={styles.collapsibleChevron} aria-hidden="true" />
             </summary>
             <div className={styles.collapsibleContent}>
-              <ExtractedTextPanel text={detail.latestVersion.text} />
+              <ExtractedTextPanel text={selectedVersion.text} />
             </div>
           </details>
         ) : null}

@@ -116,6 +116,13 @@
   line-height: 1.6;
 }
 
+.successText {
+  margin: 0;
+  color: var(--brand-green, #15803d);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
 .alert {
   margin: 0;
   padding: 1rem;

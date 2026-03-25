@@ -65,6 +65,8 @@ class ContractDetailSummary(BaseModel):
 
 class ContractVersionSummary(BaseModel):
     contract_version_id: str
+    version_number: int
+    created_at: datetime
     source: str
     original_filename: str
     used_ocr: bool
@@ -103,6 +105,33 @@ class ContractDetailResponse(BaseModel):
 class ContractSummaryResponse(BaseModel):
     summary: str
     key_points: list[str] = Field(default_factory=list)
+
+
+class ContractVersionListItem(BaseModel):
+    contract_version_id: str
+    version_number: int
+    created_at: datetime
+    source: str
+    original_filename: str
+    used_ocr: bool
+    analysis_status: str | None = None
+    contract_risk_score: float | None = None
+    is_current: bool
+
+
+class ContractVersionListResponse(BaseModel):
+    items: list[ContractVersionListItem] = Field(default_factory=list)
+
+
+class ContractVersionDetailResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    contract: ContractDetailSummary
+    selected_version: ContractVersionSummary
+    latest_version: ContractVersionSummary | None = None
+    selected_analysis: ContractLatestAnalysisSummary | None = None
+    events: list[ContractEventSummary] = Field(default_factory=list)
+    is_current: bool
 
 
 class PaginatedContractListResponse(BaseModel):

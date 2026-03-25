@@ -5,10 +5,14 @@ from typing import TYPE_CHECKING
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.application.contract_versions import (
+    build_version_snapshot,
+    persist_version_snapshot,
+    replace_contract_events,
+)
 from app.application.analysis import mark_contract_analysis_completed
 from app.db.models.analysis import AnalysisStatus, ContractAnalysis, ContractAnalysisFinding
 from app.db.models.contract import Contract, ContractVersion
-from app.db.models.event import ContractEvent
 from app.db.models.policy import Policy
 from app.domain.contract_analysis import evaluate_rules, extract_contract_facts
 from app.domain.contract_metadata import extract_contract_metadata
@@ -26,6 +30,7 @@ def run_policy_analysis(
     contract: Contract,
     contract_text: str,
     *,
+    contract_version: ContractVersion | None = None,
     llm_client: GeminiAnalysisClient | OpenAIAnalysisClient | None = None,
 ) -> None:
     """Run policy analysis using Gemini + playbook.
@@ -36,6 +41,20 @@ def run_policy_analysis(
     """
     policy = session.scalar(select(Policy).order_by(Policy.created_at.desc()))
     if not policy:
+        return
+
+    analysis_version = contract_version
+    if analysis_version is None:
+        analysis_version = session.scalar(
+            select(ContractVersion)
+            .where(ContractVersion.contract_id == contract.id)
+            .order_by(
+                ContractVersion.version_number.desc(),
+                ContractVersion.created_at.desc(),
+                ContractVersion.id.desc(),
+            )
+        )
+    if analysis_version is None:
         return
 
     # Chunk the contract text
@@ -58,6 +77,7 @@ def run_policy_analysis(
         # Create analysis record with findings
         analysis = ContractAnalysis(
             contract_id=contract.id,
+            contract_version_id=analysis_version.id,
             policy_version=policy.version if policy else "v1.0",
             status=AnalysisStatus.completed,
             contract_risk_score=analysis_result.contract_risk_score,
@@ -93,6 +113,7 @@ def run_policy_analysis(
 
         analysis = ContractAnalysis(
             contract_id=contract.id,
+            contract_version_id=analysis_version.id,
             policy_version=policy.version if policy else "v1.0",
             status=AnalysisStatus.completed,
             contract_risk_score=fallback_result.contract_risk_score,
@@ -150,21 +171,31 @@ def run_contract_pipeline(
     existing_meta["match_labels"] = metadata_result.match_labels
     contract_version.extraction_metadata = existing_meta
 
+    scheduled_events = (
+        build_contract_events(metadata_result)
+        if metadata_result.ready_for_event_generation
+        else []
+    )
+    persist_version_snapshot(
+        contract_version,
+        build_version_snapshot(
+            metadata_result,
+            scheduled_events=scheduled_events,
+            contract_version_id=contract_version.id,
+        ),
+    )
+
     if metadata_result.ready_for_event_generation:
-        for event in list(contract.events):
-            session.delete(event)
-        session.flush()
+        replace_contract_events(
+            contract,
+            scheduled_events=scheduled_events,
+            contract_version_id=contract_version.id,
+        )
 
-        scheduled_events = build_contract_events(metadata_result)
-        for scheduled in scheduled_events:
-            session.add(
-                ContractEvent(
-                    contract_id=contract.id,
-                    event_type=scheduled.event_type,
-                    event_date=scheduled.event_date,
-                    lead_time_days=scheduled.lead_time_days,
-                    metadata_json=scheduled.metadata,
-                )
-            )
-
-    run_policy_analysis(session, contract, text, llm_client=llm_client)
+    run_policy_analysis(
+        session,
+        contract,
+        text,
+        contract_version=contract_version,
+        llm_client=llm_client,
+    )

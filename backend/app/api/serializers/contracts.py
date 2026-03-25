@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+from typing import Any
+
+from app.application.contract_versions import get_contract_version_snapshot
 from app.db.models.analysis import ContractAnalysis, ContractAnalysisFinding
 from app.db.models.contract import Contract, ContractVersion
 from app.db.models.event import ContractEvent
@@ -10,20 +13,29 @@ from app.schemas.contract import (
     ContractEventSummary,
     ContractLatestAnalysisSummary,
     ContractListItem,
+    ContractVersionDetailResponse,
+    ContractVersionListItem,
+    ContractVersionListResponse,
     ContractVersionSummary,
 )
 
 
-def _latest_version(contract: Contract) -> ContractVersion | None:
+def latest_contract_version(contract: Contract) -> ContractVersion | None:
     if not contract.versions:
         return None
-    return max(contract.versions, key=lambda version: (version.created_at, version.id))
+    return max(
+        contract.versions,
+        key=lambda version: (version.version_number, version.created_at, version.id),
+    )
 
 
-def _latest_analysis(contract: Contract) -> ContractAnalysis | None:
-    if not contract.analyses:
+def latest_version_analysis(version: ContractVersion | None) -> ContractAnalysis | None:
+    if version is None or not version.analyses:
         return None
-    return max(contract.analyses, key=lambda analysis: (analysis.created_at, analysis.id))
+    return max(
+        version.analyses,
+        key=lambda analysis: (analysis.created_at, analysis.id),
+    )
 
 
 def _serialize_event(event: ContractEvent) -> ContractEventSummary:
@@ -36,10 +48,28 @@ def _serialize_event(event: ContractEvent) -> ContractEventSummary:
     )
 
 
-def _extract_field_confidence(contract: Contract) -> dict[str, float]:
-    version = _latest_version(contract)
+def _serialize_snapshot_event(
+    item: dict[str, Any],
+    *,
+    index: int,
+) -> ContractEventSummary:
+    return ContractEventSummary(
+        id=f"snapshot-{index}",
+        event_type=str(item.get("event_type", "")),
+        event_date=item.get("event_date"),
+        lead_time_days=int(item.get("lead_time_days", 0)),
+        metadata=item.get("metadata") or {},
+    )
+
+
+def _extract_field_confidence(version: ContractVersion | None) -> dict[str, float]:
     if version is None:
         return {}
+    snapshot = get_contract_version_snapshot(version) or {}
+    contract_snapshot = snapshot.get("contract") or {}
+    field_confidence = contract_snapshot.get("field_confidence")
+    if isinstance(field_confidence, dict):
+        return field_confidence
     metadata = version.extraction_metadata or {}
     return metadata.get("field_confidence") or {}
 
@@ -69,6 +99,8 @@ def _serialize_version(version: ContractVersion | None) -> ContractVersionSummar
 
     return ContractVersionSummary(
         contract_version_id=version.id,
+        version_number=version.version_number,
+        created_at=version.created_at,
         source=version.source.value,
         original_filename=version.original_filename,
         used_ocr=_normalize_used_ocr(version),
@@ -91,9 +123,37 @@ def _serialize_analysis(analysis: ContractAnalysis | None) -> ContractLatestAnal
     )
 
 
+def _build_contract_summary(
+    contract: Contract,
+    *,
+    version: ContractVersion | None,
+    snapshot_contract: dict[str, Any] | None = None,
+) -> ContractDetailSummary:
+    return ContractDetailSummary(
+        id=contract.id,
+        title=contract.title,
+        external_reference=contract.external_reference,
+        status=contract.status,
+        signature_date=(snapshot_contract or {}).get("signature_date", contract.signature_date),
+        start_date=(snapshot_contract or {}).get("start_date", contract.start_date),
+        end_date=(snapshot_contract or {}).get("end_date", contract.end_date),
+        term_months=(snapshot_contract or {}).get("term_months", contract.term_months),
+        is_active=contract.is_active,
+        activated_at=contract.activated_at,
+        last_accessed_at=contract.last_accessed_at,
+        last_analyzed_at=contract.last_analyzed_at,
+        parties=(snapshot_contract or {}).get("parties", contract.parties),
+        financial_terms=(snapshot_contract or {}).get("financial_terms", contract.financial_terms),
+        field_confidence=(snapshot_contract or {}).get(
+            "field_confidence",
+            _extract_field_confidence(version),
+        ),
+    )
+
+
 def serialize_contract_list_item(contract: Contract) -> ContractListItem:
-    latest_version = _latest_version(contract)
-    latest_analysis = _latest_analysis(contract)
+    latest_version = latest_contract_version(contract)
+    latest_analysis = latest_version_analysis(latest_version)
 
     return ContractListItem(
         id=contract.id,
@@ -117,25 +177,69 @@ def serialize_contract_list_item(contract: Contract) -> ContractListItem:
 
 
 def serialize_contract_detail(contract: Contract) -> ContractDetailResponse:
+    latest_version = latest_contract_version(contract)
+    latest_analysis = latest_version_analysis(latest_version)
+
     return ContractDetailResponse(
-        contract=ContractDetailSummary(
-            id=contract.id,
-            title=contract.title,
-            external_reference=contract.external_reference,
-            status=contract.status,
-            signature_date=contract.signature_date,
-            start_date=contract.start_date,
-            end_date=contract.end_date,
-            term_months=contract.term_months,
-            is_active=contract.is_active,
-            activated_at=contract.activated_at,
-            last_accessed_at=contract.last_accessed_at,
-            last_analyzed_at=contract.last_analyzed_at,
-            parties=contract.parties,
-            financial_terms=contract.financial_terms,
-            field_confidence=_extract_field_confidence(contract),
-        ),
-        latest_version=_serialize_version(_latest_version(contract)),
-        latest_analysis=_serialize_analysis(_latest_analysis(contract)),
+        contract=_build_contract_summary(contract, version=latest_version),
+        latest_version=_serialize_version(latest_version),
+        latest_analysis=_serialize_analysis(latest_analysis),
         events=[_serialize_event(event) for event in contract.events],
+    )
+
+
+def serialize_contract_version_list(contract: Contract) -> ContractVersionListResponse:
+    current_version = latest_contract_version(contract)
+    versions = sorted(
+        contract.versions,
+        key=lambda version: (version.version_number, version.created_at, version.id),
+        reverse=True,
+    )
+    return ContractVersionListResponse(
+        items=[
+            ContractVersionListItem(
+                contract_version_id=version.id,
+                version_number=version.version_number,
+                created_at=version.created_at,
+                source=version.source.value,
+                original_filename=version.original_filename,
+                used_ocr=_normalize_used_ocr(version),
+                analysis_status=latest_version_analysis(version).status.value
+                if latest_version_analysis(version) is not None
+                else None,
+                contract_risk_score=float(latest_version_analysis(version).contract_risk_score)
+                if latest_version_analysis(version) is not None
+                and latest_version_analysis(version).contract_risk_score is not None
+                else None,
+                is_current=current_version is not None and version.id == current_version.id,
+            )
+            for version in versions
+        ]
+    )
+
+
+def serialize_contract_version_detail(
+    contract: Contract,
+    contract_version: ContractVersion,
+) -> ContractVersionDetailResponse:
+    latest_version = latest_contract_version(contract)
+    selected_analysis = latest_version_analysis(contract_version)
+    snapshot = get_contract_version_snapshot(contract_version) or {}
+    snapshot_contract = snapshot.get("contract") if isinstance(snapshot.get("contract"), dict) else None
+    snapshot_events = snapshot.get("events") if isinstance(snapshot.get("events"), list) else None
+
+    return ContractVersionDetailResponse(
+        contract=_build_contract_summary(
+            contract,
+            version=contract_version,
+            snapshot_contract=snapshot_contract,
+        ),
+        selected_version=_serialize_version(contract_version),
+        latest_version=_serialize_version(latest_version),
+        selected_analysis=_serialize_analysis(selected_analysis),
+        events=[
+            _serialize_snapshot_event(item, index=index)
+            for index, item in enumerate(snapshot_events or [])
+        ],
+        is_current=latest_version is not None and latest_version.id == contract_version.id,
     )

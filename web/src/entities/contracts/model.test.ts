@@ -11,12 +11,14 @@ describe("contracts entity mapping", () => {
     const result = mapUploadResponseToContractUploadResult({
       contract_id: "ctr-1",
       contract_version_id: "ver-1",
+      version_number: 1,
       source: "third_party_draft",
       used_ocr: false,
       text: "Prazo de vigencia 60 meses",
     });
 
     expect(result.contractId).toBe("ctr-1");
+    expect(result.versionNumber).toBe(1);
     expect(result.usedOcr).toBe(false);
   });
 
@@ -81,7 +83,9 @@ describe("contracts entity mapping", () => {
     expect(result.contract.isActive).toBe(false);
     expect(result.contract.lastAccessedAt).toBe("2026-03-22T12:00:00Z");
     expect(result.contract.lastAnalyzedAt).toBe("2026-03-21T12:00:00Z");
+    expect(result.selectedVersion).toBeNull();
     expect(result.latestVersion).toBeNull();
-    expect(result.latestAnalysis).toBeNull();
+    expect(result.selectedAnalysis).toBeNull();
+    expect(result.isHistoricalView).toBe(false);
   });
 });

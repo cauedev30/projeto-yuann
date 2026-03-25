@@ -22,6 +22,10 @@ class ContractAnalysis(TimestampMixin, Base):
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid4()))
     contract_id: Mapped[str | None] = mapped_column(ForeignKey("contracts.id", ondelete="CASCADE"))
+    contract_version_id: Mapped[str] = mapped_column(
+        ForeignKey("contract_versions.id", ondelete="CASCADE"),
+        nullable=False,
+    )
     policy_version: Mapped[str] = mapped_column(String(50), nullable=False)
     status: Mapped[AnalysisStatus] = mapped_column(
         Enum(AnalysisStatus, name="analysis_status"),
@@ -36,6 +40,7 @@ class ContractAnalysis(TimestampMixin, Base):
     corrections_summary: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
 
     contract: Mapped["Contract"] = relationship(back_populates="analyses")
+    contract_version: Mapped["ContractVersion"] = relationship(back_populates="analyses")
     findings: Mapped[list["ContractAnalysisFinding"]] = relationship(
         back_populates="analysis",
         cascade="all, delete-orphan",

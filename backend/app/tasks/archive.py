@@ -2,8 +2,12 @@ from __future__ import annotations
 
 from sqlalchemy.orm import Session
 
+from app.application.contract_versions import (
+    build_version_snapshot,
+    persist_version_snapshot,
+    replace_contract_events,
+)
 from app.db.models.contract import ContractVersion
-from app.db.models.event import ContractEvent, EventType
 from app.domain.contract_metadata import extract_contract_metadata
 from app.domain.events import build_contract_events
 
@@ -44,20 +48,22 @@ def process_signed_contract_archive(
     extraction_metadata["signed_contract_snapshot"] = _build_signed_contract_snapshot(metadata)
     extraction_metadata["field_confidence"] = metadata.field_confidence
     contract_version.extraction_metadata = extraction_metadata
+    scheduled_events = build_contract_events(metadata)
+    persist_version_snapshot(
+        contract_version,
+        build_version_snapshot(
+            metadata,
+            scheduled_events=scheduled_events,
+            contract_version_id=contract_version.id,
+        ),
+    )
     session.add(contract_version)
 
-    contract.events.clear()
-    for scheduled_event in build_contract_events(metadata):
-        event_metadata = dict(scheduled_event.metadata)
-        event_metadata["source_contract_version_id"] = contract_version.id
-        contract.events.append(
-            ContractEvent(
-                event_type=EventType(scheduled_event.event_type),
-                event_date=scheduled_event.event_date,
-                lead_time_days=scheduled_event.lead_time_days,
-                metadata_json=event_metadata,
-            )
-        )
+    replace_contract_events(
+        contract,
+        scheduled_events=scheduled_events,
+        contract_version_id=contract_version.id,
+    )
 
     session.add(contract)
     session.flush()

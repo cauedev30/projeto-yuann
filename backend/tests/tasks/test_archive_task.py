@@ -11,6 +11,7 @@ def make_contract_version(session, *, text_content: str = "") -> ContractVersion
         status="active",
     )
     version = ContractVersion(
+        version_number=1,
         source=ContractSource.signed_contract,
         original_filename="contrato.pdf",
         storage_key="uploads/contrato.pdf",
@@ -60,6 +61,7 @@ def test_process_signed_contract_archive_merges_existing_extraction_metadata(ses
 
 def test_process_signed_contract_archive_returns_early_when_no_contract(session) -> None:
     version = ContractVersion(
+        version_number=1,
         source=ContractSource.signed_contract,
         original_filename="contrato.pdf",
         storage_key="uploads/contrato.pdf",

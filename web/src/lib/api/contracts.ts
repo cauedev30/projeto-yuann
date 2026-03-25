@@ -9,8 +9,14 @@ import {
   type ContractUploadInput,
   type ContractUploadResponsePayload,
   type ContractUploadResult,
+  type ContractVersionDetailResponsePayload,
+  type ContractVersionListResponse,
+  type ContractVersionListResponsePayload,
+  type ContractVersionUploadInput,
   mapContractDetailResponse,
   mapContractListResponse,
+  mapContractVersionDetailResponse,
+  mapContractVersionListResponse,
   mapUploadResponseToContractUploadResult,
 } from "../../entities/contracts/model";
 
@@ -94,6 +100,30 @@ export async function uploadContract(
   return mapUploadResponseToContractUploadResult(payload);
 }
 
+export async function uploadContractVersion(
+  contractId: string,
+  input: ContractVersionUploadInput,
+  fetchImpl: typeof fetch = fetch,
+): Promise<ContractUploadResult> {
+  const formData = new FormData();
+  formData.set("source", input.source);
+  formData.set("file", input.file);
+
+  const { NEXT_PUBLIC_API_URL } = getClientEnv();
+  const response = await fetchImpl(`${NEXT_PUBLIC_API_URL}/api/contracts/${contractId}/versions`, {
+    method: "POST",
+    headers: getAuthHeaders(),
+    body: formData,
+  });
+
+  if (!response.ok) {
+    throw await buildApiError(response, GENERIC_UPLOAD_ERROR, mapUploadErrorDetail);
+  }
+
+  const payload = (await response.json()) as ContractUploadResponsePayload;
+  return mapUploadResponseToContractUploadResult(payload);
+}
+
 export async function listContracts(
   scopeOrFetchImpl?: ContractScope | typeof fetch,
   fetchImpl: typeof fetch = fetch,
@@ -123,6 +153,24 @@ export async function listContracts(
   return mapContractListResponse(payload);
 }
 
+export async function listContractVersions(
+  contractId: string,
+  fetchImpl: typeof fetch = fetch,
+): Promise<ContractVersionListResponse> {
+  const { NEXT_PUBLIC_API_URL } = getClientEnv();
+  const response = await fetchImpl(`${NEXT_PUBLIC_API_URL}/api/contracts/${contractId}/versions`, {
+    headers: getAuthHeaders(),
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    throw await buildApiError(response, GENERIC_DETAIL_ERROR);
+  }
+
+  const payload = (await response.json()) as ContractVersionListResponsePayload;
+  return mapContractVersionListResponse(payload);
+}
+
 export async function getContractDetail(
   contractId: string,
   fetchImpl: typeof fetch = fetch,
@@ -139,6 +187,28 @@ export async function getContractDetail(
 
   const payload = (await response.json()) as ContractDetailResponsePayload;
   return mapContractDetailResponse(payload);
+}
+
+export async function getContractVersionDetail(
+  contractId: string,
+  versionId: string,
+  fetchImpl: typeof fetch = fetch,
+): Promise<ContractDetail> {
+  const { NEXT_PUBLIC_API_URL } = getClientEnv();
+  const response = await fetchImpl(
+    `${NEXT_PUBLIC_API_URL}/api/contracts/${contractId}/versions/${versionId}`,
+    {
+      headers: getAuthHeaders(),
+      cache: "no-store",
+    },
+  );
+
+  if (!response.ok) {
+    throw await buildApiError(response, GENERIC_DETAIL_ERROR);
+  }
+
+  const payload = (await response.json()) as ContractVersionDetailResponsePayload;
+  return mapContractVersionDetailResponse(payload);
 }
 
 export async function deleteContract(
@@ -169,8 +239,7 @@ export async function updateContract(
   fetchImpl: typeof fetch = fetch,
 ): Promise<ContractDetail> {
   const { NEXT_PUBLIC_API_URL } = getClientEnv();
-  
-  // Convert camelCase to snake_case payload
+
   const payload: Record<string, unknown> = {};
   if (updates.title !== undefined) payload.title = updates.title;
   if (updates.signatureDate !== undefined) payload.signature_date = updates.signatureDate;
@@ -198,16 +267,25 @@ export async function updateContract(
 
 export async function getContractSummary(
   contractId: string,
+  versionIdOrFetchImpl?: string | typeof fetch,
   fetchImpl: typeof fetch = fetch,
 ): Promise<ContractSummaryResponse> {
   const { NEXT_PUBLIC_API_URL } = getClientEnv();
-  const response = await fetchImpl(
-    `${NEXT_PUBLIC_API_URL}/api/contracts/${contractId}/summary`,
-    {
-      headers: getAuthHeaders(),
-      cache: "no-store",
-    },
-  );
+  const versionId =
+    typeof versionIdOrFetchImpl === "function" || versionIdOrFetchImpl === undefined
+      ? undefined
+      : versionIdOrFetchImpl;
+  const resolvedFetchImpl =
+    typeof versionIdOrFetchImpl === "function" ? versionIdOrFetchImpl : fetchImpl;
+  const url = new URL(`${NEXT_PUBLIC_API_URL}/api/contracts/${contractId}/summary`);
+  if (versionId !== undefined) {
+    url.searchParams.set("version_id", versionId);
+  }
+
+  const response = await resolvedFetchImpl(url.toString(), {
+    headers: getAuthHeaders(),
+    cache: "no-store",
+  });
 
   if (!response.ok) {
     throw await buildApiError(response, "Nao foi possivel gerar o resumo do contrato.");

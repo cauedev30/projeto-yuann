@@ -11,9 +11,10 @@ import styles from "./contract-summary-panel.module.css";
 
 type ContractSummaryPanelProps = {
   contractId: string;
+  versionId?: string | null;
 };
 
-export function ContractSummaryPanel({ contractId }: ContractSummaryPanelProps) {
+export function ContractSummaryPanel({ contractId, versionId }: ContractSummaryPanelProps) {
   const [summary, setSummary] = useState<ContractSummaryResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -23,7 +24,7 @@ export function ContractSummaryPanel({ contractId }: ContractSummaryPanelProps) 
     setError(null);
 
     try {
-      const response = await getContractSummary(contractId);
+      const response = await getContractSummary(contractId, versionId ?? undefined);
       setSummary(response);
     } catch (loadError) {
       setError(
@@ -34,7 +35,7 @@ export function ContractSummaryPanel({ contractId }: ContractSummaryPanelProps) 
     } finally {
       setIsLoading(false);
     }
-  }, [contractId]);
+  }, [contractId, versionId]);
 
   useEffect(() => {
     void loadSummary();
