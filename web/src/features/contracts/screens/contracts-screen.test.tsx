@@ -49,6 +49,7 @@ function buildUploadResult() {
   return {
     contractId: "contract-1",
     contractVersionId: "version-1",
+    versionNumber: 1,
     source: "third_party_draft" as const,
     usedOcr: false,
     text: "Prazo de vigencia 36 meses",

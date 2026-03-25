@@ -134,6 +134,37 @@ class ContractVersionDetailResponse(BaseModel):
     is_current: bool
 
 
+class ContractVersionTextDiffLine(BaseModel):
+    kind: str
+    value: str
+
+
+class ContractVersionTextDiff(BaseModel):
+    has_changes: bool
+    lines: list[ContractVersionTextDiffLine] = Field(default_factory=list)
+
+
+class ContractFindingDiffItem(BaseModel):
+    clause_name: str
+    change_type: str
+    previous_status: str | None = None
+    current_status: str | None = None
+    previous_summary: str | None = None
+    current_summary: str | None = None
+
+
+class ContractFindingsDiff(BaseModel):
+    items: list[ContractFindingDiffItem] = Field(default_factory=list)
+
+
+class ContractVersionComparisonResponse(BaseModel):
+    selected_version: ContractVersionSummary
+    baseline_version: ContractVersionSummary | None = None
+    summary: str
+    text_diff: ContractVersionTextDiff
+    findings_diff: ContractFindingsDiff
+
+
 class PaginatedContractListResponse(BaseModel):
     """Paginated contract list response."""
     items: list[ContractListItem]

@@ -1,5 +1,17 @@
 # Session Log
 
+- Data: 2026-03-25 20:00:00 -0300
+  - tarefa: implementar F6-D (historico de versoes e diff na UI) fechando a dependencia backend/frontend sem deixar comparacao pendente.
+  - resultado: endpoint `GET /api/contracts/{id}/compare` criado com diff deterministico de texto e achados; cliente web ganhou `compareContractVersions`; detalhe do contrato agora carrega historico de versoes, baseline automatica e painel de diff; verificacao fresca com `22` testes backend passando, `23` testes frontend passando e `npx tsc --noEmit` verde.
+  - arquivos alterados: `backend/app/api/routes/contracts.py`, `backend/app/schemas/contract.py`, `backend/app/application/version_diff.py`, `backend/tests/api/test_contracts_api.py`, `web/src/entities/contracts/model.ts`, `web/src/lib/api/contracts.ts`, `web/src/lib/api/contracts.test.ts`, `web/src/features/contracts/screens/contract-detail-screen.tsx`, `web/src/features/contracts/screens/contract-detail-screen.test.tsx`, `web/src/features/contracts/components/version-history-panel.tsx`, `web/src/features/contracts/components/version-history-panel.module.css`, `web/src/features/contracts/components/version-diff-panel.tsx`, `web/src/features/contracts/components/version-diff-panel.module.css`, `web/src/features/contracts/screens/contracts-screen.test.tsx`, `.codex-memory/current-state.md`, `.codex-memory/session-log.md`
+  - proximos passos: seguir para F6-E ou F6-F conforme prioridade do board.
+
+- Data: 2026-03-25 19:00:00 -0300
+  - tarefa: resincronizar o workspace Windows com um clone limpo do repositorio e absorver o contexto atual do projeto.
+  - resultado: pasta `C:\Users\win\projeto-yuann` recriada via `git clone`; checkout confirmado em `main` no commit `97c3409c519267cfc8bd70524f918cd5ed136109`; contexto consolidado a partir de `README.md`, `AGENTS.md`, `.codex-memory/`, `docs/squad/`, composition root do backend e rotas/pages principais do frontend.
+  - arquivos alterados: `.codex-memory/current-state.md`, `.codex-memory/session-log.md`
+  - proximos passos: opcionalmente subir o backend (`uvicorn`) e o frontend (`npm run dev`) para validacao manual do estado clonado.
+
 - Data: 2026-03-25 15:53:00 -0300
   - tarefa: implementar F6-B (Acervo e Histórico UI) segregando a listagem e finalizando os detalhes operacionais no Trello.
   - resultado: rotas `/acervo` e `/historico` criadas; fluxos antigos de dashboard focados em 'portfolio' corrigidos; testes dedicados implementados; suíte atualizada do frontend rodando limpa (`23` testes passando).

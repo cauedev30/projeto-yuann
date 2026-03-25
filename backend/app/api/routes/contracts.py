@@ -23,6 +23,10 @@ from app.api.serializers.contracts import (
 from app.application.analysis import mark_contract_analysis_completed
 from app.application.contract_upload import ContractUploadError, upload_contract_version_file
 from app.application.contract_pipeline import run_contract_pipeline
+from app.application.version_diff import (
+    build_contract_version_comparison,
+    resolve_baseline_version,
+)
 from app.db.models.analysis import ContractAnalysis
 from app.db.models.contract import Contract, ContractSource, ContractVersion
 from app.domain.playbook import PLAYBOOK_CLAUSES
@@ -34,6 +38,7 @@ from app.schemas.contract import (
     ContractSummaryResponse,
     ContractUpdateInput,
     CorrectedContractResponse,
+    ContractVersionComparisonResponse,
     ContractVersionDetailResponse,
     ContractVersionListResponse,
     PaginatedContractListResponse,
@@ -317,6 +322,39 @@ def get_contract_summary(
     return ContractSummaryResponse(
         summary=result.summary,
         key_points=result.key_points,
+    )
+
+
+@router.get("/{contract_id}/compare", response_model=ContractVersionComparisonResponse)
+def compare_contract_versions(
+    contract_id: str,
+    selected_version_id: str | None = Query(default=None),
+    baseline_version_id: str | None = Query(default=None),
+    session: Session = Depends(get_session),
+) -> ContractVersionComparisonResponse:
+    contract = _get_contract_or_404(session, contract_id)
+    selected_version = (
+        _get_contract_version_or_404(contract, selected_version_id)
+        if selected_version_id is not None
+        else latest_contract_version(contract)
+    )
+    if selected_version is None:
+        raise HTTPException(status_code=422, detail="No contract versions available for comparison")
+
+    baseline_version = resolve_baseline_version(
+        contract,
+        selected_version=selected_version,
+        baseline_version_id=baseline_version_id,
+    )
+    if baseline_version_id is not None and baseline_version is None:
+        raise HTTPException(status_code=404, detail="Contract version not found")
+    if baseline_version is not None and baseline_version.id == selected_version.id:
+        baseline_version = None
+
+    return build_contract_version_comparison(
+        contract,
+        selected_version=selected_version,
+        baseline_version=baseline_version,
     )
 
 

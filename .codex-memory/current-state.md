@@ -3,10 +3,11 @@
 ## Projeto
 - Monorepo `projeto-yuann` do MVP `LegalTech` para ingestao, analise e governanca de contratos.
 - Fonte de verdade usada nesta sessao: repositorio GitHub `git@github.com:cauedev30/projeto-yuann.git`.
-- Checkout verificado desta execucao: `/home/dvdev/projeto-yuann`
+- Checkout verificado desta execucao: `C:\Users\win\projeto-yuann`
 - Interface canonica de memoria compartilhada: `./.codex-memory/`
 
 ## Snapshot verificado
+- Resincronizacao local (2026-03-25): clone limpo confirmado em `main` no commit `97c3409c519267cfc8bd70524f918cd5ed136109` (`Implement contract version history and per-version analysis`).
 - Base anterior: `19dab0b feat: prepare f5-b product release [F5-B]` / `main` (`0c09517`)
 - Hardening de deploy (2026-03-22): `backend/app/core/app_factory.py` agora aceita `DATABASE_URL`, `UPLOAD_DIR` e `CORS_ORIGINS` por env com fallback local; `backend/pyproject.toml` e `backend/requirements.txt` passaram a incluir `psycopg[binary]` e `pydantic-settings`; `.env.example` e `DEPLOY_GUIDE.md` foram reescritos para o fluxo `Railway + Postgres + volume` no backend e `Vercel` no frontend.
 - Fix de runtime Railway (2026-03-22): `backend/nixpacks.toml` passou a usar o provider Python padrao e os manifests do backend agora declaram `PyMuPDF`, corrigindo a falha `ModuleNotFoundError: No module named 'fitz'` durante o boot do container.
@@ -20,6 +21,7 @@
 - Fase 5: Auth JWT — modelo `User`, rotas `/api/auth/register|login|me`, dependency `get_current_user`, migracao `0006`; frontend com `AuthProvider`, `AuthGuard`, pagina `/login` glassmorphic, headers `Authorization` em todos os API clients.
 - Fase 6 (Micro Ajustes): AI summary ativado passando `.env` para o uvicorn localmente. UI com titulo de achados alterado para "Principais Pontos". Duplicidade de visualizacao do Prazo de Vigencia resolvida limpando DB obsoleto via reanalise da API.
 - Fase 7: F6-B (Acervo e Histórico) — Rotas segregadas no frontend separando o workflow operacional (Acervo/Histórico) do fluxo de ingestão (contracts upload).
+- Fase 8: F6-D (Histórico de versões e diff) — `GET /api/contracts/{id}/compare` adicionado com diff determinístico de texto e achados entre versões; detalhe do contrato agora carrega histórico navegável de versões, baseline automática e painel de diff no frontend.
 
 ## Plano de melhorias (2026-03-18) — 4 fases concluidas
 - Fase 1 (Correcoes rapidas frontend): data hardcoded na timeline corrigida para `new Date()`; traducoes "Contracts"→"Contratos", "Findings principais"→"Achados principais", "Findings criticos"→"Achados criticos"; labels de origem traduzidos; botao "Sair" na sidebar e mobile nav; StatCards com variante compact.
@@ -29,6 +31,7 @@
 - Fase 5 (Contratos e IA): substituicao de "Texto extraido" por `ContractSummaryPanel`; remocao de botoes falhos de atualizar; correcao do erro de "Hydration failed" no `AuthGuard`; otimizacao em `evaluate_rules` para agrupar limites de `Prazo de vigencia` e fix do parser regex de entidades locais; estilizacao premium com glassmorphism no `AppShell` da sidebar.
 
 ## Evidencia operacional mais recente
+- F6-D versões/diff: backend `22 passed` em `backend/tests/api/test_contracts_api.py -q`; frontend `23 passed` em `src/lib/api/contracts.test.ts` + `src/features/contracts/screens/contract-detail-screen.test.tsx`; `npx tsc --noEmit` verde em 2026-03-25.
 - UI Acervo/Histórico: testes unitários web (23 testes) passando em 2026-03-25.
 - Backend focado em deploy: `5 passed in 1.45s` (`backend/tests/core/test_app_factory.py` + `backend/tests/core/test_config.py`)
 - Packaging/backend deploy: `6 passed in 1.38s` incluindo `backend/tests/core/test_packaging.py`

@@ -61,6 +61,7 @@ def persist_contract_analysis_for(
     contract_id: str,
     contract_version_id: str | None = None,
     contract_risk_score: float = 80,
+    items: list[AnalysisItem] | None = None,
 ) -> None:
     session = client.app.state.session_factory()
     try:
@@ -71,7 +72,8 @@ def persist_contract_analysis_for(
             policy_version="v1",
             analysis_result=ContractAnalysisResult(
                 contract_risk_score=contract_risk_score,
-                items=[
+                items=items
+                or [
                     AnalysisItem(
                         clause_name="Prazo de vigencia",
                         status="critical",
@@ -546,6 +548,111 @@ def test_get_contract_summary_uses_requested_version_text(client) -> None:
         "key_points": ["Prazo de vigencia 36 meses"],
     }
     assert second_upload["version_number"] == 2
+
+
+def test_get_contract_compare_returns_text_and_finding_diffs_between_versions(client) -> None:
+    first_upload = upload_contract(client, external_reference="LOC-150")
+    second_upload = upload_contract_version(
+        client,
+        contract_id=first_upload["contract_id"],
+        filename="contract-v2.pdf",
+        contract_text=(
+            "Prazo de vigencia 60 meses\n"
+            "Reajuste anual pelo IGP-M\n"
+            "Fiador obrigatorio"
+        ),
+    )
+
+    persist_contract_analysis_for(
+        client,
+        contract_id=first_upload["contract_id"],
+        contract_version_id=first_upload["contract_version_id"],
+        contract_risk_score=82,
+        items=[
+            AnalysisItem(
+                clause_name="Prazo de vigencia",
+                status="critical",
+                severity="critical",
+                current_summary="Prazo atual de 36 meses.",
+                policy_rule="Prazo minimo exigido: 60 meses.",
+                risk_explanation="Prazo abaixo do minimo permitido pela politica.",
+                suggested_adjustment_direction="Solicitar prazo minimo de 60 meses.",
+                metadata={},
+            ),
+            AnalysisItem(
+                clause_name="Reajuste monetario",
+                status="attention",
+                severity="medium",
+                current_summary="Clausula de reajuste ausente.",
+                policy_rule="Contrato deve prever reajuste monetario.",
+                risk_explanation="Nao ha indice de reajuste expresso.",
+                suggested_adjustment_direction="Incluir indice e periodicidade de reajuste.",
+                metadata={},
+            ),
+        ],
+    )
+    persist_contract_analysis_for(
+        client,
+        contract_id=first_upload["contract_id"],
+        contract_version_id=second_upload["contract_version_id"],
+        contract_risk_score=28,
+        items=[
+            AnalysisItem(
+                clause_name="Prazo de vigencia",
+                status="conforme",
+                severity="low",
+                current_summary="Prazo atual de 60 meses.",
+                policy_rule="Prazo minimo exigido: 60 meses.",
+                risk_explanation="Prazo alinhado com a politica.",
+                suggested_adjustment_direction="Nenhum ajuste necessario.",
+                metadata={},
+            ),
+            AnalysisItem(
+                clause_name="Fiador",
+                status="attention",
+                severity="medium",
+                current_summary="Fiador identificado, mas sem regra de substituicao.",
+                policy_rule="Garantia precisa prever substituicao adequada.",
+                risk_explanation="Clausula de fiador exige detalhamento operacional.",
+                suggested_adjustment_direction="Detalhar substituicao e obrigacoes do fiador.",
+                metadata={},
+            ),
+        ],
+    )
+
+    response = client.get(
+        f"/api/contracts/{first_upload['contract_id']}/compare"
+        f"?selected_version_id={second_upload['contract_version_id']}"
+        f"&baseline_version_id={first_upload['contract_version_id']}"
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["selected_version"]["contract_version_id"] == second_upload["contract_version_id"]
+    assert data["baseline_version"]["contract_version_id"] == first_upload["contract_version_id"]
+    assert data["summary"]
+    assert data["text_diff"]["has_changes"] is True
+    assert any(
+        line["kind"] == "removed" and "Prazo de vigencia 36 meses" in line["value"]
+        for line in data["text_diff"]["lines"]
+    )
+    assert any(
+        line["kind"] == "added" and "Prazo de vigencia 60 meses" in line["value"]
+        for line in data["text_diff"]["lines"]
+    )
+    assert any(
+        item["change_type"] == "changed" and item["clause_name"] == "Prazo de vigencia"
+        and item["previous_status"] == "critical" and item["current_status"] == "conforme"
+        for item in data["findings_diff"]["items"]
+    )
+    assert any(
+        item["change_type"] == "removed" and item["clause_name"] == "Reajuste monetario"
+        for item in data["findings_diff"]["items"]
+    )
+    assert any(
+        item["change_type"] == "added" and item["clause_name"] == "Fiador"
+        for item in data["findings_diff"]["items"]
+    )
 
 
 def test_get_contract_detail_returns_404_when_contract_does_not_exist(client) -> None:

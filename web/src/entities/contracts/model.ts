@@ -153,6 +153,37 @@ export type ContractVersionListResponse = {
   items: ContractVersionListItem[];
 };
 
+export type ContractVersionTextDiffLine = {
+  kind: "added" | "removed" | "unchanged";
+  value: string;
+};
+
+export type ContractVersionTextDiff = {
+  hasChanges: boolean;
+  lines: ContractVersionTextDiffLine[];
+};
+
+export type ContractFindingDiffItem = {
+  clauseName: string;
+  changeType: "added" | "removed" | "changed";
+  previousStatus: string | null;
+  currentStatus: string | null;
+  previousSummary: string | null;
+  currentSummary: string | null;
+};
+
+export type ContractFindingsDiff = {
+  items: ContractFindingDiffItem[];
+};
+
+export type ContractVersionComparison = {
+  selectedVersion: ContractVersionSummary;
+  baselineVersion: ContractVersionSummary | null;
+  summary: string;
+  textDiff: ContractVersionTextDiff;
+  findingsDiff: ContractFindingsDiff;
+};
+
 export type ContractLatestAnalysisSummary = {
   analysisId: string;
   analysisStatus: string;
@@ -213,6 +244,37 @@ export type ContractVersionListItemPayload = {
 
 export type ContractVersionListResponsePayload = {
   items: ContractVersionListItemPayload[];
+};
+
+export type ContractVersionTextDiffLinePayload = {
+  kind: ContractVersionTextDiffLine["kind"];
+  value: string;
+};
+
+export type ContractVersionTextDiffPayload = {
+  has_changes: boolean;
+  lines: ContractVersionTextDiffLinePayload[];
+};
+
+export type ContractFindingDiffItemPayload = {
+  clause_name: string;
+  change_type: ContractFindingDiffItem["changeType"];
+  previous_status: string | null;
+  current_status: string | null;
+  previous_summary: string | null;
+  current_summary: string | null;
+};
+
+export type ContractFindingsDiffPayload = {
+  items: ContractFindingDiffItemPayload[];
+};
+
+export type ContractVersionComparisonResponsePayload = {
+  selected_version: ContractVersionSummaryPayload;
+  baseline_version: ContractVersionSummaryPayload | null;
+  summary: string;
+  text_diff: ContractVersionTextDiffPayload;
+  findings_diff: ContractFindingsDiffPayload;
 };
 
 export type ContractAnalysisFindingSummaryPayload = {
@@ -403,6 +465,33 @@ export function mapContractVersionListResponse(
       contractRiskScore: item.contract_risk_score,
       isCurrent: item.is_current,
     })),
+  };
+}
+
+export function mapContractVersionComparisonResponse(
+  payload: ContractVersionComparisonResponsePayload,
+): ContractVersionComparison {
+  return {
+    selectedVersion: mapContractVersionSummary(payload.selected_version)!,
+    baselineVersion: mapContractVersionSummary(payload.baseline_version),
+    summary: payload.summary,
+    textDiff: {
+      hasChanges: payload.text_diff.has_changes,
+      lines: payload.text_diff.lines.map((line) => ({
+        kind: line.kind,
+        value: line.value,
+      })),
+    },
+    findingsDiff: {
+      items: payload.findings_diff.items.map((item) => ({
+        clauseName: item.clause_name,
+        changeType: item.change_type,
+        previousStatus: item.previous_status,
+        currentStatus: item.current_status,
+        previousSummary: item.previous_summary,
+        currentSummary: item.current_summary,
+      })),
+    },
   };
 }
 

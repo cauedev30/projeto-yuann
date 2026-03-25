@@ -1,6 +1,8 @@
 import { getAuthHeaders } from "./auth";
 import { getClientEnv } from "../env";
 import {
+  type ContractVersionComparison,
+  type ContractVersionComparisonResponsePayload,
   type ContractDetail,
   type ContractDetailResponsePayload,
   type ContractListResponse,
@@ -15,6 +17,7 @@ import {
   type ContractVersionUploadInput,
   mapContractDetailResponse,
   mapContractListResponse,
+  mapContractVersionComparisonResponse,
   mapContractVersionDetailResponse,
   mapContractVersionListResponse,
   mapUploadResponseToContractUploadResult,
@@ -169,6 +172,36 @@ export async function listContractVersions(
 
   const payload = (await response.json()) as ContractVersionListResponsePayload;
   return mapContractVersionListResponse(payload);
+}
+
+export async function compareContractVersions(
+  contractId: string,
+  input: {
+    selectedVersionId?: string;
+    baselineVersionId?: string | null;
+  },
+  fetchImpl: typeof fetch = fetch,
+): Promise<ContractVersionComparison> {
+  const { NEXT_PUBLIC_API_URL } = getClientEnv();
+  const url = new URL(`${NEXT_PUBLIC_API_URL}/api/contracts/${contractId}/compare`);
+  if (input.selectedVersionId) {
+    url.searchParams.set("selected_version_id", input.selectedVersionId);
+  }
+  if (input.baselineVersionId) {
+    url.searchParams.set("baseline_version_id", input.baselineVersionId);
+  }
+
+  const response = await fetchImpl(url.toString(), {
+    headers: getAuthHeaders(),
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    throw await buildApiError(response, "Nao foi possivel comparar as versoes do contrato.");
+  }
+
+  const payload = (await response.json()) as ContractVersionComparisonResponsePayload;
+  return mapContractVersionComparisonResponse(payload);
 }
 
 export async function getContractDetail(

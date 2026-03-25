@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
+  compareContractVersions,
   getContractDetail,
   getContractSummary,
   getContractVersionDetail,
@@ -276,6 +277,81 @@ describe("contracts api client", () => {
         body: expect.any(FormData),
       }),
     );
+  });
+
+  it("maps version comparison payloads from the API", async () => {
+    vi.stubEnv("NEXT_PUBLIC_API_URL", "http://127.0.0.1:8000");
+    const fetchImpl: typeof fetch = async () =>
+      new Response(
+        JSON.stringify({
+          selected_version: {
+            contract_version_id: "ver-2",
+            version_number: 2,
+            created_at: "2026-03-21T12:00:00Z",
+            source: "signed_contract",
+            original_filename: "signed-v2.pdf",
+            used_ocr: false,
+            text: "Prazo de vigencia 60 meses",
+          },
+          baseline_version: {
+            contract_version_id: "ver-1",
+            version_number: 1,
+            created_at: "2026-03-20T12:00:00Z",
+            source: "signed_contract",
+            original_filename: "signed-v1.pdf",
+            used_ocr: false,
+            text: "Prazo de vigencia 36 meses",
+          },
+          summary: "A versao 2 regulariza o prazo e adiciona fiador.",
+          text_diff: {
+            has_changes: true,
+            lines: [
+              { kind: "removed", value: "Prazo de vigencia 36 meses" },
+              { kind: "added", value: "Prazo de vigencia 60 meses" },
+            ],
+          },
+          findings_diff: {
+            items: [
+              {
+                clause_name: "Prazo de vigencia",
+                change_type: "changed",
+                previous_status: "critical",
+                current_status: "conforme",
+                previous_summary: "Prazo atual de 36 meses.",
+                current_summary: "Prazo atual de 60 meses.",
+              },
+              {
+                clause_name: "Fiador",
+                change_type: "added",
+                previous_status: null,
+                current_status: "attention",
+                previous_summary: null,
+                current_summary: "Fiador identificado.",
+              },
+            ],
+          },
+        }),
+        {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
+
+    const result = await compareContractVersions(
+      "ctr-1",
+      {
+        selectedVersionId: "ver-2",
+        baselineVersionId: "ver-1",
+      },
+      fetchImpl,
+    );
+
+    expect(result.selectedVersion.versionNumber).toBe(2);
+    expect(result.baselineVersion?.versionNumber).toBe(1);
+    expect(result.textDiff.hasChanges).toBe(true);
+    expect(result.textDiff.lines[0].kind).toBe("removed");
+    expect(result.findingsDiff.items[0].changeType).toBe("changed");
+    expect(result.findingsDiff.items[1].clauseName).toBe("Fiador");
   });
 
   it("maps upload responses for both initial and versioned uploads", async () => {
