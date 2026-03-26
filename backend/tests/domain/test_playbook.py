@@ -10,8 +10,23 @@ from app.domain.playbook import (
 class TestPlaybookClauses:
     """Tests for PLAYBOOK_CLAUSES list."""
 
-    def test_playbook_has_9_clauses(self):
-        assert len(PLAYBOOK_CLAUSES) == 9
+    def test_playbook_covers_required_contract_knowledge(self):
+        codes = {clause.code for clause in PLAYBOOK_CLAUSES}
+        assert {
+            "INFRAESTRUTURA",
+            "RESCISAO_INFRAESTRUTURA",
+            "CONDOMINIO",
+            "OBRAS",
+            "EXCLUSIVIDADE",
+            "PRAZO",
+            "VISTORIAS",
+            "CESSAO",
+            "OBRIGACAO_NAO_FAZER",
+            "REAJUSTE",
+            "GARANTIA_LOCATICIA",
+            "RENOVACAO_EMPRESARIAL",
+            "ASSINATURAS",
+        }.issubset(codes)
 
     def test_no_duplicate_codes(self):
         codes = [c.code for c in PLAYBOOK_CLAUSES]
@@ -52,6 +67,10 @@ class TestGetClauseByCode:
             "VISTORIAS",
             "CESSAO",
             "OBRIGACAO_NAO_FAZER",
+            "REAJUSTE",
+            "GARANTIA_LOCATICIA",
+            "RENOVACAO_EMPRESARIAL",
+            "ASSINATURAS",
         ]
         for code in expected_codes:
             clause = get_clause_by_code(code)

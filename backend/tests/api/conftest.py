@@ -26,6 +26,9 @@ class ApiTestClient:
     def post(self, *args, **kwargs):
         return self._client.post(*args, **kwargs)
 
+    def options(self, *args, **kwargs):
+        return self._client.options(*args, **kwargs)
+
     def patch(self, *args, **kwargs):
         return self._client.patch(*args, **kwargs)
 

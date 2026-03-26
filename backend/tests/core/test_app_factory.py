@@ -4,7 +4,7 @@ from app.core.app_factory import _get_database_url, create_app
 def test_create_app_wires_runtime_dependencies(monkeypatch, workspace_tmp_path) -> None:
     database_path = workspace_tmp_path / "runtime.db"
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
-    monkeypatch.delenv("GOOGLE_API_KEY", raising=False)
+    monkeypatch.delenv("OPENAI_MODEL", raising=False)
     app = create_app(
         database_url=f"sqlite:///{database_path}",
         storage_directory=workspace_tmp_path / "uploads",
@@ -23,7 +23,7 @@ def test_create_app_reads_database_url_and_upload_dir_from_environment(
     database_path = workspace_tmp_path / "production.db"
     upload_path = workspace_tmp_path / "production-uploads"
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
-    monkeypatch.delenv("GOOGLE_API_KEY", raising=False)
+    monkeypatch.delenv("OPENAI_MODEL", raising=False)
     monkeypatch.setenv("DATABASE_URL", f"sqlite:///{database_path}")
     monkeypatch.setenv("UPLOAD_DIR", str(upload_path))
 
@@ -48,7 +48,7 @@ def test_create_app_allows_explicit_cors_origins_from_environment(
     workspace_tmp_path,
 ) -> None:
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
-    monkeypatch.delenv("GOOGLE_API_KEY", raising=False)
+    monkeypatch.delenv("OPENAI_MODEL", raising=False)
     monkeypatch.setenv(
         "CORS_ORIGINS",
         "https://yuann.vercel.app, https://app.example.com",
@@ -64,3 +64,24 @@ def test_create_app_allows_explicit_cors_origins_from_environment(
         "https://yuann.vercel.app",
         "https://app.example.com",
     ]
+
+
+def test_create_app_wires_openai_client_with_default_model(monkeypatch, workspace_tmp_path) -> None:
+    monkeypatch.setenv("OPENAI_API_KEY", "test-openai-key")
+    monkeypatch.delenv("OPENAI_MODEL", raising=False)
+
+    app = create_app(database_url=f"sqlite:///{workspace_tmp_path / 'openai-default.db'}")
+
+    assert app.state.llm_client is not None
+    assert app.state.llm_client.__class__.__name__ == "OpenAIAnalysisClient"
+    assert app.state.llm_client._model == "gpt-5-mini"
+
+
+def test_create_app_allows_openai_model_override(monkeypatch, workspace_tmp_path) -> None:
+    monkeypatch.setenv("OPENAI_API_KEY", "test-openai-key")
+    monkeypatch.setenv("OPENAI_MODEL", "gpt-5.4-mini")
+
+    app = create_app(database_url=f"sqlite:///{workspace_tmp_path / 'openai-override.db'}")
+
+    assert app.state.llm_client is not None
+    assert app.state.llm_client._model == "gpt-5.4-mini"

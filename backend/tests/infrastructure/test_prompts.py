@@ -1,4 +1,4 @@
-"""Tests for Gemini prompts with playbook-based analysis."""
+"""Tests for OpenAI prompts with playbook-based analysis."""
 
 import pytest
 
@@ -52,24 +52,32 @@ class TestSystemPrompt:
     def test_references_playbook(self):
         assert "playbook" in SYSTEM_PROMPT.lower()
 
-    def test_no_json_format_instructions(self):
-        assert "Formato de resposta" not in SYSTEM_PROMPT
-        assert "JSON valido" not in SYSTEM_PROMPT
-        assert "EXCLUSIVAMENTE" not in SYSTEM_PROMPT
-
     def test_contains_severity_criteria(self):
         assert "critical" in SYSTEM_PROMPT
         assert "attention" in SYSTEM_PROMPT
-        assert "conforme" in SYSTEM_PROMPT
 
-    def test_contains_strict_rules(self):
-        assert "NAO INVENTE" in SYSTEM_PROMPT
+    def test_requires_pt_br_only(self):
+        assert "PT-BR" in SYSTEM_PROMPT
 
-    def test_no_hardcoded_8_clauses(self):
-        """Should NOT have the old hardcoded list of 8 generic clauses."""
-        assert "Prazo de vigencia" not in SYSTEM_PROMPT
-        assert "Multa rescisoria" not in SYSTEM_PROMPT
-        assert "Indice de reajuste" not in SYSTEM_PROMPT
+    def test_requires_legal_checks_for_lease_law(self):
+        assert "Lei 8.245" in SYSTEM_PROMPT
+        assert "cessao" in SYSTEM_PROMPT.lower()
+        assert "subloc" in SYSTEM_PROMPT.lower()
+        assert "garantia" in SYSTEM_PROMPT.lower()
+
+    def test_requires_auditable_score_justification(self):
+        assert "score" in SYSTEM_PROMPT.lower()
+        assert "justific" in SYSTEM_PROMPT.lower()
+
+    def test_requires_essential_clause_presence_or_absence_checks(self):
+        prompt = SYSTEM_PROMPT.lower()
+        assert "exclusividade" in prompt
+        assert "prazo" in prompt
+        assert "reajuste" in prompt
+        assert "vistorias" in prompt
+        assert "obras" in prompt
+        assert "infraestrutura" in prompt
+        assert "fiador" in prompt
 
 
 # ---------------------------------------------------------------------------
@@ -77,12 +85,9 @@ class TestSystemPrompt:
 # ---------------------------------------------------------------------------
 
 class TestSummarySystemPrompt:
-    def test_no_json_format_instructions(self):
-        assert "Formato de resposta" not in SUMMARY_SYSTEM_PROMPT
-        assert "JSON valido" not in SUMMARY_SYSTEM_PROMPT
-
     def test_still_has_instructions(self):
         assert "resumo" in SUMMARY_SYSTEM_PROMPT.lower()
+        assert "portugues brasileiro" in SUMMARY_SYSTEM_PROMPT.lower()
 
 
 # ---------------------------------------------------------------------------
@@ -100,9 +105,11 @@ class TestCorrectionSystemPrompt:
         # Should mention findings / achados
         assert "achado" in CORRECTION_SYSTEM_PROMPT.lower() or "finding" in CORRECTION_SYSTEM_PROMPT.lower()
 
-    def test_no_json_format_instructions(self):
-        assert "Formato de resposta" not in CORRECTION_SYSTEM_PROMPT
-        assert "JSON valido" not in CORRECTION_SYSTEM_PROMPT
+    def test_requires_preserving_business_data(self):
+        prompt = CORRECTION_SYSTEM_PROMPT.lower()
+        assert "95% do contrato original intacto" in prompt
+        assert "nomes das partes" in prompt
+        assert "valores de aluguel" in prompt
 
 
 # ---------------------------------------------------------------------------
@@ -146,6 +153,12 @@ class TestBuildUserPrompt:
     def test_no_json_return_instruction(self, sample_playbook):
         result = build_user_prompt(SAMPLE_CONTRACT, sample_playbook)
         assert "retorne o JSON" not in result
+
+    def test_mentions_legal_and_business_focus(self, sample_playbook):
+        result = build_user_prompt(SAMPLE_CONTRACT, sample_playbook)
+        lowered = result.lower()
+        assert "playbook" in lowered
+        assert "contrato" in lowered
 
 
 # ---------------------------------------------------------------------------

@@ -7,7 +7,10 @@
 - Interface canonica de memoria compartilhada: `./.codex-memory/`
 
 ## Snapshot verificado
-- Resincronizacao local (2026-03-25): clone limpo confirmado em `main` no commit `97c3409c519267cfc8bd70524f918cd5ed136109` (`Implement contract version history and per-version analysis`).
+- Resincronizacao local (2026-03-25): clone limpo confirmado em `main` no commit `13205909c1ec7fb024b38457b49e06a49e9db20b` (`feat: add contract version comparison workflow`), alinhado com `origin/main`.
+- F6-E OpenAI-only (2026-03-25): Gemini removido do runtime/backend manifests; `OpenAIAnalysisClient` agora e o unico adapter LLM com default `gpt-5-mini` configuravel por `OPENAI_MODEL`; prompts reforcados para PT-BR + checks da Lei 8.245; score final deixou de usar `max(llm, deterministic)` puro e passou a compor pesos entre achados LLM e regras deterministicas.
+- F6-E benchmark harness (2026-03-25): `backend/tests/support/openai_benchmark.py` agora executa um benchmark versionado do stack de analise com `gpt-5-mini`, medindo custo estimado por tokens, estabilidade de score em execucoes repetidas e diff de achados entre versoes; o fechamento 100% do card ainda depende apenas de rodar esse harness com `OPENAI_API_KEY` valida e anexar o artefato JSON.
+- F6-E benchmark real (2026-03-26): benchmark oficial executado com `OPENAI_API_KEY` valida e artefato salvo em `docs/squad/artifacts/2026-03-25-f6-e-openai-benchmark.json`; `gpt-5-mini` ficou com custo medio `US$ 0.009158`, spread maximo `12.49` e queda de score de `100.0` para `30.23` no cenario `lease-redraft`, considerado `acceptable = true`.
 - Base anterior: `19dab0b feat: prepare f5-b product release [F5-B]` / `main` (`0c09517`)
 - Hardening de deploy (2026-03-22): `backend/app/core/app_factory.py` agora aceita `DATABASE_URL`, `UPLOAD_DIR` e `CORS_ORIGINS` por env com fallback local; `backend/pyproject.toml` e `backend/requirements.txt` passaram a incluir `psycopg[binary]` e `pydantic-settings`; `.env.example` e `DEPLOY_GUIDE.md` foram reescritos para o fluxo `Railway + Postgres + volume` no backend e `Vercel` no frontend.
 - Fix de runtime Railway (2026-03-22): `backend/nixpacks.toml` passou a usar o provider Python padrao e os manifests do backend agora declaram `PyMuPDF`, corrigindo a falha `ModuleNotFoundError: No module named 'fitz'` durante o boot do container.
@@ -16,7 +19,7 @@
 - Fase 1: Pipeline de upload conectada — `contract_upload.py` agora chama `run_contract_pipeline` (metadata + events + analysis) para drafts, e `run_policy_analysis` para signed contracts (apos archive).
 - Fase 2: Regras de negocio — `MAX_TERM_MONTHS`, `MAX_VALUE`, `GRACE_PERIOD_DAYS` adicionadas a `evaluate_rules`; `extract_contract_facts` expandido com `contract_value` e `grace_period_days`; politica padrao seedada em `app_factory.py`.
 - Fase 3: Integracao OpenAI — `OpenAIAnalysisClient` em `infrastructure/openai_client.py` com prompts em `infrastructure/prompts.py`; fallback deterministico quando `OPENAI_API_KEY` ausente.
-- Task 1.7: `GeminiAnalysisClient` em `infrastructure/gemini_client.py` — wraps google.genai SDK, structured output com Pydantic, retry 1x, fallback tipado. 12 testes.
+- Task 1.7: `GeminiAnalysisClient` em `infrastructure/gemini_client.py` — historico obsoleto apos F6-E OpenAI-only de 2026-03-25.
 - Fase 4: Notificacoes SMTP — `SmtpEmailSender` em `infrastructure/notifications.py`; eventos de notificacao em 10/9/8/7 meses antes do vencimento; corpo do email enriquecido.
 - Fase 5: Auth JWT — modelo `User`, rotas `/api/auth/register|login|me`, dependency `get_current_user`, migracao `0006`; frontend com `AuthProvider`, `AuthGuard`, pagina `/login` glassmorphic, headers `Authorization` em todos os API clients.
 - Fase 6 (Micro Ajustes): AI summary ativado passando `.env` para o uvicorn localmente. UI com titulo de achados alterado para "Principais Pontos". Duplicidade de visualizacao do Prazo de Vigencia resolvida limpando DB obsoleto via reanalise da API.
@@ -31,6 +34,7 @@
 - Fase 5 (Contratos e IA): substituicao de "Texto extraido" por `ContractSummaryPanel`; remocao de botoes falhos de atualizar; correcao do erro de "Hydration failed" no `AuthGuard`; otimizacao em `evaluate_rules` para agrupar limites de `Prazo de vigencia` e fix do parser regex de entidades locais; estilizacao premium com glassmorphism no `AppShell` da sidebar.
 
 ## Evidencia operacional mais recente
+- F6-E OpenAI-only: `43 passed in 7.51s` em `tests/core/test_app_factory.py`, `tests/infrastructure/test_openai_client.py`, `tests/infrastructure/test_docx_generator.py`, `tests/infrastructure/test_prompts.py`, `tests/domain/test_contract_analysis.py`, `tests/services/test_policy_analysis.py`; `28 passed in 39.80s` em `tests/application/test_contract_upload.py`, `tests/api/test_contracts_api.py`, `tests/core/test_packaging.py`; suite backend completa `149 passed, 2 warnings in 69.92s` via `py -3.13 -m pytest -q --basetemp=.pytest-tmp` apos fechar o benchmark real e os ajustes do harness.
 - F6-D versões/diff: backend `22 passed` em `backend/tests/api/test_contracts_api.py -q`; frontend `23 passed` em `src/lib/api/contracts.test.ts` + `src/features/contracts/screens/contract-detail-screen.test.tsx`; `npx tsc --noEmit` verde em 2026-03-25.
 - UI Acervo/Histórico: testes unitários web (23 testes) passando em 2026-03-25.
 - Backend focado em deploy: `5 passed in 1.45s` (`backend/tests/core/test_app_factory.py` + `backend/tests/core/test_config.py`)
@@ -40,6 +44,7 @@
 - Observacao: o build do frontend segue com warnings de ESLint/Next pre-existentes sobre `<img>` e variaveis nao usadas, mas sem bloquear a compilacao.
 
 ## Riscos / pendencias
+- A API real da OpenAI para `gpt-5-mini` rejeita `temperature` customizada neste endpoint; o adapter agora omite `temperature` automaticamente para modelos `gpt-5*`.
 - O deploy real ainda depende de configurar `DATABASE_URL`, `UPLOAD_DIR`, `CORS_ORIGINS`, `JWT_SECRET` e `NEXT_PUBLIC_API_URL` na plataforma.
 - O backend continua usando storage local; em producao isso exige volume persistente no Railway montado em `/data`.
 - `backend/pyproject.toml` continua declarando `requires-python = ">=3.12"`; a verificacao local usou `Python 3.12.3`.

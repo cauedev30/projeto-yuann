@@ -15,7 +15,7 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.shared import Inches, Pt, RGBColor
 
 if TYPE_CHECKING:
-    from app.infrastructure.gemini_models import CorrectedContractResult
+    from app.infrastructure.llm_models import CorrectedContractResult
 
 
 def generate_corrected_contract_docx(
@@ -25,7 +25,7 @@ def generate_corrected_contract_docx(
     """Generate a DOCX file with the corrected contract and corrections summary.
 
     Args:
-        result: CorrectedContractResult from Gemini analysis.
+        result: CorrectedContractResult from the OpenAI-backed analysis.
         contract_title: Title for the document header.
 
     Returns:

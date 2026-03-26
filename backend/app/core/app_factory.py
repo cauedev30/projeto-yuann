@@ -20,7 +20,6 @@ from app.api.routes.policies import router as policies_router
 from app.api.routes.uploads import router as uploads_router
 from app.db.base import Base
 from app.db.models import Policy, PolicyRule
-from app.infrastructure.gemini_client import GeminiAnalysisClient
 from app.infrastructure.openai_client import OpenAIAnalysisClient
 from app.infrastructure.notifications import NoopEmailSender, SmtpEmailSender
 from app.infrastructure.ocr import NoopOcrClient
@@ -129,12 +128,13 @@ def create_app(
     app.state.ocr_client = NoopOcrClient()
 
     openai_api_key = os.environ.get("OPENAI_API_KEY")
-    google_api_key = os.environ.get("GOOGLE_API_KEY")
-    
+    openai_model = os.environ.get("OPENAI_MODEL", "gpt-5-mini")
+
     if openai_api_key:
-        app.state.llm_client = OpenAIAnalysisClient(api_key=openai_api_key)
-    elif google_api_key:
-        app.state.llm_client = GeminiAnalysisClient(api_key=google_api_key)
+        app.state.llm_client = OpenAIAnalysisClient(
+            api_key=openai_api_key,
+            model=openai_model,
+        )
     else:
         app.state.llm_client = None
 

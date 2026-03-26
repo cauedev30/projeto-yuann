@@ -6,12 +6,30 @@ import unicodedata
 from app.schemas.analysis import AnalysisItem, ContractAnalysisResult
 
 
-def _score_for_status(status: str) -> int:
-    if status == "critical":
-        return 80
-    if status == "attention":
-        return 40
-    return 0
+CATEGORY_WEIGHTS = {
+    "essencial": 55,
+    "prazo": 35,
+    "financeiro": 32,
+    "garantia": 28,
+    "operacional": 22,
+    "infraestrutura": 24,
+    "comercial": 26,
+    "temporal": 18,
+    "redacao": 14,
+    "other": 16,
+}
+
+STATUS_MULTIPLIERS = {
+    "critical": 1.0,
+    "attention": 0.55,
+    "conforme": 0.0,
+}
+
+SEVERITY_MULTIPLIERS = {
+    "high": 1.0,
+    "medium": 0.75,
+    "low": 0.35,
+}
 
 
 def _coerce_number(value: object) -> int | None:
@@ -25,7 +43,7 @@ def _coerce_number(value: object) -> int | None:
 
 
 def _parse_brl(raw: str) -> float | None:
-    cleaned = raw.replace(".", "").replace(",", ".")
+    cleaned = raw.strip().rstrip(".,;:").replace(".", "").replace(",", ".")
     try:
         return float(cleaned)
     except ValueError:
@@ -65,6 +83,7 @@ def extract_contract_facts(contract_text: str) -> dict[str, object]:
     # Contract value: prefer explicit aluguel context over any R$ value
     value_patterns = [
         r"aluguel\s+mensal\s+(?:de\s+)?R\$\s*([\d.,]+)",
+        r"aluguel\s+mensal\s+ser[aá]\s+de\s+R\$\s*([\d.,]+)",
         r"valor\s+(?:do\s+)?aluguel\s*(?::\s*|de\s+|ser[aá]\s+de\s+)R\$\s*([\d.,]+)",
         r"aluguel\s+(?:de\s+)?R\$\s*([\d.,]+)",
         r"R\$\s*([\d.,]+)\s*(?:\([^)]*\)\s*)?[,.]?\s*(?:mensal|mensais|por\s+m[eê]s|de\s+aluguel)",
@@ -94,6 +113,45 @@ def _normalize_clause_key(name: str) -> str:
     normalized = unicodedata.normalize("NFD", name)
     stripped = "".join(c for c in normalized if unicodedata.category(c) != "Mn")
     return stripped.strip().lower()
+
+
+def _score_items(items: list[AnalysisItem], *, source: str) -> float:
+    total = 0.0
+    source_multiplier = 0.45 if source == "llm" else 1.0
+
+    for item in items:
+        status_multiplier = STATUS_MULTIPLIERS.get(item.status, 0.0)
+        if status_multiplier == 0:
+            continue
+
+        severity_multiplier = SEVERITY_MULTIPLIERS.get(item.severity, 0.55)
+        category = str(item.metadata.get("category", "other")).lower()
+        weight = CATEGORY_WEIGHTS.get(category, CATEGORY_WEIGHTS["other"])
+        if item.metadata.get("essential_clause"):
+            weight = max(weight, CATEGORY_WEIGHTS["essencial"])
+
+        item_score = weight * status_multiplier * severity_multiplier * source_multiplier
+        if item.metadata.get("essential_clause") and item.status == "critical":
+            item_score += 8
+        if item.metadata.get("missing_clause") and item.status == "critical":
+            item_score += 12
+
+        total += item_score
+
+    return total
+
+
+def calculate_final_risk_score(
+    *,
+    llm_score: float,
+    llm_items: list[AnalysisItem],
+    deterministic_items: list[AnalysisItem],
+) -> float:
+    llm_component = min(float(llm_score) * 0.18, 18.0)
+    llm_item_component = _score_items(llm_items, source="llm")
+    deterministic_component = _score_items(deterministic_items, source="deterministic")
+    final_score = min(llm_component + llm_item_component + deterministic_component, 100.0)
+    return round(final_score, 2)
 
 
 def merge_analysis_items(
@@ -152,6 +210,9 @@ def evaluate_rules(
                     "term_months": actual_term,
                     "min_term_months": min_term,
                     "max_term_months": max_term,
+                    "category": "prazo",
+                    "essential_clause": True,
+                    "missing_clause": actual_term is None,
                 },
             )
         )
@@ -190,6 +251,7 @@ def evaluate_rules(
                     metadata={
                         "penalty_months": actual_fine,
                         "maximum_fine_months": maximum_fine,
+                        "category": "financeiro",
                     },
                 )
             )
@@ -225,6 +287,8 @@ def evaluate_rules(
                     metadata={
                         "contract_value": float(actual_value),
                         "maximum_value": float(max_value),
+                        "category": "financeiro",
+                        "essential_clause": True,
                     },
                 )
             )
@@ -259,11 +323,16 @@ def evaluate_rules(
                     metadata={
                         "grace_period_days": actual_grace,
                         "allowed_grace_period_days": allowed_days,
+                        "category": "operacional",
                     },
                 )
             )
 
     return ContractAnalysisResult(
-        contract_risk_score=max((_score_for_status(item.status) for item in items), default=0),
+        contract_risk_score=calculate_final_risk_score(
+            llm_score=0,
+            llm_items=[],
+            deterministic_items=items,
+        ),
         items=items,
     )

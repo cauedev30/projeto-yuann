@@ -1,0 +1,169 @@
+{
+  "generated_at": "2026-03-26T03:47:54.106304+00:00",
+  "model": "gpt-5-mini",
+  "pricing": {
+    "input_cost_per_1m": 0.25,
+    "output_cost_per_1m": 2.0
+  },
+  "scenarios": [
+    {
+      "scenario_id": "lease-redraft",
+      "title": "Draft with missing safeguards versus corrected version",
+      "versions": [
+        {
+          "label": "v1",
+          "runs": [
+            {
+              "final_risk_score": 100.0,
+              "observed_identifiers": [
+                "assinaturas",
+                "cessao",
+                "condominio",
+                "exclusividade",
+                "garantia",
+                "infraestrutura",
+                "obras",
+                "prazo",
+                "reajuste",
+                "valor",
+                "vistorias"
+              ],
+              "prompt_tokens": 1586,
+              "completion_tokens": 4018,
+              "total_tokens": 5604,
+              "estimated_cost_usd": 0.008432
+            },
+            {
+              "final_risk_score": 100.0,
+              "observed_identifiers": [
+                "assinaturas",
+                "cessao",
+                "condominio",
+                "exclusividade",
+                "garantia",
+                "infraestrutura",
+                "obras",
+                "prazo",
+                "valor",
+                "vistorias"
+              ],
+              "prompt_tokens": 1586,
+              "completion_tokens": 4345,
+              "total_tokens": 5931,
+              "estimated_cost_usd": 0.009086
+            },
+            {
+              "final_risk_score": 100.0,
+              "observed_identifiers": [
+                "assinaturas",
+                "cessao",
+                "condominio",
+                "exclusividade",
+                "garantia",
+                "obras",
+                "prazo",
+                "valor",
+                "vistorias"
+              ],
+              "prompt_tokens": 1586,
+              "completion_tokens": 3513,
+              "total_tokens": 5099,
+              "estimated_cost_usd": 0.007423
+            }
+          ],
+          "average_score": 100.0,
+          "average_cost_usd": 0.008314,
+          "evaluation": {
+            "missing_identifiers": [],
+            "unexpected_identifiers": [],
+            "score_within_expected_range": true,
+            "quality_passed": true,
+            "score_spread": 0.0,
+            "stability_passed": true
+          }
+        },
+        {
+          "label": "v2",
+          "runs": [
+            {
+              "final_risk_score": 37.39,
+              "observed_identifiers": [
+                "cessao",
+                "condominio",
+                "garantia",
+                "obras",
+                "vistorias"
+              ],
+              "prompt_tokens": 2315,
+              "completion_tokens": 4408,
+              "total_tokens": 6723,
+              "estimated_cost_usd": 0.009395
+            },
+            {
+              "final_risk_score": 24.9,
+              "observed_identifiers": [
+                "cessao",
+                "garantia",
+                "infraestrutura",
+                "obras"
+              ],
+              "prompt_tokens": 2315,
+              "completion_tokens": 5355,
+              "total_tokens": 7670,
+              "estimated_cost_usd": 0.011289
+            },
+            {
+              "final_risk_score": 28.39,
+              "observed_identifiers": [
+                "assinaturas",
+                "cessao",
+                "obras",
+                "vistorias"
+              ],
+              "prompt_tokens": 2315,
+              "completion_tokens": 4373,
+              "total_tokens": 6688,
+              "estimated_cost_usd": 0.009325
+            }
+          ],
+          "average_score": 30.23,
+          "average_cost_usd": 0.010003,
+          "evaluation": {
+            "missing_identifiers": [],
+            "unexpected_identifiers": [],
+            "score_within_expected_range": true,
+            "quality_passed": true,
+            "score_spread": 12.49,
+            "stability_passed": true
+          }
+        }
+      ],
+      "diffs": [
+        {
+          "from_label": "v1",
+          "to_label": "v2",
+          "changed_identifiers": [
+            "condominio",
+            "exclusividade",
+            "garantia",
+            "prazo",
+            "valor"
+          ],
+          "score_delta": -71.61,
+          "missing_expected_identifiers": [],
+          "changed_identifiers_count": 5,
+          "score_drop_passed": true,
+          "diff_passed": true
+        }
+      ],
+      "scenario_passed": true
+    }
+  ],
+  "overall": {
+    "average_cost_usd": 0.009158,
+    "max_score_spread": 12.49,
+    "max_average_cost_usd": 0.03,
+    "max_allowed_score_spread": 20.0,
+    "acceptable": true
+  }
+}

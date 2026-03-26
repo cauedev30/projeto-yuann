@@ -29,6 +29,7 @@ Monorepo for the first sellable version of the contract governance platform for 
 
 ## Runtime notes
 - The current local backend runtime defaults to SQLite (`legaltech.db`) plus filesystem uploads under `backend/uploads/`.
+- The backend analysis stack is OpenAI-only. Set `OPENAI_API_KEY` to enable LLM analysis and use `OPENAI_MODEL` to override the default `gpt-5-mini` model.
 - Dashboard fixture data no longer sits in the runtime path. When no live snapshot exists, the UI shows an explicit unavailable state.
 - Docker and `docker-compose.yml` remain available for optional local infrastructure experiments via `make up`, but the verified MVP test flow runs without requiring those services.
 - The release-candidate baseline for this repository is `Python 3.13` plus the local Node.js runtime used by `web/`.
@@ -41,6 +42,8 @@ Monorepo for the first sellable version of the contract governance platform for 
 3. Install web dependencies with `cd web && npm install`.
 4. Run `make up` if you want the optional Docker services from `docker-compose.yml`; otherwise skip it for the verified SQLite release flow.
 5. Copy `.env.example` to `.env` only if you need optional local infrastructure variables.
+   - OpenAI analysis is enabled only when `OPENAI_API_KEY` is configured.
+   - `OPENAI_MODEL` defaults to `gpt-5-mini`.
 6. Start the API with `cd backend && python -m uvicorn app.main:app --host 127.0.0.1 --port 8000`.
 7. Start the frontend with `cd web && NEXT_PUBLIC_API_URL="http://127.0.0.1:8000" npm run dev -- --hostname 127.0.0.1 --port 3000`.
    - Windows PowerShell: `cd web; $env:NEXT_PUBLIC_API_URL="http://127.0.0.1:8000"; npm run dev -- --hostname 127.0.0.1 --port 3000`
@@ -48,6 +51,7 @@ Monorepo for the first sellable version of the contract governance platform for 
 ## Verification
 - Optional Docker infra: `make up` and `make down`
 - Backend: `cd backend && python -m pytest -q`
+- OpenAI benchmark: `cd backend && python -m tests.support.openai_benchmark --runs 3 --output ../docs/squad/artifacts/2026-03-25-f6-e-openai-benchmark.json`
 - Root shortcut: `make backend-test`
 - Web tests: `cd web && npm run test`
 - Typecheck: `cd web && npx tsc --noEmit`
@@ -57,6 +61,7 @@ Monorepo for the first sellable version of the contract governance platform for 
 
 ## Release verification
 - Use the verification order above as the official local MVP verification baseline.
+- The `F6-E` closeout benchmark requires `OPENAI_API_KEY` and records cost, score stability, and version-diff quality in a JSON artifact under `docs/squad/artifacts/`.
 - The Playwright suite is intentionally serialized in the checked-in config because the local backend runtime shares one SQLite database during E2E verification.
 - Seed the dashboard demo state with `cd backend && python -m tests.support.seed_dashboard_runtime seed`.
 - Clear the dashboard demo state with `cd backend && python -m tests.support.seed_dashboard_runtime clear`.

@@ -29,10 +29,17 @@ from app.application.version_diff import (
 )
 from app.db.models.analysis import ContractAnalysis
 from app.db.models.contract import Contract, ContractSource, ContractVersion
+from app.domain.contract_analysis import (
+    calculate_final_risk_score,
+    evaluate_rules,
+    extract_contract_facts,
+    merge_analysis_items,
+)
 from app.domain.playbook import PLAYBOOK_CLAUSES
 from app.infrastructure.contract_chunker import chunk_contract
 from app.infrastructure.docx_generator import generate_corrected_contract_docx
 from app.infrastructure.storage import LocalStorageService
+from app.schemas.analysis import AnalysisItem
 from app.schemas.contract import (
     ContractDetailResponse,
     ContractSummaryResponse,
@@ -378,15 +385,13 @@ async def _analysis_stream(
     
     yield f"data: {json.dumps({'stage': 'analyzing', 'message': f'Analisando {total_chunks} seções...', 'total': total_chunks})}\n\n"
     
-    # Call Gemini for analysis
+    # Call the OpenAI-backed analysis adapter
     try:
         result = llm_client.analyze_contract(
             chunks=chunk_texts,
             playbook=list(PLAYBOOK_CLAUSES),
         )
         
-        # Save to database
-        from sqlalchemy.orm import Session as DBSession
         from app.db.models.analysis import AnalysisStatus, ContractAnalysis, ContractAnalysisFinding
         from app.db.models.contract import Contract
         from app.db.models.policy import Policy
@@ -394,6 +399,37 @@ async def _analysis_stream(
         with session_factory() as session:
             contract = session.scalar(select(Contract).where(Contract.id == contract_id))
             policy = session.scalar(select(Policy).order_by(Policy.created_at.desc()))
+            rules_dicts = [
+                {"code": rule.code, "value": rule.value, "description": rule.description}
+                for rule in (policy.rules if policy and policy.rules else [])
+            ]
+            deterministic_result = evaluate_rules(
+                rules_dicts,
+                extract_contract_facts(contract_text),
+            )
+            llm_analysis_items = [
+                AnalysisItem(
+                    clause_name=item.clause_title,
+                    status=item.severity,
+                    severity="high" if item.severity == "critical" else "medium",
+                    current_summary=item.explanation,
+                    policy_rule=item.clause_code,
+                    risk_explanation=item.explanation,
+                    suggested_adjustment_direction=item.suggested_correction or "",
+                    metadata={
+                        "category": "essencial"
+                        if item.clause_code in {"EXCLUSIVIDADE", "PRAZO", "ASSINATURAS"}
+                        else "redacao",
+                        "essential_clause": item.clause_code in {"EXCLUSIVIDADE", "PRAZO", "ASSINATURAS"},
+                        "risk_score": item.risk_score,
+                        "clause_code": item.clause_code,
+                        "page_reference": item.page_reference,
+                    },
+                )
+                for item in result.items
+            ]
+            merged_items = merge_analysis_items(llm_analysis_items, deterministic_result.items)
+            filtered_items = [item for item in merged_items if item.status != "conforme"]
             
             if contract:
                 analysis = ContractAnalysis(
@@ -401,26 +437,29 @@ async def _analysis_stream(
                     contract_version_id=contract_version_id,
                     policy_version=policy.version if policy else "v1.0",
                     status=AnalysisStatus.completed,
-                    contract_risk_score=result.contract_risk_score,
+                    contract_risk_score=calculate_final_risk_score(
+                        llm_score=float(result.contract_risk_score),
+                        llm_items=llm_analysis_items,
+                        deterministic_items=deterministic_result.items,
+                    ),
                     raw_payload={
-                        "items": [item.model_dump() for item in result.items],
                         "summary": result.summary,
+                        "llm_items": [item.model_dump() for item in result.items],
+                        "deterministic_items": [item.model_dump() for item in deterministic_result.items],
+                        "merged_items": [item.model_dump() for item in filtered_items],
                     },
                     findings=[
                         ContractAnalysisFinding(
-                            clause_name=item.clause_code,
-                            status="evaluated",
+                            clause_name=item.clause_name,
+                            status=item.status,
                             severity=item.severity,
-                            current_summary=item.explanation,
-                            policy_rule=item.clause_code,
-                            risk_explanation=item.explanation,
-                            suggested_adjustment_direction=item.suggested_correction,
-                            metadata_json={
-                                "risk_score": item.risk_score,
-                                "playbook_title": item.clause_title,
-                            },
+                            current_summary=item.current_summary,
+                            policy_rule=item.policy_rule,
+                            risk_explanation=item.risk_explanation,
+                            suggested_adjustment_direction=item.suggested_adjustment_direction,
+                            metadata_json=item.metadata,
                         )
-                        for item in result.items
+                        for item in filtered_items
                     ],
                 )
                 session.add(analysis)
@@ -566,7 +605,7 @@ def download_corrected_contract_docx(
         )
 
     # Build a simple result object for docx generator
-    from app.infrastructure.gemini_models import CorrectedContractResult, CorrectionItem
+    from app.infrastructure.llm_models import CorrectedContractResult, CorrectionItem
     
     corrections = latest_analysis.corrections_summary or []
     result = CorrectedContractResult(

@@ -1,6 +1,10 @@
 from app.schemas.analysis import AnalysisItem
 
-from app.domain.contract_analysis import merge_analysis_items
+from app.domain.contract_analysis import (
+    calculate_final_risk_score,
+    extract_contract_facts,
+    merge_analysis_items,
+)
 
 
 def test_merge_analysis_items_prefers_deterministic_result_for_same_clause() -> None:
@@ -33,3 +37,68 @@ def test_merge_analysis_items_prefers_deterministic_result_for_same_clause() -> 
 
     assert merged[0].status == "critical"
     assert merged[0].risk_explanation == "Deterministico"
+
+
+def test_calculate_final_risk_score_uses_weighted_composition_instead_of_max() -> None:
+    llm_items = [
+        AnalysisItem(
+            clause_name="Redacao ambigua",
+            status="attention",
+            severity="medium",
+            risk_explanation="Texto juridicamente ambiguo.",
+            current_summary="Pode gerar interpretacao dupla.",
+            policy_rule="Deve ser objetivo.",
+            suggested_adjustment_direction="Redigir com maior precisao.",
+            metadata={"category": "redacao"},
+        )
+    ]
+    deterministic_items = [
+        AnalysisItem(
+            clause_name="Prazo de vigencia",
+            status="conforme",
+            severity="low",
+            risk_explanation="Prazo dentro da politica.",
+            current_summary="60 meses.",
+            policy_rule="Minimo de 60 meses.",
+            suggested_adjustment_direction="Nenhum ajuste necessario.",
+            metadata={"category": "prazo", "essential_clause": True},
+        )
+    ]
+
+    score = calculate_final_risk_score(
+        llm_score=92,
+        llm_items=llm_items,
+        deterministic_items=deterministic_items,
+    )
+
+    assert score < 92
+    assert score <= 45
+
+
+def test_calculate_final_risk_score_penalizes_missing_essential_clause() -> None:
+    score = calculate_final_risk_score(
+        llm_score=18,
+        llm_items=[],
+        deterministic_items=[
+            AnalysisItem(
+                clause_name="Exclusividade",
+                status="critical",
+                severity="high",
+                risk_explanation="Clausula essencial ausente.",
+                current_summary="Clausula nao encontrada.",
+                policy_rule="Clausula obrigatoria.",
+                suggested_adjustment_direction="Inserir clausula de exclusividade.",
+                metadata={"category": "essencial", "essential_clause": True, "missing_clause": True},
+            )
+        ],
+    )
+
+    assert score >= 70
+
+
+def test_extract_contract_facts_parses_aluguel_mensal_sera_de_pattern() -> None:
+    facts = extract_contract_facts(
+        "CLAUSULA 2 - ALUGUEL. O aluguel mensal sera de R$ 8500,00, com carencia de 45 dias."
+    )
+
+    assert facts["contract_value"] == 8500.0

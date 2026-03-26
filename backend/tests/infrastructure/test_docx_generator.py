@@ -6,7 +6,7 @@ import pytest
 from docx import Document
 
 from app.infrastructure.docx_generator import generate_corrected_contract_docx
-from app.infrastructure.gemini_models import CorrectedContractResult, CorrectionItem
+from app.infrastructure.llm_models import CorrectedContractResult, CorrectionItem
 
 
 class TestGenerateCorrectedContractDocx:

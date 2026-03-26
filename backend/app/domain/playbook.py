@@ -153,6 +153,42 @@ PLAYBOOK_CLAUSES: list[PlaybookClause] = [
             "do Inquilinato (Lei nº 8.245/91)."
         ),
     ),
+    PlaybookClause(
+        code="REAJUSTE",
+        title="Do Reajuste Monetario",
+        category="financeiro",
+        full_text=(
+            "O contrato deve prever indice, periodicidade e data-base do reajuste do "
+            "aluguel, vedando aumento arbitrario sem criterio objetivo."
+        ),
+    ),
+    PlaybookClause(
+        code="GARANTIA_LOCATICIA",
+        title="Da Garantia Locaticia",
+        category="garantia",
+        full_text=(
+            "A garantia da locacao deve estar expressamente definida, com responsabilidade "
+            "clara do fiador ou da modalidade pactuada, em conformidade com a Lei 8.245/1991."
+        ),
+    ),
+    PlaybookClause(
+        code="RENOVACAO_EMPRESARIAL",
+        title="Da Renovacao Empresarial",
+        category="temporal",
+        full_text=(
+            "O contrato nao deve afastar de modo abusivo a renovacao da locacao nao "
+            "residencial ou a protecao juridica do ponto comercial."
+        ),
+    ),
+    PlaybookClause(
+        code="ASSINATURAS",
+        title="Das Assinaturas e Formalizacao",
+        category="essencial",
+        full_text=(
+            "O instrumento deve prever assinaturas das partes e, quando aplicavel, do "
+            "fiador, com qualificacao minima suficiente para validade e execucao do contrato."
+        ),
+    ),
 ]
 
 

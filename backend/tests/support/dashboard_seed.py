@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.db.base import Base
 from app.db.models.analysis import ContractAnalysis, ContractAnalysisFinding
-from app.db.models.contract import Contract
+from app.db.models.contract import Contract, ContractSource, ContractVersion
 from app.db.models.event import ContractEvent, EventType, Notification, NotificationChannel
 
 
@@ -44,9 +44,43 @@ def seed_dashboard_data(session: Session, *, reference_date: date = date(2026, 4
         financial_terms={"valor_mensal": "R$ 9.800,00", "indice_reajuste": "IGPM"},
     )
 
+    uploaded_version_v1 = ContractVersion(
+        version_number=1,
+        source=ContractSource.third_party_draft,
+        original_filename="loc-001-v1.pdf",
+        storage_key="fixtures/loc-001-v1.pdf",
+        text_content="Versao inicial do contrato da Loja Centro.",
+    )
+    uploaded_version_v2 = ContractVersion(
+        version_number=2,
+        source=ContractSource.third_party_draft,
+        original_filename="loc-001-v2.pdf",
+        storage_key="fixtures/loc-001-v2.pdf",
+        text_content="Versao atualizada do contrato da Loja Centro.",
+    )
+    active_version = ContractVersion(
+        version_number=1,
+        source=ContractSource.signed_contract,
+        original_filename="loc-002-v1.pdf",
+        storage_key="fixtures/loc-002-v1.pdf",
+        text_content="Contrato assinado da Loja Norte.",
+    )
+    draft_version = ContractVersion(
+        version_number=1,
+        source=ContractSource.third_party_draft,
+        original_filename="loc-003-v1.pdf",
+        storage_key="fixtures/loc-003-v1.pdf",
+        text_content="Rascunho interno.",
+    )
+
+    uploaded_contract.versions.extend([uploaded_version_v1, uploaded_version_v2])
+    active_contract.versions.append(active_version)
+    draft_contract.versions.append(draft_version)
+
     uploaded_contract.analyses.extend(
         [
             ContractAnalysis(
+                contract_version=uploaded_version_v1,
                 policy_version="v1",
                 status="completed",
                 contract_risk_score=85,
@@ -63,6 +97,7 @@ def seed_dashboard_data(session: Session, *, reference_date: date = date(2026, 4
                 ],
             ),
             ContractAnalysis(
+                contract_version=uploaded_version_v2,
                 policy_version="v2",
                 status="completed",
                 contract_risk_score=20,
@@ -82,6 +117,7 @@ def seed_dashboard_data(session: Session, *, reference_date: date = date(2026, 4
     )
     active_contract.analyses.append(
         ContractAnalysis(
+            contract_version=active_version,
             policy_version="v1",
             status="completed",
             contract_risk_score=80,
