@@ -1,5 +1,18 @@
 # Session Log
 
+- Data: 2026-03-26 20:37:47 -03:00
+  - tarefa: limpar a ressalva documental restante do F6-E removendo referencias residuais ao provedor legado em `docs/`.
+  - resultado: `docs/` ficou sem ocorrencias de `Gemini|gemini`; os arquivos historicos/planos foram neutralizados para linguagem de provedor legado e o review antigo teve a chave exposta substituida por `<redacted>`.
+  - arquivos alterados: `docs/vectorhire-analysis.md`, `docs/superpowers/specs/2026-03-21-legalboard-modernization-design.md`, `docs/superpowers/specs/2026-03-21-legalboard-modernization-review.md`, `docs/superpowers/specs/2026-03-25-legalboard-contract-lifecycle-openai-design.md`, `docs/superpowers/plans/2026-03-25-legalboard-contract-lifecycle-openai.md`, `docs/superpowers/plans/2026-03-25-f6-e-openai-only-analysis-hardening.md`, `.codex-memory/current-state.md`, `.codex-memory/session-log.md`
+  - verificacao: `rg -n "Gemini|gemini" C:\Users\win\projeto-yuann\docs` retornou sem resultados.
+  - proximos passos: opcionalmente revisar se vale limpar tambem referencias residuais fora de `docs/` em historicos de memoria e nomes de testes.
+
+- Data: 2026-03-26 20:37:47 -03:00
+  - tarefa: resincronizar o workspace Windows com um clone limpo do repositorio e absorver o contexto atual do projeto apos o fechamento do F6-E.
+  - resultado: pasta `C:\Users\win\projeto-yuann` substituida por um novo `git clone`; checkout confirmado limpo em `main` no commit `f169a4dba9734cefe5fc566077747bbaadb1d19f` (`feat: complete F6-E OpenAI-only analysis hardening`), alinhado com `origin/main`; contexto consolidado a partir de `README.md`, `AGENTS.md`, `CLAUDE.md`, `./.codex-memory/`, `docs/squad/`, `docs/release-candidate-runbook.md`, `backend/pyproject.toml`, `backend/app/core/app_factory.py`, `backend/app/api/routes/` e `web/package.json`.
+  - arquivos alterados: `.codex-memory/current-state.md`, `.codex-memory/session-log.md`
+  - proximos passos: opcionalmente instalar dependencias e subir backend/frontend para validacao manual do checkout atual.
+
 - Data: 2026-03-26 00:50:00 -03:00
   - tarefa: fechar 100% o F6-E executando benchmark real de custo/qualidade com a API da OpenAI e ajustando o harness para variacao real do `gpt-5-mini`.
   - resultado: o benchmark ao vivo primeiro expôs um bug de compatibilidade do adapter (`gpt-5-mini` rejeitando `temperature` customizada), corrigido em `backend/app/infrastructure/openai_client.py`; `extract_contract_facts` passou a reconhecer `aluguel mensal sera de R$ ...`; o harness `backend/tests/support/openai_benchmark.py` foi endurecido com identificadores canonicos, diff por score-drop material e cenario alinhado ao playbook real; benchmark oficial salvo em `docs/squad/artifacts/2026-03-25-f6-e-openai-benchmark.json` e resumido em `docs/squad/artifacts/2026-03-25-f6-e-openai-benchmark.md`, com `acceptable = true`, custo medio `US$ 0.009158`, spread `12.49`, score medio `100.0 -> 30.23` e diff material de `5` identificadores.

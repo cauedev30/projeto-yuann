@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED: Use superpowers:subagent-driven-development (if subagents available) or superpowers:executing-plans to implement this plan. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Remove Gemini from the backend runtime, standardize contract analysis on OpenAI with `gpt-5-mini` as the default model, and harden prompts plus scoring for stronger PT-BR legal analysis.
+**Goal:** Remove the legacy alternate provider from the backend runtime, standardize contract analysis on OpenAI with `gpt-5-mini` as the default model, and harden prompts plus scoring for stronger PT-BR legal analysis.
 
 **Architecture:** Keep one OpenAI adapter as the only LLM boundary, preserve deterministic fallback when no API key is configured, and move score composition out of the current `max(llm, deterministic)` shortcut. Extend the canonical playbook and prompt layer so the backend produces auditable PT-BR findings grounded in franchise clauses and core lease-law checks.
 
@@ -10,7 +10,7 @@
 
 ---
 
-### Task 1: Remove Gemini runtime and config
+### Task 1: Remove legacy alternate-provider runtime and config
 
 **Files:**
 - Modify: `backend/pyproject.toml`
@@ -19,8 +19,8 @@
 - Modify: `backend/tests/core/test_app_factory.py`
 - Modify: `.env.example`
 - Modify: `README.md`
-- Delete: `backend/app/infrastructure/gemini_client.py`
-- Delete: `backend/app/infrastructure/gemini_models.py`
+- Delete: deprecated legacy-provider client modules
+- Delete: deprecated legacy-provider response models
 
 - [ ] **Step 1: Write failing runtime/config tests**
 Add or extend tests to assert the app factory no longer reads `GOOGLE_API_KEY` and wires the LLM client only from `OPENAI_API_KEY`.
@@ -28,11 +28,11 @@ Add or extend tests to assert the app factory no longer reads `GOOGLE_API_KEY` a
 - [ ] **Step 2: Run the focused app-factory tests and verify RED**
 Run: `cd backend && py -3.13 -m pytest tests/core/test_app_factory.py -q`
 
-- [ ] **Step 3: Remove Gemini dependency and runtime wiring**
-Drop `google-genai`, delete Gemini modules, and simplify app boot to either OpenAI or deterministic fallback.
+- [ ] **Step 3: Remove legacy alternate-provider dependency and runtime wiring**
+Drop `google-genai`, delete the deprecated modules, and simplify app boot to either OpenAI or deterministic fallback.
 
 - [ ] **Step 4: Update env and README contract**
-Replace Gemini env/config references with `OPENAI_API_KEY` and `OPENAI_MODEL`.
+Replace legacy-provider env/config references with `OPENAI_API_KEY` and `OPENAI_MODEL`.
 
 - [ ] **Step 5: Re-run focused app-factory tests and verify GREEN**
 Run: `cd backend && py -3.13 -m pytest tests/core/test_app_factory.py -q`
@@ -49,7 +49,7 @@ Run: `cd backend && py -3.13 -m pytest tests/core/test_app_factory.py -q`
 - Modify: `backend/app/application/contract_pipeline.py`
 
 - [ ] **Step 1: Write failing OpenAI adapter tests**
-Cover default model selection, typed fallback behavior, summary flow, correction flow, and imports no longer depending on Gemini-specific models.
+Cover default model selection, typed fallback behavior, summary flow, correction flow, and imports no longer depending on legacy-provider models.
 
 - [ ] **Step 2: Run focused infrastructure tests and verify RED**
 Run: `cd backend && py -3.13 -m pytest tests/infrastructure/test_openai_client.py tests/infrastructure/test_docx_generator.py -q`

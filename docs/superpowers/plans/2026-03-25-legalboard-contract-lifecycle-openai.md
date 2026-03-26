@@ -4,7 +4,7 @@
 
 **Goal:** Deliver `Acervo`, `Historico`, versionamento por contrato, comparacao entre versoes, analise juridica OpenAI-only e base de conhecimento obrigatoria sem travar a evolucao futura para Postgres/Supabase.
 
-**Architecture:** Expand the backend contract lifecycle model first, then bind analyses to versions, then expose version/history endpoints, then update the Next.js workspace to separate active contracts from historical analyses. Replace Gemini entirely with a single OpenAI adapter, move the legal reasoning to a deterministic-plus-LLM pipeline, and keep the Supabase decision as a bounded infrastructure spike rather than a blocker.
+**Architecture:** Expand the backend contract lifecycle model first, then bind analyses to versions, then expose version/history endpoints, then update the Next.js workspace to separate active contracts from historical analyses. Replace the legacy alternate provider entirely with a single OpenAI adapter, move the legal reasoning to a deterministic-plus-LLM pipeline, and keep the Supabase decision as a bounded infrastructure spike rather than a blocker.
 
 **Tech Stack:** FastAPI, SQLAlchemy, SQLite-compatible schema with Postgres-safe direction, Next.js 15, React 19, TypeScript, OpenAI Python SDK, Vitest, Playwright, pytest
 
@@ -52,15 +52,15 @@ Run: `cd web && npm run test -- src/lib/api/contracts.test.ts src/entities/contr
 - Modify: `backend/pyproject.toml`
 - Modify: `backend/app/core/app_factory.py`
 - Modify: `backend/app/infrastructure/openai_client.py`
-- Delete: `backend/app/infrastructure/gemini_client.py`
-- Delete: `backend/app/infrastructure/gemini_models.py`
+- Delete: deprecated legacy-provider client modules
+- Delete: deprecated legacy-provider response models
 - Modify: `backend/app/infrastructure/prompts.py`
 - Modify: `.env.example`
 - Modify: `README.md`
 - Modify: `backend/tests/infrastructure/test_prompts.py`
 
-- [ ] **Step 1: Remove Gemini dependencies and config**
-Drop `google-genai`, `GOOGLE_API_KEY`, and Gemini fallback wiring from runtime/config/docs.
+- [ ] **Step 1: Remove legacy alternate-provider dependencies and config**
+Drop `google-genai`, `GOOGLE_API_KEY`, and fallback wiring from runtime/config/docs.
 
 - [ ] **Step 2: Standardize one OpenAI adapter**
 Keep a single OpenAI client for:
@@ -77,8 +77,8 @@ Prompts must require:
 - justification of score-driving items
 
 - [ ] **Step 5: Verify prompt and client tests**
-Run: `cd backend && python -m pytest tests/infrastructure/test_prompts.py tests/infrastructure/test_gemini_client.py -q`
-Expected follow-up change: rename or replace Gemini-specific tests with OpenAI-specific ones.
+Run: `cd backend && python -m pytest tests/infrastructure/test_prompts.py tests/infrastructure/test_legacy_provider_client.py -q`
+Expected follow-up change: rename or replace legacy-provider tests with OpenAI-specific ones.
 
 ## Task 3: Knowledge Base and Score Rework
 

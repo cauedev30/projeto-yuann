@@ -9,7 +9,7 @@
 ## CRITICAL Issues
 
 ### 1. API Key Leaked in Spec (CRITICAL)
-**Section 8** contains a real `GOOGLE_API_KEY` value (`AIzaSyBud1Wju8IjlegIxBAGMm48Al3bbRWUZro`) directly in the spec document. This is a credential leak. If this doc is committed to git, the key is exposed in history forever.
+**Section 8** contains a real `GOOGLE_API_KEY` value (`<redacted>`) directly in the spec document. This is a credential leak. If this doc is committed to git, the key is exposed in history forever.
 
 **Fix:** Remove the real key immediately. Replace with placeholder `your-google-ai-studio-key`. Rotate the exposed key in Google AI Studio.
 
@@ -32,7 +32,7 @@ The spec replaces `Policy`/`PolicyRule` with hardcoded `PLAYBOOK_CLAUSES` but do
 ## IMPORTANT Issues
 
 ### 4. Env Var Naming Inconsistency (Important)
-The spec says the Gemini key uses `GOOGLE_API_KEY`, but the existing `.env.example` uses `OPENAI_API_KEY`. The spec does not mention updating `backend/app/core/config.py` (which likely reads `OPENAI_API_KEY`) or updating `docker-compose.yml` environment.
+The spec says the legacy alternate-provider key uses `GOOGLE_API_KEY`, but the existing `.env.example` uses `OPENAI_API_KEY`. The spec does not mention updating `backend/app/core/config.py` (which likely reads `OPENAI_API_KEY`) or updating `docker-compose.yml` environment.
 
 **Fix:** Add explicit instructions to update `config.py` and `.env.example` with the new env var name. Document the transition path.
 
@@ -42,8 +42,8 @@ The spec says the Gemini key uses `GOOGLE_API_KEY`, but the existing `.env.examp
 **Fix:** Add `pymupdf` to the dependencies list in Section 8. Clarify if this is a new dependency or if the existing PDF extraction approach is being changed.
 
 ### 6. No Rate Limiting / Token Budget (Important)
-The spec mentions "retry 1x with backoff" for Gemini failures but does not address:
-- Max token budget per request (Gemini 2.5 Flash has limits)
+The spec mentions "retry 1x with backoff" for failures of the legacy alternate provider but does not address:
+- Max token budget per request (the legacy flash model has limits)
 - Rate limiting on the API endpoints to prevent abuse
 - Cost controls (e.g., max analyses per day)
 
@@ -72,7 +72,7 @@ The codebase has a `backend/app/services/` directory with `policy_analysis.py`, 
 **Fix:** Clarify which `services/` files are deprecated/removed vs kept.
 
 ### 10. No Rollback Plan for LLM Migration (Minor)
-Removing OpenAI entirely is a one-way door. If Gemini 2.5 Flash quality proves insufficient for Portuguese legal text, there is no fallback.
+Removing OpenAI entirely is a one-way door. If the legacy flash-model quality proves insufficient for Portuguese legal text, there is no fallback.
 
 **Fix:** Consider keeping an `LLMClient` interface/protocol so the implementation can be swapped. This also makes testing easier.
 
@@ -81,7 +81,7 @@ Removing OpenAI entirely is a one-way door. If Gemini 2.5 Flash quality proves i
 
 ### 12. Test Strategy Lacks Detail (Minor)
 Section 10 lists test categories but does not specify:
-- Mock strategy for Gemini SDK (VCR cassettes? Manual mocks?)
+- Mock strategy for the legacy provider SDK (VCR cassettes? Manual mocks?)
 - Fixture files for contract PDFs
 - Whether existing tests in `tests/services/test_policy_analysis.py` and `test_rule_evaluator.py` should be updated or removed
 

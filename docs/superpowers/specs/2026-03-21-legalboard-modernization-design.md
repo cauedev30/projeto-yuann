@@ -19,10 +19,10 @@ Plataforma de governança contratual para franquias (Lavanderia 60 Minutos) que:
 - **Logo**: `/web/public/logo.png` (balança neon ciano/verde sobre fundo escuro)
 - **Aplicar em**: navbar, login, `<title>`, favicon, API title, package.json, pyproject.toml
 
-## 3. Migração de LLM: Gemini 2.5 Flash
+## 3. Migração de LLM: provedor alternativo legado
 
 ### Motivação
-| Aspecto | Gemini 2.5 Flash | GPT-4o-mini |
+| Aspecto | modelo flash legado | GPT-4o-mini |
 |---|---|---|
 | Custo | ~$0.075/1M tokens | ~$0.15/1M tokens |
 | Structured output | `response_schema` Pydantic nativo | `beta.parse()` |
@@ -30,7 +30,7 @@ Plataforma de governança contratual para franquias (Lavanderia 60 Minutos) que:
 | Qualidade PT-BR jurídico | Excelente | Muito boa |
 
 ### Implementação
-- Novo: `backend/app/infrastructure/gemini_client.py`
+- Novo: `backend/app/infrastructure/legacy_provider_client.py`
 - SDK: `google-genai`
 - API key via env var `GOOGLE_API_KEY` (arquivo `.env`, gitignored)
 - Modelos Pydantic de resposta: `ContractAnalysisResult`, `ContractSummaryResult`, `CorrectedContractResult`
@@ -66,9 +66,9 @@ Upload PDF
   → ContractChunker divide por cláusula (regex)
   → SSE inicia streaming de progresso
   → Para cada chunk:
-      → Gemini analisa contra playbook → Pydantic validado
+      → provedor legado analisa contra playbook → Pydantic validado
       → SSE emite "Analisando cláusula 3/8..."
-  → Merge findings Gemini + avaliação determinística
+  → Merge findings do provedor legado + avaliação determinística
   → Salva análise + findings no banco
   → SSE emite "completed"
 ```
@@ -81,15 +81,15 @@ Upload PDF
 
 ### Etapa 3 — Geração de Contrato Corrigido (NOVO)
 - Botão "Gerar contrato corrigido" disponível após análise
-- Gemini recebe: contrato original + findings + playbook
+- O provedor legado recebe: contrato original + findings + playbook
 - Gera contrato completo corrigido
 - Resumo de alterações: para cada cláusula alterada, explica o que mudou e por quê
 - Download como DOCX (usando python-docx)
 
 ## 6. Componentes Backend
 
-### 6.1 `infrastructure/gemini_client.py`
-- `GeminiAnalysisClient(api_key, model="gemini-2.5-flash")`
+### 6.1 `infrastructure/legacy_provider_client.py`
+- `LegacyAnalysisClient(api_key, model="legacy-2.5-flash")`
 - `analyze_contract(chunks: list[str], playbook: list[PlaybookClause]) -> ContractAnalysisResult`
 - `summarize_contract(text: str) -> ContractSummaryResult`
 - `generate_corrected_contract(original: str, findings: list, playbook: list) -> CorrectedContractResult`
@@ -123,7 +123,7 @@ Upload PDF
 ### 6.7 `infrastructure/prompts.py` (reescrita)
 - System prompt em PT-BR para análise jurídica de contratos de locação
 - Prompt para geração de contrato corrigido
-- Instruções claras para o Gemini avaliar cada cláusula contra o playbook
+- Instruções claras para o provedor legado avaliar cada cláusula contra o playbook
 
 ## 7. Componentes Frontend
 
@@ -188,13 +188,13 @@ JWT_SECRET=
 - `GET /contracts/{id}/analysis-status` — retorna estado atual da análise (pending/analyzing/completed/failed + progresso)
 
 ## 9. Tratamento de Erros
-- Gemini timeout/falha: retry 1x com backoff, depois `status=failed` com mensagem
+- Falha do provedor legado: retry 1x com backoff, depois `status=failed` com mensagem
 - PDF sem texto: OCR fallback existente, se falhar retorna erro claro
 - Chunker sem padrões: fallback para chunks por tamanho
 - SSE desconecta: frontend reconecta, busca estado via GET
 
 ## 10. Testes
-- Unit: `GeminiAnalysisClient` (mock SDK), `ContractChunker` (fixtures), `playbook.py`
+- Unit: `LegacyAnalysisClient` (mock SDK), `ContractChunker` (fixtures), `playbook.py`
 - Integration: pipeline completo upload → chunk → análise → findings → geração
 - Frontend: Vitest para hooks, Playwright para E2E
 - Testes existentes adaptados — nenhum teste removido sem substituição

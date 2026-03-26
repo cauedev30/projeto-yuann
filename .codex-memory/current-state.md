@@ -7,10 +7,11 @@
 - Interface canonica de memoria compartilhada: `./.codex-memory/`
 
 ## Snapshot verificado
-- Resincronizacao local (2026-03-25): clone limpo confirmado em `main` no commit `13205909c1ec7fb024b38457b49e06a49e9db20b` (`feat: add contract version comparison workflow`), alinhado com `origin/main`.
+- Resincronizacao local (2026-03-26): clone limpo confirmado em `main` no commit `f169a4dba9734cefe5fc566077747bbaadb1d19f` (`feat: complete F6-E OpenAI-only analysis hardening`), alinhado com `origin/main`.
 - F6-E OpenAI-only (2026-03-25): Gemini removido do runtime/backend manifests; `OpenAIAnalysisClient` agora e o unico adapter LLM com default `gpt-5-mini` configuravel por `OPENAI_MODEL`; prompts reforcados para PT-BR + checks da Lei 8.245; score final deixou de usar `max(llm, deterministic)` puro e passou a compor pesos entre achados LLM e regras deterministicas.
 - F6-E benchmark harness (2026-03-25): `backend/tests/support/openai_benchmark.py` agora executa um benchmark versionado do stack de analise com `gpt-5-mini`, medindo custo estimado por tokens, estabilidade de score em execucoes repetidas e diff de achados entre versoes; o fechamento 100% do card ainda depende apenas de rodar esse harness com `OPENAI_API_KEY` valida e anexar o artefato JSON.
 - F6-E benchmark real (2026-03-26): benchmark oficial executado com `OPENAI_API_KEY` valida e artefato salvo em `docs/squad/artifacts/2026-03-25-f6-e-openai-benchmark.json`; `gpt-5-mini` ficou com custo medio `US$ 0.009158`, spread maximo `12.49` e queda de score de `100.0` para `30.23` no cenario `lease-redraft`, considerado `acceptable = true`.
+- F6-E docs cleanup (2026-03-26): referencias residuais ao provedor legado foram removidas do diretório `docs/` para fechar a pendencia documental do card; o review historico tambem teve a chave de exemplo redigida para `<redacted>`.
 - Base anterior: `19dab0b feat: prepare f5-b product release [F5-B]` / `main` (`0c09517`)
 - Hardening de deploy (2026-03-22): `backend/app/core/app_factory.py` agora aceita `DATABASE_URL`, `UPLOAD_DIR` e `CORS_ORIGINS` por env com fallback local; `backend/pyproject.toml` e `backend/requirements.txt` passaram a incluir `psycopg[binary]` e `pydantic-settings`; `.env.example` e `DEPLOY_GUIDE.md` foram reescritos para o fluxo `Railway + Postgres + volume` no backend e `Vercel` no frontend.
 - Fix de runtime Railway (2026-03-22): `backend/nixpacks.toml` passou a usar o provider Python padrao e os manifests do backend agora declaram `PyMuPDF`, corrigindo a falha `ModuleNotFoundError: No module named 'fitz'` durante o boot do container.
@@ -61,4 +62,4 @@
 - Atualizar `CORS_ORIGINS` no Railway com a URL final do frontend e validar `GET /health`.
 
 ## Ultima atualizacao
-- 2026-03-25
+- 2026-03-26

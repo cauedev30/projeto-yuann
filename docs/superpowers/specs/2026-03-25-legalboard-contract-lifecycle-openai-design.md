@@ -176,7 +176,7 @@ Adicionar ou expandir endpoints para:
 
 ### 6.1 Decisao
 
-- remover Gemini do runtime, dependencias e configuracao
+- remover o provedor alternativo legado do runtime, dependencias e configuracao
 - manter apenas clientes e variaveis da OpenAI
 - padronizar a camada de IA em um unico adaptador OpenAI
 

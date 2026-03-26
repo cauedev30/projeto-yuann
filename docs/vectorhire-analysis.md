@@ -10,10 +10,10 @@ VectorHire é um ATS (Applicant Tracking System) B2B que analisa currículos sem
 **Tech Stack:**
 - Backend: FastAPI + PostgreSQL + `pgvector`
 - Embeddings: `sentence-transformers/all-MiniLM-L6-v2` (local, ~80MB)
-- LLM: Google Gemini 2.5 Flash via `google-generativeai`
+- LLM: modelo flash de um provedor alternativo via `google-generativeai`
 - PDF: PyMuPDF (`fitz`)
 - ORM: SQLAlchemy 2.x com Repository Pattern
-- Output estruturado: Pydantic schema forçado via `response_schema` do Gemini
+- Output estruturado: Pydantic schema forçado via `response_schema` do provedor alternativo
 - Streaming: Server-Sent Events (SSE) via `StreamingResponse` do FastAPI
 
 **Pipeline:**
@@ -22,7 +22,7 @@ VectorHire é um ATS (Applicant Tracking System) B2B que analisa currículos sem
 3. Chunks → embeddings vetoriais locais (sentence-transformers)
 4. Embeddings → upsert no PostgreSQL/pgvector
 5. Job description → embedding → cosine distance search → top-N chunks relevantes
-6. Chunks relevantes → Gemini com schema Pydantic → JSON estruturado com veredito
+6. Chunks relevantes → provedor alternativo com schema Pydantic → JSON estruturado com veredito
 
 ---
 
@@ -30,7 +30,7 @@ VectorHire é um ATS (Applicant Tracking System) B2B que analisa currículos sem
 
 | Aspecto | Projeto Yuann | VectorHire |
 |---|---|---|
-| LLM | OpenAI GPT-4o-mini | Gemini 2.5 Flash |
+| LLM | OpenAI GPT-4o-mini | modelo flash de provedor alternativo |
 | Output estruturado | `response_format: json_object` (sem schema) | `response_schema=PydanticModel` (schema forçado) |
 | Embeddings | Nenhum (texto direto para LLM) | `all-MiniLM-L6-v2` local |
 | Banco vetorial | Nenhum (SQLite) | PostgreSQL + pgvector |
@@ -84,7 +84,7 @@ def chunk_contract_by_clause(text: str, contract_id: str) -> list[ContractChunk]
 ### Gap 3: Sem output estruturado com schema Pydantic forçado
 **Problema atual:** O projeto usa `response_format={"type": "json_object"}` que apenas pede JSON genérico. O LLM pode retornar campos errados, tipos errados, ou JSON inválido.
 
-**Solução do VectorHire com Gemini:** Usa `response_schema=CandidateEvaluation` que força o modelo a respeitar o schema Pydantic exatamente.
+**Solução do VectorHire com schema nativo do provedor alternativo:** Usa `response_schema=CandidateEvaluation` que força o modelo a respeitar o schema Pydantic exatamente.
 
 **Solução equivalente para OpenAI (Structured Outputs):**
 ```python
@@ -157,7 +157,7 @@ with fitz.open(pdf_path) as doc:
 
 6. **Migrar para PostgreSQL + pgvector** — Para escala, seguir o modelo exato do VectorHire: `pgvector.sqlalchemy.Vector` no modelo ORM + `session.merge()` para upsert idempotente de chunks.
 
-7. **Considerar Gemini como alternativa ao GPT-4o-mini** — Gemini 2.5 Flash tem custo menor e suporta `response_schema` nativo. VectorHire demonstra que é viável para análise jurídica estruturada.
+7. **Considerar um provedor alternativo ao GPT-4o-mini** — um modelo flash com `response_schema` nativo pode reduzir custo. VectorHire demonstra que isso é viável para análise jurídica estruturada.
 
 ---
 
@@ -167,7 +167,7 @@ with fitz.open(pdf_path) as doc:
 |---|---|---|
 | `src/vector_db/repository.py` | `session.merge()` para upsert idempotente de chunks | `infrastructure/` ao adicionar chunks vetoriais |
 | `src/vector_db/repository.py` | `.cosine_distance(embedding)` com pgvector | `db/models/` se migrar para Postgres |
-| `src/llm/matching_service.py` | `response_schema=PydanticModel` no Gemini | `openai_client.py` com equivalente OpenAI |
+| `src/llm/matching_service.py` | `response_schema=PydanticModel` no provedor alternativo | `openai_client.py` com equivalente OpenAI |
 | `src/api/app.py` | `StreamingResponse` + `event_generator()` assíncrono | `api/routes/contracts.py` |
 | `src/processing/text_chunker.py` | Chunking preservando seção como prefixo do chunk | `infrastructure/contract_chunker.py` |
 | `src/extraction/pdf_extractor.py` | `chr(12)` como separador de páginas | `infrastructure/pdf_text.py` |
