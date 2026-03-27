@@ -49,6 +49,26 @@ Verify the LegalTech MVP release with one reproducible local verification flow f
 6. Run `cd backend && python -m tests.support.seed_dashboard_runtime clear`, then open `http://127.0.0.1:3000/dashboard` and confirm the unavailable state.
 7. Run `cd backend && python -m tests.support.seed_dashboard_runtime seed`, then refresh `http://127.0.0.1:3000/dashboard` and confirm the populated dashboard renders.
 
+## Contract retention operation
+- Purpose: expurgo seguro de contratos inativos cujo `last_analyzed_at` venceu ha 30 dias ou mais, sempre em UTC.
+- Preservation rules:
+  - never remove active contracts
+  - never remove contracts without `last_analyzed_at`
+  - never remove inactive contracts still inside the 30-day window
+- Dry-run inspection:
+  - `cd backend && python -m app.tasks.retention --dry-run`
+- Real execution:
+  - `cd backend && python -m app.tasks.retention`
+- Runtime config:
+  - the task uses the normal backend configuration, including `DATABASE_URL` and `UPLOAD_DIR`
+  - scheduling remains external to the app
+- Expected behavior:
+  - eligible contracts are deleted from the database
+  - related versions, analyses, findings, events, and notifications are removed by cascade
+  - physical version files are deleted only after a successful database commit
+  - the CLI prints mode, counts, and contract references for auditability
+  - exit code is non-zero if the database phase fails or if post-commit file cleanup reports failures
+
 ## Known non-blocking risks
 - `web/src/app/globals.css` still emits the known autoprefixer warning for `end`.
 - Old `.worktrees/`, `tmp/`, `backend/uploads/`, and the local SQLite database may remain on disk after verification; they are operational cleanup, not part of this release gate.

@@ -51,6 +51,7 @@ Monorepo for the first sellable version of the contract governance platform for 
 ## Verification
 - Optional Docker infra: `make up` and `make down`
 - Backend: `cd backend && python -m pytest -q`
+- Retention task: `cd backend && python -m pytest tests/tasks/test_retention_task.py -q`
 - OpenAI benchmark: `cd backend && python -m tests.support.openai_benchmark --runs 3 --output ../docs/squad/artifacts/2026-03-25-f6-e-openai-benchmark.json`
 - Root shortcut: `make backend-test`
 - Web tests: `cd web && npm run test`
@@ -58,6 +59,19 @@ Monorepo for the first sellable version of the contract governance platform for 
 - Lint: `cd web && npm run lint`
 - Build: `cd web && npm run build`
 - End to end: `cd web && npm run e2e`
+
+## Contract retention job
+- The backend includes a CLI-only retention task for expurgo of inactive contracts whose `last_analyzed_at` is at least 30 full days old in UTC.
+- The task preserves all active contracts, all contracts without `last_analyzed_at`, and all inactive contracts still inside the 30-day window.
+- It uses the normal backend runtime configuration, including `DATABASE_URL` and `UPLOAD_DIR`.
+- Inspect candidates without changing state:
+  - `cd backend && python -m app.tasks.retention --dry-run`
+- Apply the expurgo:
+  - `cd backend && python -m app.tasks.retention`
+- The job deletes the eligible contract row and relies on ORM/database cascades to remove versions, analyses, findings, events, and notifications.
+- Physical files for eligible versions are deleted only after the database commit succeeds.
+- Scheduling remains external to the app. Use cron, Railway, or another job runner to invoke the CLI on your cadence.
+- The CLI prints mode, counts, and contract references for operational auditing. It exits non-zero if the database phase fails or if post-commit file cleanup reports failures.
 
 ## Release verification
 - Use the verification order above as the official local MVP verification baseline.
