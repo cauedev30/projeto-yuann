@@ -34,7 +34,10 @@ def test_extract_contract_metadata_accepts_label_variants_and_tracks_snapshot_co
     assert result.start_date.isoformat() == "2026-04-01"
     assert result.end_date.isoformat() == "2031-03-31"
     assert result.term_months == 60
-    assert result.parties == ["Franquia XPTO LTDA"]
+    assert result.parties == {
+        "entities": ["Franquia XPTO LTDA"],
+        "locatario": "Franquia XPTO LTDA",
+    }
     assert result.financial_terms == {
         "grace_period_months": 3,
         "readjustment_type": "annual",
@@ -60,3 +63,25 @@ def test_extract_contract_metadata_accepts_label_variants_and_tracks_snapshot_co
         "readjustment_type": "reajuste anual",
     }
     assert result.ready_for_event_generation is True
+
+
+def test_extract_contract_metadata_separates_contract_roles_when_text_is_explicit() -> None:
+    contract_text = (
+        "LOCADOR: Imobiliaria Centro SPE LTDA, inscrita no CNPJ 00.000.000/0001-00. "
+        "LOCATARIO: Franquia XPTO LTDA, inscrita no CNPJ 11.111.111/0001-11. "
+        "FIADOR: Joao da Silva, portador do CPF 222.222.222-22."
+    )
+
+    result = extract_contract_metadata(contract_text)
+
+    assert result.parties == {
+        "entities": [
+            "Imobiliaria Centro SPE LTDA",
+            "Franquia XPTO LTDA",
+            "Joao da Silva",
+        ],
+        "locador": "Imobiliaria Centro SPE LTDA",
+        "locatario": "Franquia XPTO LTDA",
+        "fiador": "Joao da Silva",
+    }
+    assert result.field_confidence["parties"] == 1.0

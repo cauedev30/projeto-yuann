@@ -25,13 +25,13 @@ export function NotificationHistory({ items, showTitle = true }: NotificationHis
   function formatEventType(eventType: string): string {
     switch (eventType) {
       case "renewal":
-        return "Renovacao";
+        return "Renovação";
       case "expiration":
-        return "Expiracao";
+        return "Vencimento";
       case "readjustment":
-        return "Reajuste";
+        return "Reajuste monetário";
       case "grace_period_end":
-        return "Fim da carencia";
+        return "Fim da carência";
       default:
         return eventType;
     }
@@ -39,7 +39,7 @@ export function NotificationHistory({ items, showTitle = true }: NotificationHis
 
   function formatSentAt(sentAt: string | null): string {
     if (sentAt === null) {
-      return "Ainda nao enviado";
+      return "Ainda não enviado";
     }
 
     return new Intl.DateTimeFormat("pt-BR", {
@@ -51,15 +51,15 @@ export function NotificationHistory({ items, showTitle = true }: NotificationHis
   if (items.length === 0) {
     return (
       <section className={styles.section}>
-        {showTitle ? <h2>Historico de notificacoes</h2> : null}
-        <p className={styles.emptyState}>Nenhuma notificacao registrada.</p>
+        {showTitle ? <h2>Histórico de notificações</h2> : null}
+        <p className={styles.emptyState}>Nenhuma notificação registrada.</p>
       </section>
     );
   }
 
   return (
     <section className={styles.section}>
-      {showTitle ? <h2>Historico de notificacoes</h2> : null}
+      {showTitle ? <h2>Histórico de notificações</h2> : null}
       <ul className={styles.list}>
         {items.map((item) => (
           <li key={item.id} className={styles.item}>

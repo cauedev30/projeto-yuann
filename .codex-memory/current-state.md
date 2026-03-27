@@ -7,6 +7,9 @@
 - Interface canonica de memoria compartilhada: `./.codex-memory/`
 
 ## Snapshot verificado
+- F6-F detalhe/timeline/PT-BR (2026-03-27 01:28 -03:00): detalhe do contrato revisado para PT-BR consistente, `MetadataSection` passou a suportar `parties` estruturadas com `locador/locatario/fiador` + fallback para `entities`, `EventTimeline` passou a exibir `Reajuste monetário`, `ContractSummaryPanel` ganhou estado vazio honesto + `Principais pontos`, e a timeline operacional do dashboard foi alinhada ao mesmo vocabulário (`Renovação`, `Vencimento`, `Reajuste monetário`, `Fim da carência`) com copy PT-BR revisada em `dashboard-screen`, `empty-dashboard-state` e `notification-history`; no backend, `ContractMetadataResult.parties` passou a carregar dicionario enriquecido, snapshots legados seguem compatíveis e o prompt de resumo foi endurecido para cobrir prazo, aluguel, reajuste, garantias, vistorias e ausências explícitas.
+- Workspace isolado para proxima task (2026-03-27 00:06 -03:00): worktree criada em `C:\Users\win\projeto-yuann\.worktrees\task-next-task` na branch `task/next-task`; backend preparado com `.venv` + `pip install -e ".[dev]"`; frontend preparado com `npm install`.
+- Baseline da worktree (2026-03-27 00:06 -03:00): backend verde com `149 passed, 2 warnings in 33.43s` via `.venv\Scripts\python -m pytest -q --basetemp=.pytest-tmp`; frontend verde com `95 passed` via `npm.cmd run test` apos corrigir o import padrao de `React` em `web/src/lib/query-provider.tsx`, que quebrava `src/app/page.test.tsx` com `ReferenceError: React is not defined`.
 - Resincronizacao local (2026-03-26): clone limpo confirmado em `main` no commit `f169a4dba9734cefe5fc566077747bbaadb1d19f` (`feat: complete F6-E OpenAI-only analysis hardening`), alinhado com `origin/main`.
 - F6-E OpenAI-only (2026-03-25): Gemini removido do runtime/backend manifests; `OpenAIAnalysisClient` agora e o unico adapter LLM com default `gpt-5-mini` configuravel por `OPENAI_MODEL`; prompts reforcados para PT-BR + checks da Lei 8.245; score final deixou de usar `max(llm, deterministic)` puro e passou a compor pesos entre achados LLM e regras deterministicas.
 - F6-E benchmark harness (2026-03-25): `backend/tests/support/openai_benchmark.py` agora executa um benchmark versionado do stack de analise com `gpt-5-mini`, medindo custo estimado por tokens, estabilidade de score em execucoes repetidas e diff de achados entre versoes; o fechamento 100% do card ainda depende apenas de rodar esse harness com `OPENAI_API_KEY` valida e anexar o artefato JSON.
@@ -35,6 +38,7 @@
 - Fase 5 (Contratos e IA): substituicao de "Texto extraido" por `ContractSummaryPanel`; remocao de botoes falhos de atualizar; correcao do erro de "Hydration failed" no `AuthGuard`; otimizacao em `evaluate_rules` para agrupar limites de `Prazo de vigencia` e fix do parser regex de entidades locais; estilizacao premium com glassmorphism no `AppShell` da sidebar.
 
 ## Evidencia operacional mais recente
+- F6-F detalhe/timeline/PT-BR: frontend completo verde com `102 passed` via `npm.cmd run test`; backend completo verde com `153 passed, 2 warnings in 32.56s` via `.venv\Scripts\python -m pytest -q --basetemp=.pytest-tmp`; focos novos/verdes em `metadata-section.test.tsx`, `event-timeline.test.tsx`, `contract-detail-screen.test.tsx`, `contract-summary-panel.test.tsx`, `dashboard/events-timeline.test.tsx`, `dashboard-screen.test.tsx`, `tests/services/test_contract_metadata.py`, `tests/infrastructure/test_prompts.py`.
 - F6-E OpenAI-only: `43 passed in 7.51s` em `tests/core/test_app_factory.py`, `tests/infrastructure/test_openai_client.py`, `tests/infrastructure/test_docx_generator.py`, `tests/infrastructure/test_prompts.py`, `tests/domain/test_contract_analysis.py`, `tests/services/test_policy_analysis.py`; `28 passed in 39.80s` em `tests/application/test_contract_upload.py`, `tests/api/test_contracts_api.py`, `tests/core/test_packaging.py`; suite backend completa `149 passed, 2 warnings in 69.92s` via `py -3.13 -m pytest -q --basetemp=.pytest-tmp` apos fechar o benchmark real e os ajustes do harness.
 - F6-D versões/diff: backend `22 passed` em `backend/tests/api/test_contracts_api.py -q`; frontend `23 passed` em `src/lib/api/contracts.test.ts` + `src/features/contracts/screens/contract-detail-screen.test.tsx`; `npx tsc --noEmit` verde em 2026-03-25.
 - UI Acervo/Histórico: testes unitários web (23 testes) passando em 2026-03-25.
@@ -56,10 +60,8 @@
 - Cleanup de `.worktrees/`, `tmp/`, uploads legados permanece fora do escopo.
 
 ## Proximo passo recomendado
-- Criar o servico `backend` no Railway com `Root Directory=backend`.
-- Adicionar `Postgres` e um `Volume` no Railway, configurando `UPLOAD_DIR=/data/uploads`.
-- Publicar o frontend na Vercel com `Root Directory=web` e `NEXT_PUBLIC_API_URL` apontando para o backend.
-- Atualizar `CORS_ORIGINS` no Railway com a URL final do frontend e validar `GET /health`.
+- Revisar o diff da branch `task-next-task`, decidir o nome final do commit da F6-F e integrar essa worktree na `main`.
+- Se quiser prova manual antes do merge, subir `backend` e `web` a partir da worktree para inspecionar metadata, timeline e resumo do contrato com payload real.
 
 ## Ultima atualizacao
-- 2026-03-26
+- 2026-03-27

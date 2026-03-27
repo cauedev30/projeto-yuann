@@ -107,7 +107,10 @@ def test_upload_signed_contract_persists_snapshot_and_rebuilds_events(
     assert contract.start_date.isoformat() == "2026-04-01"
     assert contract.end_date.isoformat() == "2031-03-31"
     assert contract.term_months == 60
-    assert contract.parties == {"entities": ["Franquia XPTO LTDA"]}
+    assert contract.parties == {
+        "entities": ["Franquia XPTO LTDA"],
+        "locatario": "Franquia XPTO LTDA",
+    }
     assert contract.financial_terms == {
         "grace_period_months": 3,
         "readjustment_type": "annual",
@@ -121,7 +124,10 @@ def test_upload_signed_contract_persists_snapshot_and_rebuilds_events(
             "start_date": "2026-04-01",
             "end_date": "2031-03-31",
             "term_months": 60,
-            "parties": ["Franquia XPTO LTDA"],
+            "parties": {
+                "entities": ["Franquia XPTO LTDA"],
+                "locatario": "Franquia XPTO LTDA",
+            },
             "financial_terms": {
                 "grace_period_months": 3,
                 "readjustment_type": "annual",
@@ -154,7 +160,10 @@ def test_upload_signed_contract_persists_snapshot_and_rebuilds_events(
         "start_date": "2026-04-01",
         "end_date": "2031-03-31",
         "term_months": 60,
-        "parties": {"entities": ["Franquia XPTO LTDA"]},
+        "parties": {
+            "entities": ["Franquia XPTO LTDA"],
+            "locatario": "Franquia XPTO LTDA",
+        },
         "financial_terms": {
             "grace_period_months": 3,
             "readjustment_type": "annual",

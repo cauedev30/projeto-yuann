@@ -19,7 +19,7 @@ def _build_signed_contract_snapshot(metadata) -> dict[str, object]:
             "start_date": metadata.start_date.isoformat() if metadata.start_date else None,
             "end_date": metadata.end_date.isoformat() if metadata.end_date else None,
             "term_months": metadata.term_months,
-            "parties": metadata.parties,
+            "parties": metadata.parties or None,
             "financial_terms": metadata.financial_terms,
         },
         "field_confidence": metadata.field_confidence,
@@ -42,7 +42,7 @@ def process_signed_contract_archive(
     contract.start_date = metadata.start_date
     contract.end_date = metadata.end_date
     contract.term_months = metadata.term_months
-    contract.parties = {"entities": metadata.parties}
+    contract.parties = metadata.parties or None
     contract.financial_terms = metadata.financial_terms
     extraction_metadata = dict(contract_version.extraction_metadata or {})
     extraction_metadata["signed_contract_snapshot"] = _build_signed_contract_snapshot(metadata)

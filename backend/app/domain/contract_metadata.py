@@ -7,44 +7,54 @@ from datetime import date, timedelta
 from app.schemas.metadata import ContractMetadataResult
 
 _MONTH_NAMES: dict[str, int] = {
-    "janeiro": 1, "fevereiro": 2,
-    "março": 3, "marco": 3,
-    "abril": 4, "maio": 5, "junho": 6,
-    "julho": 7, "agosto": 8, "setembro": 9,
-    "outubro": 10, "novembro": 11, "dezembro": 12,
+    "janeiro": 1,
+    "fevereiro": 2,
+    "marco": 3,
+    "março": 3,
+    "abril": 4,
+    "maio": 5,
+    "junho": 6,
+    "julho": 7,
+    "agosto": 8,
+    "setembro": 9,
+    "outubro": 10,
+    "novembro": 11,
+    "dezembro": 12,
 }
 
 _RE_NUMERIC_DATE = re.compile(r"(\d{1,2})/(\d{1,2})/(\d{4})")
 _RE_WRITTEN_DATE = re.compile(
-    r"(\d{1,2})\s+de\s+([A-Za-zÀ-ÿ]+)\s+de\s+(\d{4})", re.IGNORECASE,
+    r"(\d{1,2})\s+de\s+([A-Za-zÀ-ÿ]+)\s+de\s+(\d{4})",
+    re.IGNORECASE,
 )
 
 
-def _parse_date_numeric(m: re.Match[str]) -> date | None:
+def _parse_date_numeric(match: re.Match[str]) -> date | None:
     try:
-        return date(int(m.group(3)), int(m.group(2)), int(m.group(1)))
+        return date(int(match.group(3)), int(match.group(2)), int(match.group(1)))
     except (ValueError, IndexError):
         return None
 
 
-def _parse_date_written(m: re.Match[str]) -> date | None:
-    month = _MONTH_NAMES.get(m.group(2).lower())
+def _parse_date_written(match: re.Match[str]) -> date | None:
+    month = _MONTH_NAMES.get(match.group(2).lower())
     if month is None:
         return None
     try:
-        return date(int(m.group(3)), month, int(m.group(1)))
+        return date(int(match.group(3)), month, int(match.group(1)))
     except (ValueError, IndexError):
         return None
 
 
 def _extract_date_from_fragment(text: str) -> date | None:
-    """Extract a date from a text fragment, trying numeric then written format."""
-    m = _RE_NUMERIC_DATE.search(text)
-    if m:
-        return _parse_date_numeric(m)
-    m = _RE_WRITTEN_DATE.search(text)
-    if m:
-        return _parse_date_written(m)
+    numeric_match = _RE_NUMERIC_DATE.search(text)
+    if numeric_match:
+        return _parse_date_numeric(numeric_match)
+
+    written_match = _RE_WRITTEN_DATE.search(text)
+    if written_match:
+        return _parse_date_written(written_match)
+
     return None
 
 
@@ -82,36 +92,71 @@ def _first_match(
     return None, None
 
 
-def _extract_parties(contract_text: str) -> tuple[list[str], str | None]:
-    """Extract parties (LOCADOR, LOCATÁRIO, etc.) from contract text.
-
-    Returns (list of party names, label describing matched pattern).
-    """
-    parties: list[str] = []
+def _extract_parties(contract_text: str) -> tuple[dict[str, object], str | None]:
+    entities: list[str] = []
     seen_names: set[str] = set()
+    parties: dict[str, object] = {}
     label: str | None = None
-    party_patterns: list[tuple[str, str]] = [
-        (r"LOCADOR(?:A)?\s*:\s*(.{2,130}?)(?:\n|,\s*(?:inscrit|CNPJ|CPF|com sede|residente|portador|pessoa|empresa|denominad))", "locador"),
-        (r"LOCAT[AÁ]RIO(?:A)?\s*:\s*(.{2,130}?)(?:\n|,\s*(?:inscrit|CNPJ|CPF|com sede|residente|portador|pessoa|empresa|denominad))", "locatario"),
-        (r"locat[aá]ria\s*/\s*franqueada\s*:\s*(.{2,130}?)(?=\s+(?:car[eê]ncia|reajuste|data|assinatura|in[ií]cio|prazo)\b|[.;\n]|$)", "locataria / franqueada"),
-        (r"locat[aá]ria\s*:\s*(.{2,130}?)(?=\s+(?:car[eê]ncia|reajuste|data|assinatura|in[ií]cio|prazo)\b|[.;\n]|$)", "locataria"),
-        (r"franqueada\s*:\s*(.{2,130}?)(?=\s+(?:car[eê]ncia|reajuste|data|assinatura|in[ií]cio|prazo)\b|[.;\n]|$)", "franqueada"),
+    party_patterns: list[tuple[str, str, str | None]] = [
+        (
+            r"LOCADOR(?:A)?\s*:\s*(.{2,130}?)(?:\n|,\s*(?:inscrit|CNPJ|CPF|com sede|residente|portador|pessoa|empresa|denominad)|[.;]|$)",
+            "locador",
+            "locador",
+        ),
+        (
+            r"LOCAT[ÁA]RIO(?:A)?\s*:\s*(.{2,130}?)(?:\n|,\s*(?:inscrit|CNPJ|CPF|com sede|residente|portador|pessoa|empresa|denominad)|[.;]|$)",
+            "locatario",
+            "locatario",
+        ),
+        (
+            r"locat[áa]ria\s*/\s*franqueada\s*:\s*(.{2,130}?)(?=\s+(?:car[êe]ncia|reajuste|data|assinatura|in[íi]cio|prazo)\b|[.;\n]|$)",
+            "locataria / franqueada",
+            "locatario",
+        ),
+        (
+            r"locat[áa]ria\s*:\s*(.{2,130}?)(?=\s+(?:car[êe]ncia|reajuste|data|assinatura|in[íi]cio|prazo)\b|[.;\n]|$)",
+            "locataria",
+            "locatario",
+        ),
+        (
+            r"franqueada\s*:\s*(.{2,130}?)(?=\s+(?:car[êe]ncia|reajuste|data|assinatura|in[íi]cio|prazo)\b|[.;\n]|$)",
+            "franqueada",
+            "locatario",
+        ),
+        (
+            r"FIADOR(?:A)?\s*:\s*(.{2,130}?)(?:\n|,\s*(?:inscrit|CNPJ|CPF|com sede|residente|portador|pessoa|empresa|denominad)|[.;]|$)",
+            "fiador",
+            "fiador",
+        ),
     ]
-    for pattern, role in party_patterns:
-        m = re.search(pattern, contract_text, re.IGNORECASE)
-        if m:
-            name = m.group(1).strip().rstrip(",;.")
-            normalized = name.upper()
-            if name and len(name) > 2 and normalized not in seen_names:
-                parties.append(name[:145])
-                seen_names.add(normalized)
-                if label is None:
-                    label = role
+
+    for pattern, role_label, party_key in party_patterns:
+        match = re.search(pattern, contract_text, re.IGNORECASE)
+        if not match:
+            continue
+
+        name = match.group(1).strip().rstrip(",;.")
+        normalized = name.upper()
+        if not name or len(name) <= 2:
+            continue
+
+        if normalized not in seen_names:
+            entities.append(name[:145])
+            seen_names.add(normalized)
+
+        if party_key and party_key not in parties:
+            parties[party_key] = name[:145]
+
+        if label is None:
+            label = role_label
+
+    if entities:
+        parties["entities"] = entities
+
     return parties, label
 
 
 def extract_contract_metadata(contract_text: str) -> ContractMetadataResult:
-    # --- Signature date ---
     signature_label, signature_match = _first_match(
         contract_text,
         [
@@ -129,16 +174,15 @@ def extract_contract_metadata(contract_text: str) -> ContractMetadataResult:
         else:
             signature_date = _extract_date_from_fragment(raw)
 
-    # --- Start date ---
     start_label, start_match = _first_match(
         contract_text,
         [
-            ("inicio de vigencia", r"in[ií]cio de vig[eê]ncia\s*:\s*(\d{2}/\d{2}/\d{4})"),
-            ("inicio da vigencia", r"in[ií]cio da vig[eê]ncia\s*:\s*(\d{2}/\d{2}/\d{4})"),
-            ("vigencia inicial", r"vig[eê]ncia inicial\s*:\s*(\d{2}/\d{2}/\d{4})"),
-            ("iniciando-se", r"iniciando[- ]se\s+(?:no dia\s+|em\s+)(.+?)(?:[,.]|\s+e\s+terminando|\s+at[eé])"),
-            ("com inicio em", r"com\s+in[ií]cio\s+em\s+(.+?)(?:[,.]|\s+e\s+|\s+at[eé])"),
-            ("a partir de", r"a\s+partir\s+de\s+(.+?)(?:[,.]|\s+e\s+|\s+at[eé])"),
+            ("inicio de vigencia", r"in[íi]cio de vig[êe]ncia\s*:\s*(\d{2}/\d{2}/\d{4})"),
+            ("inicio da vigencia", r"in[íi]cio da vig[êe]ncia\s*:\s*(\d{2}/\d{2}/\d{4})"),
+            ("vigencia inicial", r"vig[êe]ncia inicial\s*:\s*(\d{2}/\d{2}/\d{4})"),
+            ("iniciando-se", r"iniciando[- ]se\s+(?:no dia\s+|em\s+)(.+?)(?:[,.]|\s+e\s+terminando|\s+at[ée])"),
+            ("com inicio em", r"com\s+in[íi]cio\s+em\s+(.+?)(?:[,.]|\s+e\s+|\s+at[ée])"),
+            ("a partir de", r"a\s+partir\s+de\s+(.+?)(?:[,.]|\s+e\s+|\s+at[ée])"),
         ],
     )
     start_date = None
@@ -149,15 +193,14 @@ def extract_contract_metadata(contract_text: str) -> ContractMetadataResult:
         else:
             start_date = _extract_date_from_fragment(raw)
 
-    # --- End date (explicit) ---
     end_label, end_match = _first_match(
         contract_text,
         [
             ("terminando", r"terminando\s+(?:no dia\s+|em\s+)(.+?)(?:[,.]|\s+(?:podendo|prorrog|renov))"),
-            ("termino em", r"t[eé]rmino\s+em\s+(.+?)(?:[,.]|\s+(?:podendo|prorrog|renov))"),
-            ("data de termino", r"data\s+de\s+t[eé]rmino\s*:\s*(.+?)(?:[,.]|\s+(?:podendo|prorrog|renov))"),
-            ("ate o dia", r"at[eé]\s+o\s+dia\s+(.+?)(?:[,.]|\s+(?:podendo|prorrog|renov))"),
-            ("vigencia ate", r"vig[eê]ncia\s+at[eé]\s+(.+?)(?:[,.]|\s+(?:podendo|prorrog|renov))"),
+            ("termino em", r"t[ée]rmino\s+em\s+(.+?)(?:[,.]|\s+(?:podendo|prorrog|renov))"),
+            ("data de termino", r"data\s+de\s+t[ée]rmino\s*:\s*(.+?)(?:[,.]|\s+(?:podendo|prorrog|renov))"),
+            ("ate o dia", r"at[ée]\s+o\s+dia\s+(.+?)(?:[,.]|\s+(?:podendo|prorrog|renov))"),
+            ("vigencia ate", r"vig[êe]ncia\s+at[ée]\s+(.+?)(?:[,.]|\s+(?:podendo|prorrog|renov))"),
         ],
     )
     explicit_end_date = None
@@ -168,20 +211,18 @@ def extract_contract_metadata(contract_text: str) -> ContractMetadataResult:
         else:
             explicit_end_date = _extract_date_from_fragment(raw)
 
-    # --- Term months ---
     term_label, term_match = _first_match(
         contract_text,
         [
-            ("prazo do contrato", r"prazo\s+do\s+presente\s+contrato\s+[eé]\s+de\s+(\d+)\s*(?:\([^)]*\)\s*)?meses"),
-            ("prazo de vigencia", r"prazo\s+de\s+vig[eê]ncia\s*(?::\s*|\s+[eé]\s+de\s+)(\d+)\s*(?:\([^)]*\)\s*)?meses"),
-            ("prazo contratual", r"prazo\s+contratual\s*(?::\s*|\s+[eé]\s+de\s+)(\d+)\s*(?:\([^)]*\)\s*)?meses"),
+            ("prazo do contrato", r"prazo\s+do\s+presente\s+contrato\s+[ée]\s+de\s+(\d+)\s*(?:\([^)]*\)\s*)?meses"),
+            ("prazo de vigencia", r"prazo\s+de\s+vig[êe]ncia\s*(?::\s*|\s+[ée]\s+de\s+)(\d+)\s*(?:\([^)]*\)\s*)?meses"),
+            ("prazo contratual", r"prazo\s+contratual\s*(?::\s*|\s+[ée]\s+de\s+)(\d+)\s*(?:\([^)]*\)\s*)?meses"),
             ("prazo de N meses", r"prazo\s+de\s+(\d+)\s*(?:\([^)]*\)\s*)?meses"),
-            ("vigencia de N meses", r"vig[eê]ncia\s+de\s+(\d+)\s*(?:\([^)]*\)\s*)?meses"),
+            ("vigencia de N meses", r"vig[êe]ncia\s+de\s+(\d+)\s*(?:\([^)]*\)\s*)?meses"),
         ],
     )
     term_months = int(term_match.group(1)) if term_match else None
 
-    # --- Compute end_date ---
     end_date = explicit_end_date
     if end_date is None and start_date is not None and term_months is not None:
         end_date = _add_months(start_date, term_months) - timedelta(days=1)
@@ -192,28 +233,25 @@ def extract_contract_metadata(contract_text: str) -> ContractMetadataResult:
             term_months = delta_months
             term_label = "calculado"
 
-    # --- Parties ---
     parties, parties_label = _extract_parties(contract_text)
 
-    # --- Grace period ---
     grace_label, grace_match = _first_match(
         contract_text,
         [
-            ("carencia de", r"car[eê]ncia\s+de\s+(\d+)\s*meses"),
-            ("carencia", r"car[eê]ncia\s*:\s*(\d+)\s*meses"),
+            ("carencia de", r"car[êe]ncia\s+de\s+(\d+)\s*meses"),
+            ("carencia", r"car[êe]ncia\s*:\s*(\d+)\s*meses"),
         ],
     )
 
-    # --- Financial terms ---
     financial_terms: dict[str, object] = {}
 
     rent_label, rent_match = _first_match(
         contract_text,
         [
             ("aluguel mensal", r"aluguel\s+mensal\s+(?:de\s+)?R\$\s*([\d.,]+)"),
-            ("valor do aluguel", r"valor\s+(?:do\s+)?aluguel\s*(?::\s*|de\s+|ser[aá]\s+de\s+)R\$\s*([\d.,]+)"),
+            ("valor do aluguel", r"valor\s+(?:do\s+)?aluguel\s*(?::\s*|de\s+|ser[áa]\s+de\s+)R\$\s*([\d.,]+)"),
             ("aluguel de R$", r"aluguel\s+(?:de\s+)?R\$\s*([\d.,]+)"),
-            ("R$ mensal", r"R\$\s*([\d.,]+)\s*(?:\([^)]*\)\s*)?[,.]?\s*(?:mensal|mensais|por\s+m[eê]s|de\s+aluguel)"),
+            ("R$ mensal", r"R\$\s*([\d.,]+)\s*(?:\([^)]*\)\s*)?[,.]?\s*(?:mensal|mensais|por\s+m[êe]s|de\s+aluguel)"),
         ],
     )
     if rent_match:
@@ -246,7 +284,6 @@ def extract_contract_metadata(contract_text: str) -> ContractMetadataResult:
     if fine_match:
         financial_terms["penalty_months"] = int(fine_match.group(1))
 
-    # --- Field confidence ---
     field_confidence = {
         "signature_date": 1.0 if signature_date else 0.0,
         "start_date": 1.0 if start_date else 0.0,
@@ -258,6 +295,7 @@ def extract_contract_metadata(contract_text: str) -> ContractMetadataResult:
         "monthly_rent": 1.0 if "monthly_rent" in financial_terms else 0.0,
         "penalty_months": 1.0 if "penalty_months" in financial_terms else 0.0,
     }
+
     match_labels = {}
     for field, label in {
         "signature_date": signature_label,

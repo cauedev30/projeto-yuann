@@ -20,19 +20,19 @@ describe("DashboardScreen", () => {
   it("frames the unavailable state with an executive header", async () => {
     render(<DashboardScreen loadDashboardSnapshot={async () => null} />);
 
-    expect(await screen.findByText("Dashboard indisponivel no momento.")).toBeInTheDocument();
+    expect(await screen.findByText("Dashboard indisponível no momento.")).toBeInTheDocument();
   });
 
   it("renders an error state when the dashboard request fails", async () => {
     render(
       <DashboardScreen
         loadDashboardSnapshot={async () => {
-          throw new Error("Falha de integracao.");
+          throw new Error("Falha de integração.");
         }}
       />,
     );
 
-    expect(await screen.findByRole("alert")).toHaveTextContent("Falha de integracao.");
+    expect(await screen.findByRole("alert")).toHaveTextContent("Falha de integração.");
   });
 
   it("renders summary, timeline and notification blocks when a snapshot exists", async () => {
@@ -40,6 +40,6 @@ describe("DashboardScreen", () => {
 
     expect(await screen.findByText("Resumo geral")).toBeInTheDocument();
     expect(screen.getByText("Timeline de eventos")).toBeInTheDocument();
-    expect(screen.getByText("Historico de notificacoes")).toBeInTheDocument();
+    expect(screen.getByText("Histórico de notificações")).toBeInTheDocument();
   });
 });

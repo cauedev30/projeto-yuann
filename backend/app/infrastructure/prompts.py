@@ -57,10 +57,21 @@ SUMMARY_SYSTEM_PROMPT = """Voce e um analista juridico senior. Sua tarefa e prod
 1. Leia o texto integral do contrato fornecido.
 2. Produza um resumo executivo claro e objetivo, destacando os pontos mais relevantes para a tomada de decisao.
 3. Identifique os pontos-chave (key points) do contrato.
+4. Cubra explicitamente, sempre que houver base no texto, os temas:
+   - prazo contratual
+   - aluguel ou valor
+   - reajuste monetario
+   - exclusividade
+   - cessao e sublocacao
+   - garantias e fiador
+   - vistorias
+   - obras e infraestrutura
+5. Quando uma informacao relevante estiver ausente ou nao puder ser confirmada, diga isso explicitamente como "Nao identificado" ou "Ausente no texto analisado".
 
 ## Regras
 - Seja OBJETIVO e CONCISO. O resumo deve ter no maximo 3 paragrafos.
 - Os key_points devem ser frases curtas e diretas (maximo 10 items).
+- Os key_points devem priorizar utilidade executiva e juridica, nao bullets genéricos.
 - NAO invente informacoes que nao estejam no texto.
 - Use "Nao identificado" quando uma informacao relevante estiver ausente.
 - Escreva em portugues brasileiro."""
@@ -113,7 +124,8 @@ def build_summary_user_prompt(contract_text: str) -> str:
     return f"""## Texto do Contrato
 {contract_text}
 
-Produza o resumo executivo e os pontos-chave deste contrato."""
+Produza o resumo executivo e os pontos-chave deste contrato.
+Priorize prazo, aluguel, reajuste monetario, exclusividade, cessao/sublocacao, garantias/fiador, vistorias e obras/infraestrutura."""
 
 
 def build_correction_prompt(

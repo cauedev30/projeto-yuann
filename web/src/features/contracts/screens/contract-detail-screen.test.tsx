@@ -214,6 +214,10 @@ describe("ContractDetailScreen", () => {
     expect(await screen.findByRole("heading", { name: "Loja Centro" })).toBeInTheDocument();
     expect(loadContractDetail).toHaveBeenCalledWith("ctr-1");
     expect(loadContractVersionDetail).not.toHaveBeenCalled();
+    expect(
+      screen.getByText("Referência LOC-001 com leitura da versão atual do contrato."),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Enviado")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Gerar Contrato Corrigido" })).toBeInTheDocument();
   });
 
@@ -232,9 +236,12 @@ describe("ContractDetailScreen", () => {
       />,
     );
 
-    expect(await screen.findByText("Versao historica")).toBeInTheDocument();
+    expect(await screen.findByText("Versão histórica")).toBeInTheDocument();
     expect(loadContractVersionDetail).toHaveBeenCalledWith("ctr-1", "ver-1");
     expect(loadContractDetail).not.toHaveBeenCalled();
+    expect(
+      screen.getByText("Referência LOC-001 em leitura histórica da versão 1. A versão atual é a 2."),
+    ).toBeInTheDocument();
   });
 
   it("shows an honest partial state when no selected analysis is available", async () => {
@@ -247,7 +254,7 @@ describe("ContractDetailScreen", () => {
       <ContractDetailScreen contractId="ctr-1" loadContractDetail={loadContractDetail} />,
     );
 
-    expect(await screen.findByText("Analise ainda nao disponivel.")).toBeInTheDocument();
+    expect(await screen.findByText("Análise ainda não disponível.")).toBeInTheDocument();
   });
 
   it("shows an honest partial state when no selected version is available", async () => {
@@ -261,7 +268,7 @@ describe("ContractDetailScreen", () => {
       <ContractDetailScreen contractId="ctr-1" loadContractDetail={loadContractDetail} />,
     );
 
-    expect(await screen.findByText("Versao ainda nao disponivel.")).toBeInTheDocument();
+    expect(await screen.findByText("Versão ainda não disponível.")).toBeInTheDocument();
   });
 
   it("shows a historical state explicitly and hides mutable actions", async () => {
@@ -277,8 +284,8 @@ describe("ContractDetailScreen", () => {
       />,
     );
 
-    expect(await screen.findByText("Versao historica")).toBeInTheDocument();
-    expect(screen.getByText("Voce esta vendo a versao 1. A atual e a versao 2.")).toBeInTheDocument();
+    expect(await screen.findByText("Versão histórica")).toBeInTheDocument();
+    expect(screen.getByText("Você está vendo a versão 1. A atual é a versão 2.")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Gerar Contrato Corrigido" })).not.toBeInTheDocument();
     expect(
       screen.queryByRole("link", { name: "Baixar Contrato Corrigido (.docx)" }),
@@ -295,10 +302,10 @@ describe("ContractDetailScreen", () => {
     );
 
     expect(
-      await screen.findAllByRole("heading", { name: "Contrato nao encontrado." }),
+      await screen.findAllByRole("heading", { name: "Contrato não encontrado." }),
     ).toHaveLength(2);
     expect(
-      screen.getByText("Revise a navegacao da lista e tente abrir o contrato novamente."),
+      screen.getByText("Revise a navegação da lista e tente abrir o contrato novamente."),
     ).toBeInTheDocument();
   });
 
@@ -464,12 +471,9 @@ describe("ContractDetailScreen", () => {
       await screen.findByText("A versao 2 corrige o prazo e adiciona fiador."),
     ).toBeInTheDocument();
     expect(loadContractVersions).toHaveBeenCalledWith("ctr-1");
-    expect(compareVersions).toHaveBeenCalledWith(
-      "ctr-1",
-      {
-        selectedVersionId: "ver-2",
-        baselineVersionId: "ver-1",
-      },
-    );
+    expect(compareVersions).toHaveBeenCalledWith("ctr-1", {
+      selectedVersionId: "ver-2",
+      baselineVersionId: "ver-1",
+    });
   });
 });

@@ -20,7 +20,7 @@ export function classifyEventUrgency(daysUntil: number, leadTimeDays: number): U
 const EVENT_LABELS: Record<ContractEventType, string> = {
   renewal: "Renovação",
   expiration: "Vencimento",
-  readjustment: "Reajuste",
+  readjustment: "Reajuste monetário",
   grace_period_end: "Fim da carência",
 };
 
@@ -33,6 +33,7 @@ const URGENCY_LABELS: Record<Urgency, string> = {
 function formatDate(dateStr: string | null): string {
   if (!dateStr) return "Data não definida";
   const [year, month, day] = dateStr.split("-");
+  if (!year || !month || !day) return dateStr;
   return `${day}/${month}/${year}`;
 }
 
@@ -80,9 +81,7 @@ function EventNode({ event }: EventNodeProps) {
 }
 
 export function EventTimeline({ events = [] }: EventTimelineProps) {
-  const displayEvents = events.filter(
-    (e) => !e.metadata?.notification_sequence,
-  );
+  const displayEvents = events.filter((event) => !event.metadata?.notification_sequence);
 
   return (
     <SurfaceCard title="Eventos críticos">

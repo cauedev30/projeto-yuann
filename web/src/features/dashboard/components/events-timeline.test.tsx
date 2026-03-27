@@ -5,7 +5,6 @@ import { describe, expect, it } from "vitest";
 
 import { EventsTimeline } from "./events-timeline";
 
-
 describe("EventsTimeline", () => {
   it("shows renewal and expiration events in chronological order", () => {
     render(
@@ -38,9 +37,32 @@ describe("EventsTimeline", () => {
     );
 
     const items = screen.getAllByRole("listitem");
-    expect(items[0]).toHaveTextContent("Renovacao");
-    expect(items[1]).toHaveTextContent("Expiracao");
+    expect(items[0]).toHaveTextContent("Renovação");
+    expect(items[1]).toHaveTextContent("Vencimento");
     expect(items[0]).toHaveTextContent("Loja Centro");
+  });
+
+  it("shows Reajuste monetário and overdue label in PT-BR", () => {
+    render(
+      <EventsTimeline
+        events={[
+          {
+            id: "1",
+            eventType: "readjustment",
+            eventDate: "2030-12-10",
+            leadTimeDays: 15,
+            contractId: "ctr-3",
+            contractTitle: "Loja Sul",
+            externalReference: "LOC-003",
+            daysUntilDue: -3,
+            isOverdue: true,
+          },
+        ]}
+      />,
+    );
+
+    expect(screen.getByText("Reajuste monetário")).toBeInTheDocument();
+    expect(screen.getByText("Atrasado há 3 dias")).toBeInTheDocument();
   });
 
   it("filters events by operational status", async () => {

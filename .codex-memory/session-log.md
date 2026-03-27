@@ -1,5 +1,26 @@
 # Session Log
 
+- Data: 2026-03-27 01:28:00 -03:00
+  - tarefa: fechar a lacuna restante da `F6-F` no dashboard, alinhando a timeline operacional e a copy PT-BR aos criterios do card.
+  - resultado: `EventsTimeline` do dashboard passou a usar `Renovação`, `Vencimento`, `Reajuste monetário`, `Fim da carência` e `Atrasado há ... dias`; `DashboardScreen`, `EmptyDashboardState` e `NotificationHistory` tiveram a copy PT-BR revisada; novos testes cobrindo dashboard/timeline foram adicionados e a suite web completa fechou com `102 passed`.
+  - arquivos alterados: `web/src/features/dashboard/components/events-timeline.tsx`, `web/src/features/dashboard/components/events-timeline.test.tsx`, `web/src/features/dashboard/components/empty-dashboard-state.tsx`, `web/src/features/dashboard/screens/dashboard-screen.tsx`, `web/src/features/dashboard/screens/dashboard-screen.test.tsx`, `web/src/features/notifications/components/notification-history.tsx`, `.codex-memory/current-state.md`, `.codex-memory/session-log.md`
+  - verificacao: `npm.cmd run test -- src/features/dashboard/components/events-timeline.test.tsx src/features/dashboard/screens/dashboard-screen.test.tsx`; `npm.cmd run test`
+  - proximos passos: integrar a branch `task-next-task` na `main`.
+
+- Data: 2026-03-27 00:52:00 -03:00
+  - tarefa: implementar a `F6-F Revisar detalhe do contrato, timeline e linguagem PT-BR` na worktree `task-next-task`.
+  - resultado: o backend passou a enriquecer `parties` como dicionario estruturado (`locador/locatario/fiador` + `entities`) e o prompt de resumo passou a exigir cobertura de prazo, aluguel, reajuste monetario, garantias, vistorias e ausencias explicitas; no frontend, `MetadataSection` ganhou leitura de papéis contratuais + termos financeiros em PT-BR, `EventTimeline` passou a exibir `Reajuste monetário`, `ContractSummaryPanel` ganhou `Principais pontos` e estado vazio honesto, e `ContractDetailScreen` foi revisada para copy PT-BR consistente com status localizados e mensagens historicas/erro corrigidas.
+  - arquivos alterados: `backend/app/schemas/metadata.py`, `backend/app/domain/contract_metadata.py`, `backend/app/application/contract_versions.py`, `backend/app/tasks/archive.py`, `backend/app/infrastructure/prompts.py`, `backend/tests/services/test_contract_metadata.py`, `backend/tests/infrastructure/test_prompts.py`, `backend/tests/application/test_contract_upload.py`, `backend/tests/api/test_contracts_api.py`, `web/src/features/contracts/components/metadata-section.tsx`, `web/src/features/contracts/components/metadata-section.test.tsx`, `web/src/features/contracts/components/event-timeline.tsx`, `web/src/features/contracts/components/event-timeline.test.tsx`, `web/src/features/contracts/components/contract-summary-panel.tsx`, `web/src/features/contracts/components/contract-summary-panel.test.tsx`, `web/src/features/contracts/screens/contract-detail-screen.tsx`, `web/src/features/contracts/screens/contract-detail-screen.test.tsx`, `docs/superpowers/specs/2026-03-27-f6-f-contract-detail-timeline-ptbr-design.md`, `docs/superpowers/plans/2026-03-27-f6-f-contract-detail-timeline-ptbr.md`, `.codex-memory/current-state.md`, `.codex-memory/session-log.md`
+  - verificacao: `npm.cmd run test -- src/features/contracts/components/metadata-section.test.tsx src/features/contracts/components/event-timeline.test.tsx`; `npm.cmd run test -- src/features/contracts/screens/contract-detail-screen.test.tsx src/features/contracts/components/contract-summary-panel.test.tsx`; `npm.cmd run test`; `.venv\Scripts\python -m pytest tests/services/test_contract_metadata.py -q --basetemp=.pytest-tmp`; `.venv\Scripts\python -m pytest tests/infrastructure/test_prompts.py -q --basetemp=.pytest-tmp`; `.venv\Scripts\python -m pytest -q --basetemp=.pytest-tmp`
+  - proximos passos: revisar o diff final da `task-next-task`, commitar a F6-F e integrar na `main`.
+
+- Data: 2026-03-27 00:06:52 -03:00
+  - tarefa: preparar uma worktree isolada para a proxima task, instalar dependencias e validar o baseline do repositorio antes de novas mudancas.
+  - resultado: worktree `C:\Users\win\projeto-yuann\.worktrees\task-next-task` criada na branch `task/next-task`; backend recebeu `.venv` + dependencias; frontend recebeu `node_modules`; o backend fechou com `149 passed, 2 warnings`; o frontend expôs uma falha real de baseline em `web/src/lib/query-provider.tsx` (`React is not defined` em `src/app/page.test.tsx`), corrigida com a adicao do import padrao de `React`; suite web revalidada com `95 passed`.
+  - arquivos alterados: `web/src/lib/query-provider.tsx`, `.codex-memory/current-state.md`, `.codex-memory/session-log.md`
+  - verificacao: `.venv\Scripts\python -m pytest -q --basetemp=.pytest-tmp`; `npm.cmd run test -- src/app/page.test.tsx`; `npm.cmd run test`
+  - proximos passos: receber a task e implementar em cima da branch `task/next-task` com baseline limpo.
+
 - Data: 2026-03-26 20:37:47 -03:00
   - tarefa: limpar a ressalva documental restante do F6-E removendo referencias residuais ao provedor legado em `docs/`.
   - resultado: `docs/` ficou sem ocorrencias de `Gemini|gemini`; os arquivos historicos/planos foram neutralizados para linguagem de provedor legado e o review antigo teve a chave exposta substituida por `<redacted>`.

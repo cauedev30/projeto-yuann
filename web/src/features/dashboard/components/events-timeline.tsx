@@ -22,13 +22,13 @@ const FILTER_LABELS: Record<TimelineFilter, string> = {
 function formatEventType(eventType: string): string {
   switch (eventType) {
     case "renewal":
-      return "Renovacao";
+      return "Renovação";
     case "expiration":
-      return "Expiracao";
+      return "Vencimento";
     case "readjustment":
-      return "Reajuste";
+      return "Reajuste monetário";
     case "grace_period_end":
-      return "Fim da carencia";
+      return "Fim da carência";
     default:
       return eventType;
   }
@@ -40,7 +40,7 @@ function formatEventDate(eventDate: string): string {
 
 function buildOperationalLabel(event: DashboardEvent): string {
   if (event.isOverdue) {
-    return `Atrasado ha ${Math.abs(event.daysUntilDue)} dias`;
+    return `Atrasado há ${Math.abs(event.daysUntilDue)} dias`;
   }
   if (event.daysUntilDue <= event.leadTimeDays) {
     return `Dentro da janela de alerta (${event.daysUntilDue} dias)`;

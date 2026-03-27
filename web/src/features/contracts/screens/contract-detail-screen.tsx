@@ -34,6 +34,19 @@ const SOURCE_LABELS: Record<string, string> = {
   signed_contract: "Contrato assinado",
 };
 
+const CONTRACT_STATUS_LABELS: Record<string, string> = {
+  uploaded: "Enviado",
+  analyzed: "Analisado",
+  active: "Ativo",
+  archived: "Arquivado",
+};
+
+const ANALYSIS_STATUS_LABELS: Record<string, string> = {
+  completed: "concluída",
+  pending: "pendente",
+  failed: "com falha",
+};
+
 type ContractDetailScreenProps = {
   contractId: string;
   versionId?: string | null;
@@ -45,10 +58,10 @@ type ContractDetailScreenProps = {
 
 function buildContractDescription(detail: ContractDetail): string {
   if (detail.isHistoricalView && detail.selectedVersion && detail.latestVersion) {
-    return `Referencia ${detail.contract.externalReference} em leitura historica da versao ${detail.selectedVersion.versionNumber}. A versao atual e a ${detail.latestVersion.versionNumber}.`;
+    return `Referência ${detail.contract.externalReference} em leitura histórica da versão ${detail.selectedVersion.versionNumber}. A versão atual é a ${detail.latestVersion.versionNumber}.`;
   }
 
-  return `Referencia ${detail.contract.externalReference} com leitura da versao atual.`;
+  return `Referência ${detail.contract.externalReference} com leitura da versão atual do contrato.`;
 }
 
 function isNotFoundError(error: unknown): error is ContractsApiError {
@@ -58,7 +71,7 @@ function isNotFoundError(error: unknown): error is ContractsApiError {
 function normalizeDetailError(detailError: unknown): Error {
   return detailError instanceof Error
     ? detailError
-    : new Error("Nao foi possivel carregar o contrato.");
+    : new Error("Não foi possível carregar o contrato.");
 }
 
 function formatSelectedVersionTimestamp(detail: ContractDetail): string {
@@ -66,7 +79,24 @@ function formatSelectedVersionTimestamp(detail: ContractDetail): string {
     return "";
   }
 
-  return detail.selectedVersion.createdAt;
+  const timestamp = new Date(detail.selectedVersion.createdAt);
+  if (Number.isNaN(timestamp.getTime())) {
+    return detail.selectedVersion.createdAt;
+  }
+
+  return new Intl.DateTimeFormat("pt-BR", {
+    dateStyle: "short",
+    timeStyle: "short",
+    timeZone: "UTC",
+  }).format(timestamp);
+}
+
+function formatContractStatus(status: string): string {
+  return CONTRACT_STATUS_LABELS[status] ?? status;
+}
+
+function formatAnalysisStatus(status: string): string {
+  return ANALYSIS_STATUS_LABELS[status] ?? status;
 }
 
 function getSelectedVersionId(detail: ContractDetail | null): string | null {
@@ -203,7 +233,7 @@ export function ContractDetailScreen({
         setVersionsError(
           loadVersionsError instanceof Error
             ? loadVersionsError.message
-            : "Nao foi possivel carregar o historico de versoes.",
+            : "Não foi possível carregar o histórico de versões.",
         );
       } finally {
         if (isActive) {
@@ -258,7 +288,7 @@ export function ContractDetailScreen({
         setComparisonError(
           loadComparisonError instanceof Error
             ? loadComparisonError.message
-            : "Nao foi possivel comparar as versoes.",
+            : "Não foi possível comparar as versões.",
         );
       } finally {
         if (isActive) {
@@ -337,12 +367,12 @@ export function ContractDetailScreen({
         </div>
         <PageHeader
           eyebrow="Contratos"
-          title="Contrato nao encontrado."
-          description="O identificador informado nao corresponde a um contrato persistido no backend."
+          title="Contrato não encontrado."
+          description="O identificador informado não corresponde a um contrato persistido no backend."
         />
         <EmptyState
-          body="Revise a navegacao da lista e tente abrir o contrato novamente."
-          title="Contrato nao encontrado."
+          body="Revise a navegação da lista e tente abrir o contrato novamente."
+          title="Contrato não encontrado."
         />
       </section>
     );
@@ -362,7 +392,7 @@ export function ContractDetailScreen({
         <SurfaceCard title="Detalhe do contrato">
           <div className={styles.stack}>
             <p className={styles.alert} role="alert">
-              {error?.message ?? "Nao foi possivel carregar o contrato."}
+              {error?.message ?? "Não foi possível carregar o contrato."}
             </p>
             <div className={styles.refreshRow}>
               <button
@@ -425,16 +455,16 @@ export function ContractDetailScreen({
         ) : null}
 
         {detail.isHistoricalView && detail.selectedVersion && detail.latestVersion ? (
-          <SurfaceCard title="Versao historica">
+          <SurfaceCard title="Versão histórica">
             <p className={styles.inlineText}>
-              Voce esta vendo a versao {detail.selectedVersion.versionNumber}. A atual e a versao{" "}
+              Você está vendo a versão {detail.selectedVersion.versionNumber}. A atual é a versão{" "}
               {detail.latestVersion.versionNumber}.
             </p>
           </SurfaceCard>
         ) : null}
 
         <div className={styles.statGrid}>
-          <StatCard compact label="Status" value={detail.contract.status} />
+          <StatCard compact label="Status" value={formatContractStatus(detail.contract.status)} />
           <StatCard
             compact
             label="Prazo"
@@ -461,11 +491,11 @@ export function ContractDetailScreen({
             endDate={detail.contract.endDate}
           />
 
-          <SurfaceCard title="Versao em visualizacao">
+          <SurfaceCard title="Versão em visualização">
             {selectedVersion ? (
               <dl className={styles.summaryList}>
                 <div className={styles.summaryRow}>
-                  <dt>Versao</dt>
+                  <dt>Versão</dt>
                   <dd>{selectedVersion.versionNumber}</dd>
                 </div>
                 <div className={styles.summaryRow}>
@@ -486,7 +516,7 @@ export function ContractDetailScreen({
                 </div>
               </dl>
             ) : (
-              <p className={styles.inlineText}>Versao ainda nao disponivel.</p>
+              <p className={styles.inlineText}>Versão ainda não disponível.</p>
             )}
           </SurfaceCard>
         </div>
@@ -520,15 +550,15 @@ export function ContractDetailScreen({
 
         <details className={styles.collapsible} open>
           <summary className={styles.collapsibleSummary}>
-            <span className={styles.collapsibleTitle}>Analise da versao</span>
+            <span className={styles.collapsibleTitle}>Análise da versão</span>
             <span className={styles.collapsibleChevron} aria-hidden="true" />
           </summary>
           <div className={styles.collapsibleContent}>
             {selectedAnalysis ? (
               <div className={styles.stack}>
                 <p className={styles.inlineText}>
-                  Politica {selectedAnalysis.policyVersion} com status{" "}
-                  {selectedAnalysis.analysisStatus}.
+                  Política {selectedAnalysis.policyVersion} com status{" "}
+                  {formatAnalysisStatus(selectedAnalysis.analysisStatus)}.
                 </p>
                 <FindingsSection items={selectedAnalysis.findings} />
 
@@ -570,7 +600,7 @@ export function ContractDetailScreen({
                 ) : null}
               </div>
             ) : (
-              <p className={styles.inlineText}>Analise ainda nao disponivel.</p>
+              <p className={styles.inlineText}>Análise ainda não disponível.</p>
             )}
           </div>
         </details>
@@ -588,7 +618,7 @@ export function ContractDetailScreen({
         {selectedVersion?.text ? (
           <details className={styles.collapsible}>
             <summary className={styles.collapsibleSummary}>
-              <span className={styles.collapsibleTitle}>Texto extraido</span>
+              <span className={styles.collapsibleTitle}>Texto extraído</span>
               <span className={styles.collapsibleChevron} aria-hidden="true" />
             </summary>
             <div className={styles.collapsibleContent}>

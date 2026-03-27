@@ -89,6 +89,22 @@ class TestSummarySystemPrompt:
         assert "resumo" in SUMMARY_SYSTEM_PROMPT.lower()
         assert "portugues brasileiro" in SUMMARY_SYSTEM_PROMPT.lower()
 
+    def test_requires_f6_f_clause_coverage(self):
+        prompt = SUMMARY_SYSTEM_PROMPT.lower()
+        assert "prazo" in prompt
+        assert "aluguel" in prompt or "valor" in prompt
+        assert "reajuste" in prompt
+        assert "exclusividade" in prompt
+        assert "cess" in prompt and "subloc" in prompt
+        assert "garant" in prompt and "fiador" in prompt
+        assert "vistor" in prompt
+        assert "obra" in prompt and "infraestrutura" in prompt
+
+    def test_requires_explicit_absence_handling(self):
+        prompt = SUMMARY_SYSTEM_PROMPT.lower()
+        assert "nao identificado" in prompt
+        assert "ausente" in prompt or "ausencia" in prompt
+
 
 # ---------------------------------------------------------------------------
 # CORRECTION_SYSTEM_PROMPT tests
@@ -196,3 +212,8 @@ class TestBuildSummaryUserPrompt:
     def test_no_json_return_instruction(self):
         result = build_summary_user_prompt(SAMPLE_CONTRACT)
         assert "JSON especificado" not in result
+
+    def test_mentions_executive_and_key_point_expectations(self):
+        result = build_summary_user_prompt(SAMPLE_CONTRACT).lower()
+        assert "resumo executivo" in result
+        assert "pontos-chave" in result or "pontos-chave" in result

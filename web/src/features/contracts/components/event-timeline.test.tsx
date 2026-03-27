@@ -9,7 +9,7 @@ function makeEvent(overrides: Partial<ContractEventSummary> = {}): ContractEvent
   return {
     id: "evt-1",
     eventType: "renewal",
-    eventDate: "2026-04-16", // 31 days from 2026-03-16
+    eventDate: "2026-04-16",
     leadTimeDays: 30,
     metadata: {},
     ...overrides,
@@ -31,14 +31,19 @@ describe("EventTimeline", () => {
     expect(screen.getByText("Nenhum evento identificado")).toBeInTheDocument();
   });
 
-  it("shows 'Renovação' for renewal event type", () => {
+  it("shows Renovação for renewal event type", () => {
     render(<EventTimeline events={[makeEvent({ eventType: "renewal" })]} />);
     expect(screen.getByText("Renovação")).toBeInTheDocument();
   });
 
-  it("shows 'Vencimento' for expiration event type", () => {
+  it("shows Vencimento for expiration event type", () => {
     render(<EventTimeline events={[makeEvent({ eventType: "expiration" })]} />);
     expect(screen.getByText("Vencimento")).toBeInTheDocument();
+  });
+
+  it("shows Reajuste monetário for readjustment event type", () => {
+    render(<EventTimeline events={[makeEvent({ eventType: "readjustment" })]} />);
+    expect(screen.getByText("Reajuste monetário")).toBeInTheDocument();
   });
 
   it("shows date formatted as DD/MM/YYYY", () => {
@@ -46,41 +51,37 @@ describe("EventTimeline", () => {
     expect(screen.getByText("15/06/2026")).toBeInTheDocument();
   });
 
-  it("shows 'em X dias' for future events", () => {
-    // 2026-03-26 is 10 days from today (2026-03-16)
+  it("shows em X dias for future events", () => {
     render(<EventTimeline events={[makeEvent({ eventDate: "2026-03-26", leadTimeDays: 5 })]} />);
     expect(screen.getByText("em 10 dias")).toBeInTheDocument();
   });
 
-  it("shows 'há X dias' for past events", () => {
-    // 2026-03-06 is 10 days in the past from 2026-03-16
+  it("shows há X dias for past events", () => {
     render(<EventTimeline events={[makeEvent({ eventDate: "2026-03-06", leadTimeDays: 5 })]} />);
     expect(screen.getByText("há 10 dias")).toBeInTheDocument();
   });
 
-  it("shows 'Crítico' pill for urgent events (daysUntil <= leadTimeDays)", () => {
-    // 2026-03-26 is 10 days from today, leadTimeDays=30 → critical
+  it("shows Crítico pill for urgent events", () => {
     render(<EventTimeline events={[makeEvent({ eventDate: "2026-03-26", leadTimeDays: 30 })]} />);
     expect(screen.getByText("Crítico")).toBeInTheDocument();
   });
 
-  it("shows 'Conforme' pill for non-urgent events", () => {
-    // 2026-06-15 is 91 days from today, leadTimeDays=30 → conforme (91 > 60)
+  it("shows Conforme pill for non-urgent events", () => {
     render(<EventTimeline events={[makeEvent({ eventDate: "2026-06-15", leadTimeDays: 30 })]} />);
     expect(screen.getByText("Conforme")).toBeInTheDocument();
   });
 });
 
 describe("classifyEventUrgency", () => {
-  it("returns 'critical' when daysUntil <= leadTimeDays", () => {
+  it("returns critical when daysUntil <= leadTimeDays", () => {
     expect(classifyEventUrgency(10, 30)).toBe("critical");
   });
 
-  it("returns 'attention' when daysUntil <= leadTimeDays * 2", () => {
+  it("returns attention when daysUntil <= leadTimeDays * 2", () => {
     expect(classifyEventUrgency(45, 30)).toBe("attention");
   });
 
-  it("returns 'conforme' when daysUntil > leadTimeDays * 2", () => {
+  it("returns conforme when daysUntil > leadTimeDays * 2", () => {
     expect(classifyEventUrgency(100, 30)).toBe("conforme");
   });
 });

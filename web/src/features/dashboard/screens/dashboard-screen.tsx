@@ -20,7 +20,7 @@ type DashboardScreenProps = {
 };
 
 function normalizeDashboardError(error: unknown): Error {
-  return error instanceof Error ? error : new Error("Nao foi possivel carregar o dashboard.");
+  return error instanceof Error ? error : new Error("Não foi possível carregar o dashboard.");
 }
 
 export function DashboardScreen({
@@ -90,7 +90,7 @@ export function DashboardScreen({
       <PageHeader
         eyebrow="Dashboard"
         title="Visão geral"
-        description="Resumo dos contratos, eventos e notificacoes."
+        description="Resumo dos contratos, eventos e notificações."
       />
 
       {isLoading ? (
@@ -134,7 +134,7 @@ export function DashboardScreen({
               <EventsTimeline events={snapshot.events} showTitle={false} />
             </SurfaceCard>
 
-            <SurfaceCard title="Historico de notificacoes">
+            <SurfaceCard title="Histórico de notificações">
               <NotificationHistory items={snapshot.notifications} showTitle={false} />
             </SurfaceCard>
           </div>

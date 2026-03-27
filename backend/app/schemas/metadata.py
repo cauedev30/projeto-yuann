@@ -10,7 +10,7 @@ class ContractMetadataResult(BaseModel):
     start_date: date | None = None
     end_date: date | None = None
     term_months: int | None = None
-    parties: list[str] = Field(default_factory=list)
+    parties: dict[str, object] = Field(default_factory=dict)
     financial_terms: dict[str, object] = Field(default_factory=dict)
     critical_events: list[dict[str, object]] = Field(default_factory=list)
     field_confidence: dict[str, float] = Field(default_factory=dict)

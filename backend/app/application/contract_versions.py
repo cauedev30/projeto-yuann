@@ -23,7 +23,7 @@ def next_contract_version_number(session: Session, contract: Contract) -> int:
 def _snapshot_contract_parties(metadata: ContractMetadataResult) -> dict[str, Any] | None:
     if not metadata.parties:
         return None
-    return {"entities": metadata.parties}
+    return dict(metadata.parties)
 
 
 def build_contract_snapshot(metadata: ContractMetadataResult) -> dict[str, Any]:
@@ -114,13 +114,18 @@ def get_contract_version_snapshot(contract_version: ContractVersion) -> dict[str
 
     fields = signed_snapshot.get("fields") or {}
     parties = fields.get("parties")
+    serialized_parties = (
+        parties
+        if isinstance(parties, dict)
+        else {"entities": parties} if parties else None
+    )
     return {
         "contract": {
             "signature_date": fields.get("signature_date"),
             "start_date": fields.get("start_date"),
             "end_date": fields.get("end_date"),
             "term_months": fields.get("term_months"),
-            "parties": {"entities": parties} if parties else None,
+            "parties": serialized_parties,
             "financial_terms": fields.get("financial_terms") or None,
             "field_confidence": signed_snapshot.get("field_confidence")
             or metadata.get("field_confidence")

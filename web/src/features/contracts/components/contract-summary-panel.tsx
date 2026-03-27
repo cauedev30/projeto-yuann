@@ -30,7 +30,7 @@ export function ContractSummaryPanel({ contractId, versionId }: ContractSummaryP
       setError(
         loadError instanceof Error
           ? loadError.message
-          : "Nao foi possivel gerar o resumo.",
+          : "Não foi possível gerar o resumo.",
       );
     } finally {
       setIsLoading(false);
@@ -67,8 +67,12 @@ export function ContractSummaryPanel({ contractId, versionId }: ContractSummaryP
     );
   }
 
-  if (!summary || !summary.summary) {
-    return null;
+  if (!summary || !summary.summary.trim()) {
+    return (
+      <SurfaceCard title="Resumo do contrato">
+        <p className={styles.paragraph}>Resumo ainda não disponível.</p>
+      </SurfaceCard>
+    );
   }
 
   return (
@@ -82,7 +86,7 @@ export function ContractSummaryPanel({ contractId, versionId }: ContractSummaryP
 
         {summary.key_points.length > 0 ? (
           <div className={styles.keyPoints}>
-            <h4 className={styles.keyPointsTitle}>Pontos-chave</h4>
+            <h4 className={styles.keyPointsTitle}>Principais pontos</h4>
             <ul className={styles.keyPointsList}>
               {summary.key_points.map((point, index) => (
                 <li className={styles.keyPointItem} key={index}>

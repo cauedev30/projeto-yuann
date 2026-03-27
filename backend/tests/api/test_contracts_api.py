@@ -499,7 +499,10 @@ def test_get_contract_version_detail_returns_snapshot_for_requested_version(clie
     assert data["contract"]["start_date"] == "2026-04-01"
     assert data["contract"]["end_date"] == "2031-03-31"
     assert data["contract"]["term_months"] == 60
-    assert data["contract"]["parties"] == {"entities": ["Franquia XPTO LTDA"]}
+    assert data["contract"]["parties"] == {
+        "entities": ["Franquia XPTO LTDA"],
+        "locatario": "Franquia XPTO LTDA",
+    }
     assert data["selected_analysis"]["analysis_status"] == "completed"
     assert {event["metadata"]["source_contract_version_id"] for event in data["events"]} == {
         first_upload["contract_version_id"]
