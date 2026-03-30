@@ -1,8 +1,9 @@
 import React from "react";
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import type { ContractDetail } from "../../../entities/contracts/model";
 import { listContracts, updateContract } from "../../../lib/api/contracts";
 import { HistoricoScreen } from "./historico-screen";
 
@@ -39,6 +40,34 @@ function buildHistoryContractsResult(lastAnalyzedDaysAgo: number = 5) {
         latestVersionSource: "signed_contract" as const,
       },
     ],
+  };
+}
+
+function buildUpdatedContractDetail(): ContractDetail {
+  return {
+    contract: {
+      id: "ctr-hist",
+      title: "Contrato Histórico",
+      externalReference: "HST-001",
+      status: "uploaded",
+      signatureDate: null,
+      startDate: null,
+      endDate: null,
+      termMonths: 24,
+      isActive: true,
+      activatedAt: null,
+      lastAccessedAt: null,
+      lastAnalyzedAt: null,
+      parties: null,
+      financialTerms: null,
+      fieldConfidence: {},
+    },
+    selectedVersion: null,
+    latestVersion: null,
+    selectedAnalysis: null,
+    events: [],
+    isCurrent: true,
+    isHistoricalView: false,
   };
 }
 
@@ -95,7 +124,7 @@ describe("HistoricoScreen", () => {
   it("calls updateContract to activate and refreshes", async () => {
     const user = userEvent.setup();
     vi.mocked(listContracts).mockResolvedValue(buildHistoryContractsResult(5));
-    vi.mocked(updateContract).mockResolvedValue({} as any);
+    vi.mocked(updateContract).mockResolvedValue(buildUpdatedContractDetail());
 
     render(<HistoricoScreen />);
     

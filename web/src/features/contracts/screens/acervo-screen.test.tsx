@@ -1,8 +1,9 @@
 import React from "react";
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import type { ContractDetail } from "../../../entities/contracts/model";
 import { listContracts, updateContract } from "../../../lib/api/contracts";
 import { AcervoScreen } from "./acervo-screen";
 
@@ -36,6 +37,34 @@ function buildActiveContractsResult() {
         latestVersionSource: "signed_contract" as const,
       },
     ],
+  };
+}
+
+function buildUpdatedContractDetail(): ContractDetail {
+  return {
+    contract: {
+      id: "ctr-active",
+      title: "Contrato Ativo",
+      externalReference: "ACT-001",
+      status: "uploaded",
+      signatureDate: null,
+      startDate: null,
+      endDate: null,
+      termMonths: 12,
+      isActive: false,
+      activatedAt: null,
+      lastAccessedAt: null,
+      lastAnalyzedAt: null,
+      parties: null,
+      financialTerms: null,
+      fieldConfidence: {},
+    },
+    selectedVersion: null,
+    latestVersion: null,
+    selectedAnalysis: null,
+    events: [],
+    isCurrent: true,
+    isHistoricalView: false,
   };
 }
 
@@ -78,7 +107,7 @@ describe("AcervoScreen", () => {
   it("calls updateContract to deactivate and refreshes", async () => {
     const user = userEvent.setup();
     vi.mocked(listContracts).mockResolvedValue(buildActiveContractsResult());
-    vi.mocked(updateContract).mockResolvedValue({} as any);
+    vi.mocked(updateContract).mockResolvedValue(buildUpdatedContractDetail());
 
     render(<AcervoScreen />);
     

@@ -58,9 +58,7 @@ function buildStatusLabel(
 export function ContractsListPanel({
   items,
   isLoading,
-  isRefreshing,
   error,
-  onRefresh,
   navigateToContract,
   eyebrow = "Lista",
   title = "Contratos monitorados",

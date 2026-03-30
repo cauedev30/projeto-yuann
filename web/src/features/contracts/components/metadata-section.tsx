@@ -172,7 +172,6 @@ export function MetadataSection({
   parties,
   financialTerms,
   fieldConfidence,
-  signatureDate,
   startDate,
   endDate,
 }: MetadataSectionProps) {

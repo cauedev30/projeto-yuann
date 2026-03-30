@@ -85,6 +85,7 @@ export function DashboardScreen({
     <section className={styles.page}>
       <div aria-atomic="true" aria-live="polite" className="sr-only">
         {isLoading ? "Carregando dashboard operacional..." : ""}
+        {isRefreshing ? "Atualizando dashboard operacional..." : ""}
         {error?.message ?? ""}
       </div>
       <PageHeader
@@ -106,10 +107,11 @@ export function DashboardScreen({
             <div className={styles.refreshRow}>
               <button
                 className={styles.refreshButton}
+                disabled={isRefreshing}
                 onClick={() => void handleRefresh()}
                 type="button"
               >
-                Tentar novamente
+                {isRefreshing ? "Atualizando..." : "Tentar novamente"}
               </button>
             </div>
           </div>

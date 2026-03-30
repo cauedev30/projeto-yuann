@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import React from "react";
 import { useCallback, useEffect, useState } from "react";
 
@@ -12,7 +11,6 @@ import {
   type ContractUploadResult,
 } from "../../../entities/contracts/model";
 import { listContracts, uploadContract } from "../../../lib/api/contracts";
-import { ContractsListPanel } from "../components/contracts-list-panel";
 import { ContractsHero } from "../components/contracts-hero";
 import { ContractSummaryPanel } from "../components/contract-summary-panel";
 import { FindingsSection } from "../components/findings-section";
@@ -60,9 +58,7 @@ function buildPreviewFindings(text: string): ContractFinding[] {
 export function ContractsScreen({
   submitContract = uploadContract,
   loadContracts = listContracts,
-  navigateToContract,
 }: ContractsScreenProps) {
-  const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [result, setResult] = useState<ContractUploadResult | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -83,8 +79,6 @@ export function ContractsScreen({
         ? "success"
         : "empty";
   let statusMessage = "Nenhuma triagem foi executada nesta sessao.";
-  const openContract =
-    navigateToContract ?? ((contractId: string) => router.push(`/contracts/${contractId}`));
 
   if (statusState === "loading") {
     statusMessage = "Processando triagem inicial...";
@@ -181,6 +175,8 @@ export function ContractsScreen({
       <div aria-atomic="true" aria-live="polite" className="sr-only">
         {isSubmitting ? "Processando triagem inicial..." : ""}
         {isLoadingContracts ? "Carregando contratos..." : ""}
+        {isRefreshingContracts ? "Atualizando contratos..." : ""}
+        {!isLoadingContracts && !contractsError ? `${contracts.length} contratos sincronizados.` : ""}
         {error ?? contractsError ?? ""}
       </div>
 

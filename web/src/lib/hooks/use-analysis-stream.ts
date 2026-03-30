@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { getClientEnv } from "@/lib/env";
-import { getAuthHeaders } from "@/lib/api/auth";
 import { contractKeys } from "./use-contracts";
 
 export type AnalysisStage = "started" | "chunking" | "analyzing" | "completed" | "error";
