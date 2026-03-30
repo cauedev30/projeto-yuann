@@ -10,50 +10,6 @@
   font-size: var(--text-base);
 }
 
-.keyPoints {
-  display: grid;
-  gap: var(--space-3);
-  padding-top: var(--space-3);
-  border-top: 1px solid var(--glass-border);
-}
-
-.keyPointsTitle {
-  margin: 0;
-  font-size: var(--text-sm);
-  font-weight: 700;
-  color: var(--ink);
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
-}
-
-.keyPointsList {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: grid;
-  gap: var(--space-2);
-}
-
-.keyPointItem {
-  position: relative;
-  padding-left: var(--space-4);
-  color: var(--ink-soft);
-  line-height: 1.6;
-  font-size: var(--text-sm);
-}
-
-.keyPointItem::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0.55em;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--brand-accent, #10b981);
-  box-shadow: 0 0 6px var(--brand-glow, rgba(16, 185, 129, 0.4));
-}
-
 .loadingState {
   display: flex;
   align-items: center;

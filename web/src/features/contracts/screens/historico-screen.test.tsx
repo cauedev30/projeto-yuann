@@ -82,6 +82,7 @@ describe("HistoricoScreen", () => {
     expect(screen.getByText(`Último acesso: ${accessDateStr}`)).toBeInTheDocument();
     
     expect(screen.getByText("Expira em 25 dias")).toBeInTheDocument();
+    expect(screen.queryByText(/pontuação/i)).not.toBeInTheDocument();
   });
 
   it("renders expiration correctly when expired", async () => {

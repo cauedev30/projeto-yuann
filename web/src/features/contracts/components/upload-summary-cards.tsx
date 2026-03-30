@@ -7,19 +7,17 @@ import styles from "../screens/contracts-screen.module.css";
 type UploadSummaryCardsProps = {
   source: ContractSource;
   usedOcr: boolean;
-  riskScore: number;
   hasCriticalFinding: boolean;
 };
 
 const sourceLabelMap: Record<ContractSource, string> = {
-  third_party_draft: "Minuta de terceiro",
+  third_party_draft: "Contrato padrão",
   signed_contract: "Contrato assinado",
 };
 
 export function UploadSummaryCards({
   source,
   usedOcr,
-  riskScore,
   hasCriticalFinding,
 }: UploadSummaryCardsProps) {
   return (
@@ -45,12 +43,6 @@ export function UploadSummaryCards({
               ? "Existe ao menos um finding critico na triagem inicial."
               : "Nenhum risco critico foi identificado na primeira leitura."}
           </p>
-        </article>
-
-        <article className={styles.summaryCard}>
-          <p className={styles.summaryLabel}>Score de risco</p>
-          <strong className={styles.summaryValue}>{riskScore}</strong>
-          <p className={styles.summaryMeta}>Escala inicial derivada da leitura automatizada.</p>
         </article>
 
         <article className={styles.summaryCard}>

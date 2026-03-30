@@ -71,7 +71,7 @@ export function AppShell({ children }: AppShellProps) {
           </span>
         </Link>
 
-        <nav aria-label="Navegacao principal do workspace" className={styles.sidebarNav}>
+        <nav aria-label="Navegação principal do workspace" className={styles.sidebarNav}>
           <Link aria-label="Dashboard" className={navLinkClass("/dashboard")} href="/dashboard">
             <span className={styles.navTitle}>Dashboard</span>
             <small aria-hidden="true" className={styles.navMeta}>
@@ -115,8 +115,8 @@ export function AppShell({ children }: AppShellProps) {
       <div className={styles.contentFrame}>
         <header className={styles.topbar}>
           <details className={styles.mobileNav}>
-            <summary className={styles.mobileSummary}>Abrir navegacao</summary>
-            <nav aria-label="Navegacao movel do workspace" className={styles.mobilePanel}>
+            <summary className={styles.mobileSummary}>Abrir navegação</summary>
+            <nav aria-label="Navegação móvel do workspace" className={styles.mobilePanel}>
               <Link aria-label="Dashboard" className={navLinkClass("/dashboard")} href="/dashboard">
                 <span className={styles.navTitle}>Dashboard</span>
                 <small aria-hidden="true" className={styles.navMeta}>

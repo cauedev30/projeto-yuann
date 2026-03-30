@@ -85,3 +85,26 @@ def test_extract_contract_metadata_separates_contract_roles_when_text_is_explici
         "fiador": "Joao da Silva",
     }
     assert result.field_confidence["parties"] == 1.0
+
+
+def test_extract_contract_metadata_preserves_full_cpf_when_fiador_has_inline_qualification() -> None:
+    contract_text = (
+        "LOCADOR: AUTO POSTO GONTIJO LTDA, inscrita no CNPJ 00.000.000/0001-00. "
+        "LOCATARIO: HI FRANCHISING LTDA, inscrita no CNPJ 30.039.211/0001-07. "
+        "FIADOR: TAMIRYS DOMINGUES MOREIRA NACIONALIDADE: Brasileiro(a) "
+        "ESTADO CIVIL: Solteiro(a) CPF: 022.640.241-00 RG: 13873075 "
+        "ORGAO EMISSOR: SESPMT DATA DE NASCIMENTO: 09/11/1989."
+    )
+
+    result = extract_contract_metadata(contract_text)
+
+    assert result.parties == {
+        "entities": [
+            "AUTO POSTO GONTIJO LTDA",
+            "HI FRANCHISING LTDA",
+            "TAMIRYS DOMINGUES MOREIRA NACIONALIDADE: Brasileiro(a) ESTADO CIVIL: Solteiro(a) CPF: 022.640.241-00",
+        ],
+        "locador": "AUTO POSTO GONTIJO LTDA",
+        "locatario": "HI FRANCHISING LTDA",
+        "fiador": "TAMIRYS DOMINGUES MOREIRA NACIONALIDADE: Brasileiro(a) ESTADO CIVIL: Solteiro(a) CPF: 022.640.241-00",
+    }

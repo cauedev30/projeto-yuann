@@ -21,7 +21,7 @@ describe("AppShell", () => {
     );
 
     const navigation = screen.getByRole("navigation", {
-      name: "Navegacao principal do workspace",
+      name: "Navegação principal do workspace",
     });
     const contentRegion = screen.getByRole("main");
 

@@ -29,7 +29,7 @@ from app.infrastructure.storage import LocalStorageService
 def _get_database_url(database_url: str | None) -> str:
     resolved_database_url = database_url or os.environ.get(
         "DATABASE_URL",
-        "sqlite:///./legalboard.db",
+        "sqlite:///./legaltech.db",
     )
 
     if resolved_database_url.startswith("postgresql://"):

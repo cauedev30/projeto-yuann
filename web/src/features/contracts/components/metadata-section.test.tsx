@@ -43,9 +43,10 @@ describe("MetadataSection", () => {
     expect(container.textContent).not.toContain('{"entities"');
   });
 
-  it("renders signatureDate in DD/MM/YYYY format", () => {
+  it("does not render the signature date row anymore", () => {
     render(<MetadataSection {...defaultProps} />);
-    expect(screen.getByText("15/01/2024")).toBeInTheDocument();
+    expect(screen.queryByText("Data de assinatura")).not.toBeInTheDocument();
+    expect(screen.queryByText("15/01/2024")).not.toBeInTheDocument();
   });
 
   it("renders startDate in DD/MM/YYYY format", () => {
@@ -66,6 +67,7 @@ describe("MetadataSection", () => {
           grace_period_months: 3,
           readjustment_type: "annual",
           monthly_rent: 12000,
+          penalty_months: 3,
         }}
       />,
     );
@@ -73,6 +75,7 @@ describe("MetadataSection", () => {
     expect(screen.getByText("Carência")).toBeInTheDocument();
     expect(screen.getByText("Tipo de reajuste")).toBeInTheDocument();
     expect(screen.getByText("Aluguel")).toBeInTheDocument();
+    expect(screen.getByText("Multa (meses)")).toBeInTheDocument();
     expect(screen.getByText("Anual")).toBeInTheDocument();
   });
 
@@ -96,9 +99,9 @@ describe("MetadataSection", () => {
     expect(screen.getAllByText("Não identificado").length).toBeGreaterThanOrEqual(1);
   });
 
-  it("shows Não identificado when signatureDate is null", () => {
+  it("keeps signatureDate hidden even when it is null", () => {
     render(<MetadataSection {...defaultProps} signatureDate={null} />);
-    expect(screen.getAllByText("Não identificado").length).toBeGreaterThanOrEqual(1);
+    expect(screen.queryByText("Data de assinatura")).not.toBeInTheDocument();
   });
 
   it("shows Sem termos financeiros when financialTerms is null", () => {
@@ -106,9 +109,10 @@ describe("MetadataSection", () => {
     expect(screen.getByText("Sem termos financeiros")).toBeInTheDocument();
   });
 
-  it("shows unknown financial term keys as-is", () => {
+  it("shows unknown financial term keys as readable labels", () => {
     render(<MetadataSection {...defaultProps} financialTerms={{ custom_fee: "R$ 500" }} />);
-    expect(screen.getByText("custom_fee")).toBeInTheDocument();
+    expect(screen.getByText("Custom fee")).toBeInTheDocument();
+    expect(screen.queryByText("custom_fee")).not.toBeInTheDocument();
     expect(screen.getByText("R$ 500")).toBeInTheDocument();
   });
 });

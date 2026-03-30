@@ -26,16 +26,16 @@ export function VersionDiffPanel({
   errorMessage,
 }: VersionDiffPanelProps) {
   return (
-    <SurfaceCard title="Painel de diff">
+    <SurfaceCard title="Painel de comparação">
       <div className={styles.stack}>
-        {isLoading ? <p className={styles.hint}>Carregando diff...</p> : null}
+        {isLoading ? <p className={styles.hint}>Carregando comparação...</p> : null}
         {errorMessage ? (
           <p className={styles.alert} role="alert">
             {errorMessage}
           </p>
         ) : null}
         {!isLoading && !errorMessage && !comparison ? (
-          <p className={styles.hint}>Sem diff selecionado.</p>
+          <p className={styles.hint}>Nenhuma comparação selecionada.</p>
         ) : null}
         {!isLoading && !errorMessage && comparison ? (
           <>
@@ -44,10 +44,10 @@ export function VersionDiffPanel({
               <p className={styles.hint}>{comparison.summary}</p>
             </section>
             <section className={styles.section}>
-              <h3 className={styles.sectionTitle}>Diff de texto</h3>
+              <h3 className={styles.sectionTitle}>Comparação de texto</h3>
               <div className={styles.diffLines}>
                 {comparison.textDiff.lines.length === 0 ? (
-                  <p className={styles.hint}>Nenhuma diferenca textual relevante.</p>
+                  <p className={styles.hint}>Nenhuma diferença textual relevante.</p>
                 ) : (
                   comparison.textDiff.lines.map((line, index) => (
                     <p
@@ -61,10 +61,10 @@ export function VersionDiffPanel({
               </div>
             </section>
             <section className={styles.section}>
-              <h3 className={styles.sectionTitle}>Diff de achados</h3>
+              <h3 className={styles.sectionTitle}>Comparação de achados</h3>
               <div className={styles.findingList}>
                 {comparison.findingsDiff.items.length === 0 ? (
-                  <p className={styles.hint}>Nenhuma mudanca de achado detectada.</p>
+                  <p className={styles.hint}>Nenhuma mudança de achado detectada.</p>
                 ) : (
                   comparison.findingsDiff.items.map((item) => (
                     <article className={styles.findingItem} key={`${item.changeType}-${item.clauseName}`}>
@@ -79,7 +79,7 @@ export function VersionDiffPanel({
                         {item.currentStatus ?? "sem registro"}
                       </p>
                       <p className={styles.findingBody}>
-                        {item.currentSummary ?? item.previousSummary ?? "Sem resumo disponivel."}
+                        {item.currentSummary ?? item.previousSummary ?? "Sem resumo disponível."}
                       </p>
                     </article>
                   ))

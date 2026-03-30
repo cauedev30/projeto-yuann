@@ -43,6 +43,10 @@ def test_database_url_is_normalized_for_railway_postgres_urls() -> None:
     )
 
 
+def test_database_url_defaults_to_clean_local_sqlite_runtime() -> None:
+    assert _get_database_url(None) == "sqlite:///./legaltech.db"
+
+
 def test_create_app_allows_explicit_cors_origins_from_environment(
     monkeypatch,
     workspace_tmp_path,

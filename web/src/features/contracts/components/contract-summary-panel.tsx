@@ -83,19 +83,6 @@ export function ContractSummaryPanel({ contractId, versionId }: ContractSummaryP
             {paragraph}
           </p>
         ))}
-
-        {summary.key_points.length > 0 ? (
-          <div className={styles.keyPoints}>
-            <h4 className={styles.keyPointsTitle}>Principais pontos</h4>
-            <ul className={styles.keyPointsList}>
-              {summary.key_points.map((point, index) => (
-                <li className={styles.keyPointItem} key={index}>
-                  {point}
-                </li>
-              ))}
-            </ul>
-          </div>
-        ) : null}
       </div>
     </SurfaceCard>
   );

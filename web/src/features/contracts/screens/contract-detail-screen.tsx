@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React from "react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { EmptyState } from "../../../components/ui/empty-state";
 import { LoadingSkeleton } from "../../../components/ui/loading-skeleton";
@@ -30,7 +30,7 @@ import { VersionHistoryPanel } from "../components/version-history-panel";
 import styles from "./contract-detail-screen.module.css";
 
 const SOURCE_LABELS: Record<string, string> = {
-  third_party_draft: "Minuta de terceiro",
+  third_party_draft: "Contrato padrão",
   signed_contract: "Contrato assinado",
 };
 
@@ -39,12 +39,6 @@ const CONTRACT_STATUS_LABELS: Record<string, string> = {
   analyzed: "Analisado",
   active: "Ativo",
   archived: "Arquivado",
-};
-
-const ANALYSIS_STATUS_LABELS: Record<string, string> = {
-  completed: "concluída",
-  pending: "pendente",
-  failed: "com falha",
 };
 
 type ContractDetailScreenProps = {
@@ -95,10 +89,6 @@ function formatContractStatus(status: string): string {
   return CONTRACT_STATUS_LABELS[status] ?? status;
 }
 
-function formatAnalysisStatus(status: string): string {
-  return ANALYSIS_STATUS_LABELS[status] ?? status;
-}
-
 function getSelectedVersionId(detail: ContractDetail | null): string | null {
   if (!detail) {
     return null;
@@ -139,8 +129,6 @@ export function ContractDetailScreen({
   const router = useRouter();
   const [detail, setDetail] = useState<ContractDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [refreshSuccess, setRefreshSuccess] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [correctedReady, setCorrectedReady] = useState(false);
   const [versions, setVersions] = useState<Awaited<ReturnType<typeof listContractVersions>>["items"]>([]);
@@ -153,17 +141,7 @@ export function ContractDetailScreen({
 
   const generateCorrected = useGenerateCorrectedContract();
 
-  const liveMessage = isRefreshing
-    ? "Atualizando detalhe do contrato..."
-    : isLoading
-      ? "Carregando contrato..."
-      : error?.message ?? "";
-
-  useEffect(() => {
-    if (!refreshSuccess) return;
-    const timer = setTimeout(() => setRefreshSuccess(false), 2000);
-    return () => clearTimeout(timer);
-  }, [refreshSuccess]);
+  const liveMessage = isLoading ? "Carregando contrato..." : error?.message ?? "";
 
   useEffect(() => {
     setCorrectedReady(false);
@@ -173,6 +151,27 @@ export function ContractDetailScreen({
     setComparisonBaselineId(null);
   }, [contractId, versionId]);
 
+  const loadCurrentSelection = useCallback(async () => (
+    versionId
+      ? loadContractVersionDetail(contractId, versionId)
+      : loadContractDetail(contractId)
+  ), [contractId, loadContractDetail, loadContractVersionDetail, versionId]);
+
+  const loadVersionsSnapshot = useCallback(async () => {
+    const response = await loadContractVersions(contractId);
+    return response.items;
+  }, [contractId, loadContractVersions]);
+
+  const loadComparisonSnapshot = useCallback(
+    async (selectedId: string, baselineId: string) => (
+      compareVersions(contractId, {
+        selectedVersionId: selectedId,
+        baselineVersionId: baselineId,
+      })
+    ),
+    [compareVersions, contractId],
+  );
+
   useEffect(() => {
     let isActive = true;
 
@@ -181,9 +180,7 @@ export function ContractDetailScreen({
       setError(null);
 
       try {
-        const response = versionId
-          ? await loadContractVersionDetail(contractId, versionId)
-          : await loadContractDetail(contractId);
+        const response = await loadCurrentSelection();
         if (!isActive) {
           return;
         }
@@ -208,7 +205,7 @@ export function ContractDetailScreen({
     return () => {
       isActive = false;
     };
-  }, [contractId, versionId, loadContractDetail, loadContractVersionDetail]);
+  }, [loadCurrentSelection]);
 
   useEffect(() => {
     let isActive = true;
@@ -218,12 +215,12 @@ export function ContractDetailScreen({
       setVersionsError(null);
 
       try {
-        const response = await loadContractVersions(contractId);
+        const response = await loadVersionsSnapshot();
         if (!isActive) {
           return;
         }
 
-        setVersions(response.items);
+        setVersions(response);
       } catch (loadVersionsError) {
         if (!isActive) {
           return;
@@ -247,7 +244,7 @@ export function ContractDetailScreen({
     return () => {
       isActive = false;
     };
-  }, [contractId, loadContractVersions]);
+  }, [loadVersionsSnapshot]);
 
   const selectedVersionId = getSelectedVersionId(detail);
   const effectiveBaselineId =
@@ -270,10 +267,7 @@ export function ContractDetailScreen({
       setComparisonError(null);
 
       try {
-        const response = await compareVersions(contractId, {
-          selectedVersionId,
-          baselineVersionId: effectiveBaselineId,
-        });
+        const response = await loadComparisonSnapshot(selectedVersionId, effectiveBaselineId);
         if (!isActive) {
           return;
         }
@@ -302,29 +296,7 @@ export function ContractDetailScreen({
     return () => {
       isActive = false;
     };
-  }, [compareVersions, contractId, effectiveBaselineId, selectedVersionId]);
-
-  async function loadCurrentSelection() {
-    return versionId
-      ? loadContractVersionDetail(contractId, versionId)
-      : loadContractDetail(contractId);
-  }
-
-  async function handleRefresh() {
-    setIsRefreshing(true);
-    setError(null);
-
-    try {
-      const response = await loadCurrentSelection();
-      setDetail(response);
-      setRefreshSuccess(true);
-    } catch (detailError) {
-      setDetail(null);
-      setError(normalizeDetailError(detailError));
-    } finally {
-      setIsRefreshing(false);
-    }
-  }
+  }, [effectiveBaselineId, loadComparisonSnapshot, selectedVersionId]);
 
   async function handleRetry() {
     setIsLoading(true);
@@ -438,22 +410,7 @@ export function ContractDetailScreen({
         description={buildContractDescription(detail)}
       />
 
-      <div className={styles.refreshRow}>
-        <button
-          className={styles.refreshButton}
-          disabled={isRefreshing}
-          onClick={() => void handleRefresh()}
-          type="button"
-        >
-          {isRefreshing ? "Atualizando..." : "Atualizar detalhe"}
-        </button>
-      </div>
-
       <div className={styles.stack}>
-        {refreshSuccess ? (
-          <p className={styles.successText}>Detalhe atualizado.</p>
-        ) : null}
-
         {detail.isHistoricalView && detail.selectedVersion && detail.latestVersion ? (
           <SurfaceCard title="Versão histórica">
             <p className={styles.inlineText}>
@@ -473,11 +430,6 @@ export function ContractDetailScreen({
                 ? `${detail.contract.termMonths} meses`
                 : "a confirmar"
             }
-          />
-          <StatCard
-            compact
-            label="Score"
-            value={selectedAnalysis?.contractRiskScore ?? "a confirmar"}
           />
         </div>
 
@@ -556,10 +508,6 @@ export function ContractDetailScreen({
           <div className={styles.collapsibleContent}>
             {selectedAnalysis ? (
               <div className={styles.stack}>
-                <p className={styles.inlineText}>
-                  Política {selectedAnalysis.policyVersion} com status{" "}
-                  {formatAnalysisStatus(selectedAnalysis.analysisStatus)}.
-                </p>
                 <FindingsSection items={selectedAnalysis.findings} />
 
                 {!detail.isHistoricalView && selectedAnalysis.analysisStatus === "completed" ? (

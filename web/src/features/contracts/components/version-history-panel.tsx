@@ -24,17 +24,29 @@ export function VersionHistoryPanel({
   onOpenVersion,
   onCompareWith,
 }: VersionHistoryPanelProps) {
+  function formatVersionTimestamp(createdAt: string): string {
+    const timestamp = new Date(createdAt);
+    if (Number.isNaN(timestamp.getTime())) {
+      return createdAt;
+    }
+
+    return new Intl.DateTimeFormat("pt-BR", {
+      dateStyle: "short",
+      timeStyle: "short",
+    }).format(timestamp);
+  }
+
   return (
-    <SurfaceCard title="Historico de versoes">
+    <SurfaceCard title="Histórico de versões">
       <div className={styles.stack}>
-        {isLoading ? <p className={styles.hint}>Carregando versoes do contrato...</p> : null}
+        {isLoading ? <p className={styles.hint}>Carregando versões do contrato...</p> : null}
         {errorMessage ? (
           <p className={styles.alert} role="alert">
             {errorMessage}
           </p>
         ) : null}
         {!isLoading && !errorMessage && versions.length === 0 ? (
-          <p className={styles.hint}>Historico de versoes ainda nao disponivel.</p>
+          <p className={styles.hint}>Histórico de versões ainda não disponível.</p>
         ) : null}
         {!isLoading && !errorMessage && versions.length > 0 ? (
           <ul className={styles.list}>
@@ -45,9 +57,9 @@ export function VersionHistoryPanel({
                 <li className={styles.item} key={version.contractVersionId}>
                   <div className={styles.row}>
                     <div>
-                      <strong>Versao {version.versionNumber}</strong>
+                      <strong>Versão {version.versionNumber}</strong>
                       <p className={styles.meta}>
-                        {version.originalFilename} · {version.createdAt}
+                        {version.originalFilename} · {formatVersionTimestamp(version.createdAt)}
                       </p>
                     </div>
                     <div className={styles.badgeRow}>
@@ -56,11 +68,11 @@ export function VersionHistoryPanel({
                       ) : null}
                       {isSelected ? (
                         <span className={`${styles.badge} ${styles.badgeSelected}`}>
-                          Em visualizacao
+                          Em visualização
                         </span>
                       ) : null}
                       {isBaseline ? (
-                        <span className={`${styles.badge} ${styles.badgeBaseline}`}>Baseline</span>
+                        <span className={`${styles.badge} ${styles.badgeBaseline}`}>Base de comparação</span>
                       ) : null}
                     </div>
                   </div>
@@ -70,7 +82,7 @@ export function VersionHistoryPanel({
                       onClick={() => onOpenVersion(version.isCurrent ? null : version.contractVersionId)}
                       type="button"
                     >
-                      {version.isCurrent ? "Abrir versao atual" : `Abrir versao ${version.versionNumber}`}
+                      {version.isCurrent ? "Abrir versão atual" : `Abrir versão ${version.versionNumber}`}
                     </button>
                     <button
                       className={uiStyles.buttonPrimary}
@@ -78,7 +90,7 @@ export function VersionHistoryPanel({
                       onClick={() => onCompareWith(version.contractVersionId)}
                       type="button"
                     >
-                      Usar como baseline
+                      Usar como base de comparação
                     </button>
                   </div>
                 </li>

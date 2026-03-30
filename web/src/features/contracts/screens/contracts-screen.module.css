@@ -401,6 +401,17 @@
   gap: 1rem;
 }
 
+.navActions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 1.5rem;
+}
+
+.navLink {
+  text-decoration: none;
+}
+
 .extractedText {
   margin: 0;
   padding: 1.2rem;

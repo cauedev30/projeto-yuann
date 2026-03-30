@@ -27,6 +27,18 @@ _RE_WRITTEN_DATE = re.compile(
     r"(\d{1,2})\s+de\s+([A-Za-zÀ-ÿ]+)\s+de\s+(\d{4})",
     re.IGNORECASE,
 )
+_RE_PARTY_DOCUMENT = re.compile(
+    r"\b(?:CPF|CNPJ)\s*(?::|N[º°O]\s*)?\s*\d[\d./-]*",
+    re.IGNORECASE,
+)
+_PARTY_ROLE_TERMINATOR = (
+    r"(?=(?:"
+    r",\s*(?:inscrit\w*|cnpj|cpf|com sede|resident\w*|portador\w*|pessoa|empresa|denominad\w*|representad\w*)\b|"
+    r"[;\n]|$|"
+    r"[.;]\s*(?:as partes|do objeto|cl[áa]usula|locador(?:a)?|locat[áa]rio(?:a)?|fiador(?:a)?|locat[áa]ria|franqueada)\b|"
+    r"\s+(?:rg|org[ãa]o|data de nascimento|endere[cç]o(?:\s+eletr[ôo]nico)?|cidade|uf|cep|car[êe]ncia|reajuste|data|assinatura|in[íi]cio|prazo)\b"
+    r"))"
+)
 
 
 def _parse_date_numeric(match: re.Match[str]) -> date | None:
@@ -92,6 +104,14 @@ def _first_match(
     return None, None
 
 
+def _normalize_party_value(raw: str) -> str:
+    value = re.sub(r"\s+", " ", raw).strip().rstrip(",;.")
+    document_matches = list(_RE_PARTY_DOCUMENT.finditer(value))
+    if document_matches:
+        value = value[: document_matches[-1].end()].rstrip(",;.")
+    return value[:145]
+
+
 def _extract_parties(contract_text: str) -> tuple[dict[str, object], str | None]:
     entities: list[str] = []
     seen_names: set[str] = set()
@@ -99,32 +119,32 @@ def _extract_parties(contract_text: str) -> tuple[dict[str, object], str | None]
     label: str | None = None
     party_patterns: list[tuple[str, str, str | None]] = [
         (
-            r"LOCADOR(?:A)?\s*:\s*(.{2,130}?)(?:\n|,\s*(?:inscrit|CNPJ|CPF|com sede|residente|portador|pessoa|empresa|denominad)|[.;]|$)",
+            rf"LOCADOR(?:A)?\s*:\s*(.{{2,240}}?){_PARTY_ROLE_TERMINATOR}",
             "locador",
             "locador",
         ),
         (
-            r"LOCAT[ÁA]RIO(?:A)?\s*:\s*(.{2,130}?)(?:\n|,\s*(?:inscrit|CNPJ|CPF|com sede|residente|portador|pessoa|empresa|denominad)|[.;]|$)",
+            rf"LOCAT[ÁA]RIO(?:A)?\s*:\s*(.{{2,240}}?){_PARTY_ROLE_TERMINATOR}",
             "locatario",
             "locatario",
         ),
         (
-            r"locat[áa]ria\s*/\s*franqueada\s*:\s*(.{2,130}?)(?=\s+(?:car[êe]ncia|reajuste|data|assinatura|in[íi]cio|prazo)\b|[.;\n]|$)",
+            rf"locat[áa]ria\s*/\s*franqueada\s*:\s*(.{{2,240}}?){_PARTY_ROLE_TERMINATOR}",
             "locataria / franqueada",
             "locatario",
         ),
         (
-            r"locat[áa]ria\s*:\s*(.{2,130}?)(?=\s+(?:car[êe]ncia|reajuste|data|assinatura|in[íi]cio|prazo)\b|[.;\n]|$)",
+            rf"locat[áa]ria\s*:\s*(.{{2,240}}?){_PARTY_ROLE_TERMINATOR}",
             "locataria",
             "locatario",
         ),
         (
-            r"franqueada\s*:\s*(.{2,130}?)(?=\s+(?:car[êe]ncia|reajuste|data|assinatura|in[íi]cio|prazo)\b|[.;\n]|$)",
+            rf"franqueada\s*:\s*(.{{2,240}}?){_PARTY_ROLE_TERMINATOR}",
             "franqueada",
             "locatario",
         ),
         (
-            r"FIADOR(?:A)?\s*:\s*(.{2,130}?)(?:\n|,\s*(?:inscrit|CNPJ|CPF|com sede|residente|portador|pessoa|empresa|denominad)|[.;]|$)",
+            rf"FIADOR(?:A)?\s*:\s*(.{{2,240}}?){_PARTY_ROLE_TERMINATOR}",
             "fiador",
             "fiador",
         ),
@@ -135,17 +155,17 @@ def _extract_parties(contract_text: str) -> tuple[dict[str, object], str | None]
         if not match:
             continue
 
-        name = match.group(1).strip().rstrip(",;.")
+        name = _normalize_party_value(match.group(1))
         normalized = name.upper()
         if not name or len(name) <= 2:
             continue
 
         if normalized not in seen_names:
-            entities.append(name[:145])
+            entities.append(name)
             seen_names.add(normalized)
 
         if party_key and party_key not in parties:
-            parties[party_key] = name[:145]
+            parties[party_key] = name
 
         if label is None:
             label = role_label

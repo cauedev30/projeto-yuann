@@ -72,6 +72,7 @@ describe("AcervoScreen", () => {
     
     expect(await screen.findByText("Contrato Ativo")).toBeInTheDocument();
     expect(screen.getByText("Ref: ACT-001")).toBeInTheDocument();
+    expect(screen.queryByText(/pontuação/i)).not.toBeInTheDocument();
   });
 
   it("calls updateContract to deactivate and refreshes", async () => {

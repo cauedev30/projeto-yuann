@@ -1,5 +1,7 @@
 "use client";
 
+import React from "react";
+
 import type { AnalysisProgress } from "@/lib/hooks/use-analysis-stream";
 
 type AnalysisProgressBarProps = {
@@ -49,11 +51,6 @@ export function AnalysisProgressBar({
         <span className="progress-label">
           {error ? "Erro" : isComplete ? "Análise concluída" : "Analisando..."}
         </span>
-        {isComplete && progress?.riskScore !== undefined && (
-          <span className="risk-score">
-            Score de Risco: {progress.riskScore}
-          </span>
-        )}
       </div>
 
       <div className="progress-bar-container">
@@ -91,11 +88,6 @@ export function AnalysisProgressBar({
         .progress-label {
           font-weight: 500;
           color: var(--text-primary, #fff);
-        }
-
-        .risk-score {
-          font-size: 0.875rem;
-          color: var(--accent-cyan, #06b6d4);
         }
 
         .progress-bar-container {

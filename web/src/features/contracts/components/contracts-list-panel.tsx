@@ -9,7 +9,7 @@ import { StatusBadge } from "../../../components/ui/status-badge";
 import styles from "../screens/contracts-screen.module.css";
 
 const SOURCE_LABELS: Record<string, string> = {
-  third_party_draft: "Minuta de terceiro",
+  third_party_draft: "Contrato padrão",
   signed_contract: "Contrato assinado",
 };
 
@@ -28,11 +28,17 @@ type ContractsListPanelProps = {
   renderExtraMeta?: (item: ContractListItemSummary) => React.ReactNode;
 };
 
-function getRiskVariant(score: number | null): "critical" | "attention" | "conforme" | "neutral" {
-  if (score === null) return "neutral";
-  if (score <= 40) return "critical";    // 0-40: vermelho (alto risco)
-  if (score <= 69) return "attention";   // 41-69: amarelo (atenção)
-  return "conforme";                      // 70-100: verde (baixo risco)
+function getStatusVariant(status: string | null | undefined): "critical" | "attention" | "conforme" | "neutral" {
+  switch (status) {
+    case "failed":
+      return "critical";
+    case "pending":
+      return "attention";
+    case "completed":
+      return "conforme";
+    default:
+      return "neutral";
+  }
 }
 
 function buildStatusLabel(
@@ -45,10 +51,6 @@ function buildStatusLabel(
   };
 
   const statusStr = statusLabels[item.latestAnalysisStatus ?? ""] ?? item.latestAnalysisStatus ?? item.status;
-
-  if (item.latestAnalysisStatus && item.latestRiskScore !== null) {
-    return `${statusStr} · pontuação ${item.latestRiskScore}`;
-  }
 
   return statusStr;
 }
@@ -111,7 +113,7 @@ export function ContractsListPanel({
               >
                 <div className={styles.contractRowHeader}>
                   <strong className={styles.contractTitle}>{item.title}</strong>
-                  <StatusBadge variant={getRiskVariant(item.latestRiskScore)}>
+                  <StatusBadge variant={getStatusVariant(item.latestAnalysisStatus)}>
                     {buildStatusLabel(item)}
                   </StatusBadge>
                 </div>

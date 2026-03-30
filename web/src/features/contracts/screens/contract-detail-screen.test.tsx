@@ -68,15 +68,15 @@ vi.mock("../components/version-history-panel", () => ({
     onCompareWith: (contractVersionId: string | null) => void;
   }) => (
     <div>
-      <div>Historico de versoes</div>
+      <div>Histórico de versões</div>
       <div>Versoes carregadas: {versions.map((item) => item.versionNumber).join(", ")}</div>
       <div>Selecionada: {selectedVersionId ?? "current"}</div>
-      <div>Baseline: {comparisonBaselineId ?? "none"}</div>
+      <div>Base de comparação: {comparisonBaselineId ?? "none"}</div>
       <button onClick={() => onOpenVersion("ver-1")} type="button">
         Abrir versao 1
       </button>
       <button onClick={() => onCompareWith("ver-1")} type="button">
-        Comparar com versao 1
+        Usar como base de comparação
       </button>
     </div>
   ),
@@ -91,8 +91,8 @@ vi.mock("../components/version-diff-panel", () => ({
     isLoading: boolean;
   }) => (
     <div>
-      <div>Painel de diff</div>
-      <div>{isLoading ? "Carregando diff..." : comparison?.summary ?? "Sem diff selecionado."}</div>
+      <div>Painel de comparação</div>
+      <div>{isLoading ? "Carregando comparação..." : comparison?.summary ?? "Nenhuma comparação selecionada."}</div>
     </div>
   ),
 }));
@@ -186,6 +186,66 @@ function buildContractDetail({
   };
 }
 
+function buildContractVersionsResponse() {
+  return {
+    items: [
+      {
+        contractVersionId: "ver-2",
+        versionNumber: 2,
+        createdAt: "2026-03-21T12:00:00Z",
+        source: "third_party_draft" as const,
+        originalFilename: "contract-v2.pdf",
+        usedOcr: false,
+        analysisStatus: "completed",
+        contractRiskScore: 80,
+        isCurrent: true,
+      },
+      {
+        contractVersionId: "ver-1",
+        versionNumber: 1,
+        createdAt: "2026-03-20T12:00:00Z",
+        source: "third_party_draft" as const,
+        originalFilename: "contract-v1.pdf",
+        usedOcr: false,
+        analysisStatus: "completed",
+        contractRiskScore: 92,
+        isCurrent: false,
+      },
+    ],
+  };
+}
+
+function buildVersionComparisonResponse() {
+  return {
+    selectedVersion: {
+      contractVersionId: "ver-2",
+      versionNumber: 2,
+      createdAt: "2026-03-21T12:00:00Z",
+      source: "third_party_draft" as const,
+      originalFilename: "contract-v2.pdf",
+      usedOcr: false,
+      text: "Texto da versao 2",
+    },
+    baselineVersion: {
+      contractVersionId: "ver-1",
+      versionNumber: 1,
+      createdAt: "2026-03-20T12:00:00Z",
+      source: "third_party_draft" as const,
+      originalFilename: "contract-v1.pdf",
+      usedOcr: false,
+      text: "Texto da versao 1",
+    },
+    summary: "A versao 2 corrige o prazo e adiciona fiador.",
+    textDiff: {
+      hasChanges: true,
+      lines: [],
+    },
+    findingsDiff: {
+      items: [],
+    },
+  };
+}
+
 describe("ContractDetailScreen", () => {
   it("shows a loading skeleton while detail data is pending", () => {
     render(
@@ -218,6 +278,8 @@ describe("ContractDetailScreen", () => {
       screen.getByText("Referência LOC-001 com leitura da versão atual do contrato."),
     ).toBeInTheDocument();
     expect(screen.getByText("Enviado")).toBeInTheDocument();
+    expect(screen.getByText("Contrato padrão")).toBeInTheDocument();
+    expect(screen.queryByText(/Política .* com status/i)).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Gerar Contrato Corrigido" })).toBeInTheDocument();
   });
 
@@ -344,8 +406,7 @@ describe("ContractDetailScreen", () => {
     expect(loadContractDetail).toHaveBeenCalledTimes(2);
   });
 
-  it("refreshes the contract detail on demand", async () => {
-    const user = userEvent.setup();
+  it("does not render a manual refresh button in the contract detail header", async () => {
     const loadContractDetail = vi.fn().mockResolvedValue(buildContractDetail());
 
     render(
@@ -353,34 +414,8 @@ describe("ContractDetailScreen", () => {
     );
 
     await screen.findByRole("heading", { name: "Loja Centro" });
-    await user.click(screen.getByRole("button", { name: "Atualizar detalhe" }));
 
-    await waitFor(() => expect(loadContractDetail).toHaveBeenCalledTimes(2));
-  });
-
-  it("keeps recovery available when a manual refresh fails", async () => {
-    const user = userEvent.setup();
-    const loadContractDetail = vi
-      .fn()
-      .mockResolvedValueOnce(buildContractDetail())
-      .mockRejectedValueOnce(new Error("Falha ao atualizar o contrato."))
-      .mockResolvedValueOnce(buildContractDetail());
-
-    render(
-      <ContractDetailScreen contractId="ctr-1" loadContractDetail={loadContractDetail} />,
-    );
-
-    await screen.findByRole("heading", { name: "Loja Centro" });
-    await user.click(screen.getByRole("button", { name: "Atualizar detalhe" }));
-
-    expect(await screen.findByRole("alert")).toHaveTextContent(
-      "Falha ao atualizar o contrato.",
-    );
-
-    await user.click(screen.getByRole("button", { name: "Tentar novamente" }));
-
-    expect(await screen.findByRole("heading", { name: "Loja Centro" })).toBeInTheDocument();
-    expect(loadContractDetail).toHaveBeenCalledTimes(3);
+    expect(screen.queryByRole("button", { name: "Atualizar detalhe" })).not.toBeInTheDocument();
   });
 
   it("renderiza metadados, eventos, resumo e texto da versao selecionada", async () => {
@@ -400,60 +435,8 @@ describe("ContractDetailScreen", () => {
 
   it("carrega o historico de versoes e o diff no detalhe do contrato", async () => {
     const loadContractDetail = vi.fn().mockResolvedValue(buildContractDetail());
-    const loadContractVersions = vi.fn().mockResolvedValue({
-      items: [
-        {
-          contractVersionId: "ver-2",
-          versionNumber: 2,
-          createdAt: "2026-03-21T12:00:00Z",
-          source: "third_party_draft" as const,
-          originalFilename: "contract-v2.pdf",
-          usedOcr: false,
-          analysisStatus: "completed",
-          contractRiskScore: 80,
-          isCurrent: true,
-        },
-        {
-          contractVersionId: "ver-1",
-          versionNumber: 1,
-          createdAt: "2026-03-20T12:00:00Z",
-          source: "third_party_draft" as const,
-          originalFilename: "contract-v1.pdf",
-          usedOcr: false,
-          analysisStatus: "completed",
-          contractRiskScore: 92,
-          isCurrent: false,
-        },
-      ],
-    });
-    const compareVersions = vi.fn().mockResolvedValue({
-      selectedVersion: {
-        contractVersionId: "ver-2",
-        versionNumber: 2,
-        createdAt: "2026-03-21T12:00:00Z",
-        source: "third_party_draft" as const,
-        originalFilename: "contract-v2.pdf",
-        usedOcr: false,
-        text: "Texto da versao 2",
-      },
-      baselineVersion: {
-        contractVersionId: "ver-1",
-        versionNumber: 1,
-        createdAt: "2026-03-20T12:00:00Z",
-        source: "third_party_draft" as const,
-        originalFilename: "contract-v1.pdf",
-        usedOcr: false,
-        text: "Texto da versao 1",
-      },
-      summary: "A versao 2 corrige o prazo e adiciona fiador.",
-      textDiff: {
-        hasChanges: true,
-        lines: [],
-      },
-      findingsDiff: {
-        items: [],
-      },
-    });
+    const loadContractVersions = vi.fn().mockResolvedValue(buildContractVersionsResponse());
+    const compareVersions = vi.fn().mockResolvedValue(buildVersionComparisonResponse());
 
     render(
       <ContractDetailScreen
@@ -464,9 +447,9 @@ describe("ContractDetailScreen", () => {
       />,
     );
 
-    expect(await screen.findByText("Historico de versoes")).toBeInTheDocument();
+    expect(await screen.findByText("Histórico de versões")).toBeInTheDocument();
     expect(screen.getByText("Versoes carregadas: 2, 1")).toBeInTheDocument();
-    expect(screen.getByText("Painel de diff")).toBeInTheDocument();
+    expect(screen.getByText("Painel de comparação")).toBeInTheDocument();
     expect(
       await screen.findByText("A versao 2 corrige o prazo e adiciona fiador."),
     ).toBeInTheDocument();

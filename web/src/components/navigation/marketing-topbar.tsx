@@ -14,7 +14,7 @@ export function MarketingTopbar() {
         />
         <span className="marketingBrandText">LegalBoard</span>
       </Link>
-      <nav aria-label="Navegacao institucional" className="marketingNav">
+      <nav aria-label="Navegação institucional" className="marketingNav">
         <Link href="#fluxo">Fluxo</Link>
         <Link className="primaryCta navCta" href="/dashboard">
           Espaço de trabalho

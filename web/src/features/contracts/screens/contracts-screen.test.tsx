@@ -101,6 +101,8 @@ describe("ContractsScreen", () => {
     expect(scope.getByText("Contratos")).toBeInTheDocument();
     expect(scope.getByText("Analise de contratos")).toBeInTheDocument();
     expect(scope.getByText("Nenhuma triagem foi executada nesta sessao.")).toBeInTheDocument();
+    expect(scope.getByText("Navegação")).toBeInTheDocument();
+    expect(scope.getByText(/os achados e o resumo em inteligência artificial/i)).toBeInTheDocument();
     expect(scope.getByRole("link", { name: "Abrir Acervo" })).toBeInTheDocument();
   });
 
@@ -173,6 +175,8 @@ describe("ContractsScreen", () => {
       findingsHeading.compareDocumentPosition(aiSummaryHeading) &
         Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
+    expect(screen.getByText("Contrato padrão analisado na sessao atual.")).toBeInTheDocument();
+    expect(screen.queryByText("Score de risco")).not.toBeInTheDocument();
   });
 
   it("shows the mapped upload error returned by the transport client", async () => {
@@ -214,7 +218,6 @@ describe("ContractsScreen", () => {
 
     expect(scope.getAllByText("Carregando contratos...").length).toBeGreaterThan(0);
   });
-
 
   it("refreshes the persisted contracts list after a successful upload", async () => {
     const user = userEvent.setup();

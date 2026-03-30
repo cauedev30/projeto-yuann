@@ -12,7 +12,7 @@ type UploadFormProps = {
 };
 
 const contractTypeOptions: ReadonlyArray<{ value: ContractSource; label: string }> = [
-  { value: "third_party_draft", label: "Minuta de terceiro" },
+  { value: "third_party_draft", label: "Contrato padrão" },
   { value: "signed_contract", label: "Contrato assinado" },
 ];
 
@@ -113,7 +113,7 @@ export function UploadForm({ onSubmit, isSubmitting }: UploadFormProps) {
             {file ? file.name : "Selecione um PDF para iniciar a triagem."}
           </strong>
           <p className={styles.helper}>
-            Aceita apenas PDF. O arquivo enviado alimenta o resumo da sessao, os findings e o texto extraido.
+            Aceita apenas PDF. O arquivo enviado alimenta o resumo da sessao, os achados e o texto extraido.
           </p>
         </div>
       </div>

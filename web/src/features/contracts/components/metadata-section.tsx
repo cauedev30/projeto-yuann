@@ -20,8 +20,11 @@ type PartyRole = {
 
 const FINANCIAL_TERM_LABELS: Record<string, string> = {
   grace_period_months: "Carência",
+  grace_period_days: "Carência (dias)",
   monthly_rent: "Aluguel",
   readjustment_type: "Tipo de reajuste",
+  penalty_months: "Multa (meses)",
+  contract_value: "Valor do contrato",
 };
 
 const PARTY_ROLE_ALIASES: Array<{ keys: string[]; label: string }> = [
@@ -148,6 +151,23 @@ function formatFinancialValue(key: string, value: unknown): string {
   return "Não identificado";
 }
 
+function formatFinancialLabel(key: string): string {
+  if (FINANCIAL_TERM_LABELS[key]) {
+    return FINANCIAL_TERM_LABELS[key];
+  }
+
+  return key
+    .split("_")
+    .filter((part) => part.trim() !== "")
+    .map((part, index) => {
+      if (index === 0) {
+        return part.charAt(0).toUpperCase() + part.slice(1);
+      }
+      return part;
+    })
+    .join(" ");
+}
+
 export function MetadataSection({
   parties,
   financialTerms,
@@ -205,20 +225,6 @@ export function MetadataSection({
 
         <div className={styles.row}>
           <div className={styles.rowHeader}>
-            <dt className={styles.label}>Data de assinatura</dt>
-            {confidencePill("signatureDate", fieldConfidence)}
-          </div>
-          <dd className={styles.value}>
-            {signatureDate ? (
-              formatDate(signatureDate)
-            ) : (
-              <span className={styles.emptyText}>Não identificado</span>
-            )}
-          </dd>
-        </div>
-
-        <div className={styles.row}>
-          <div className={styles.rowHeader}>
             <dt className={styles.label}>Data de início</dt>
             {confidencePill("startDate", fieldConfidence)}
           </div>
@@ -256,7 +262,7 @@ export function MetadataSection({
                   <div key={key} className={styles.row}>
                     <div className={styles.rowHeader}>
                       <dt className={styles.label}>
-                        {FINANCIAL_TERM_LABELS[key] ?? key}
+                        {formatFinancialLabel(key)}
                       </dt>
                       {confidencePill(key, fieldConfidence)}
                     </div>

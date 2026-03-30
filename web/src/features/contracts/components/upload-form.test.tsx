@@ -18,7 +18,7 @@ describe("UploadForm", () => {
     const view = render(<UploadForm onSubmit={vi.fn()} isSubmitting={false} />);
     const scope = within(view.container);
 
-    expect(scope.getByRole("option", { name: "Minuta de terceiro" })).toBeInTheDocument();
+    expect(scope.getByRole("option", { name: "Contrato padrão" })).toBeInTheDocument();
     expect(scope.getByRole("option", { name: "Contrato assinado" })).toBeInTheDocument();
   });
 

@@ -19,6 +19,7 @@ import { FindingsSection } from "../components/findings-section";
 import { SessionStatusCard } from "../components/session-status-card";
 import { UploadSummaryCards } from "../components/upload-summary-cards";
 import { UploadForm } from "../components/upload-form";
+import uiStyles from "../../../components/ui/ui-primitives.module.css";
 import styles from "./contracts-screen.module.css";
 
 type ContractsScreenProps = {
@@ -44,14 +45,14 @@ function buildPreviewFindings(text: string): ContractFinding[] {
     ];
   }
 
-      return [
+  return [
     {
       clauseName: "Analise inicial",
       status: "conforme",
       riskExplanation: "Nenhum desvio critico identificado na triagem inicial.",
       currentSummary: "Resumo gerado com sucesso.",
       policyRule: "Continuar com a analise juridica completa.",
-      suggestedAdjustmentDirection: "Validar findings detalhados na proxima etapa.",
+      suggestedAdjustmentDirection: "Validar os achados detalhados na proxima etapa.",
     },
   ];
 }
@@ -73,11 +74,6 @@ export function ContractsScreen({
   const [showSuccessBanner, setShowSuccessBanner] = useState(false);
 
   const findings = result ? buildPreviewFindings(result.text) : [];
-  
-  const uploadedContract = result ? contracts.find(c => c.id === result.contractId) : null;
-  const riskScore = uploadedContract && uploadedContract.latestRiskScore !== null
-    ? uploadedContract.latestRiskScore
-    : (findings.some((item) => item.status === "critical") ? 80 : 10);
 
   const statusState = error
     ? "error"
@@ -215,7 +211,7 @@ export function ContractsScreen({
               <strong>Leitura guiada</strong>
               <p>
                 O retorno desta tela prioriza status da sessao, resumo executivo e
-                findings antes do texto integral.
+                achados antes do texto integral.
               </p>
             </div>
 
@@ -233,7 +229,6 @@ export function ContractsScreen({
         <>
           <UploadSummaryCards
             hasCriticalFinding={findings.some((item) => item.status === "critical")}
-            riskScore={riskScore}
             source={result.source}
             usedOcr={result.usedOcr}
           />
@@ -251,7 +246,7 @@ export function ContractsScreen({
           </div>
 
           <p className={styles.emptyCopy}>
-            Envie um PDF para liberar o resumo da triagem, os findings e o resumo em inteligência artificial.
+            Envie um PDF para liberar o resumo da triagem, os achados e o resumo em inteligência artificial.
           </p>
         </section>
       )}
@@ -259,38 +254,23 @@ export function ContractsScreen({
       <section className={`${styles.panel} ${styles.emptyPanel}`}>
         <div className={styles.sectionHeader}>
           <div>
-            <p className={styles.panelEyebrow}>Navegacao</p>
+            <p className={styles.panelEyebrow}>Navegação</p>
             <h2 className={styles.sectionTitle}>Acessar Acervo</h2>
           </div>
         </div>
-        <p className={styles.emptyCopy} style={{ marginBottom: "1.5rem" }}>
+        <p className={styles.emptyCopy}>
           Contratos ativos e o histórico operacional foram movidos para rotas dedicadas.
         </p>
-        <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
+        <div className={styles.navActions}>
           <Link
             href="/acervo"
-            style={{
-              backgroundColor: "var(--brand-main, #0070f3)",
-              color: "#fff",
-              padding: "0.5rem 1rem",
-              borderRadius: "4px",
-              textDecoration: "none",
-              fontWeight: 500
-            }}
+            className={`${uiStyles.buttonPrimary} ${styles.navLink}`}
           >
             Abrir Acervo
           </Link>
           <Link
             href="/historico"
-            style={{
-              backgroundColor: "var(--surface-sunken, #f1f5f9)",
-              color: "var(--text-main, #0f172a)",
-              border: "1px solid var(--border-subtle, #e2e8f0)",
-              padding: "0.5rem 1rem",
-              borderRadius: "4px",
-              textDecoration: "none",
-              fontWeight: 500
-            }}
+            className={`${uiStyles.buttonSecondary} ${styles.navLink}`}
           >
             Abrir Histórico
           </Link>

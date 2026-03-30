@@ -15,7 +15,7 @@ describe("ContractSummaryPanel", () => {
     vi.mocked(getContractSummary).mockReset();
   });
 
-  it("renderiza o resumo e os principais pontos em PT-BR", async () => {
+  it("renderiza apenas o resumo em PT-BR, sem exibir a lista de principais pontos", async () => {
     vi.mocked(getContractSummary).mockResolvedValue({
       summary: "Prazo contratual de 36 meses.\n\nReajuste anual pelo IPCA.",
       key_points: [
@@ -28,9 +28,9 @@ describe("ContractSummaryPanel", () => {
 
     expect(await screen.findByText("Prazo contratual de 36 meses.")).toBeInTheDocument();
     expect(screen.getByText("Reajuste anual pelo IPCA.")).toBeInTheDocument();
-    expect(screen.getByText("Principais pontos")).toBeInTheDocument();
-    expect(screen.getByText("Prazo abaixo do alvo de 60 meses.")).toBeInTheDocument();
-    expect(screen.getByText("Reajuste monetário anual previsto no texto.")).toBeInTheDocument();
+    expect(screen.queryByText("Principais pontos")).not.toBeInTheDocument();
+    expect(screen.queryByText("Prazo abaixo do alvo de 60 meses.")).not.toBeInTheDocument();
+    expect(screen.queryByText("Reajuste monetário anual previsto no texto.")).not.toBeInTheDocument();
   });
 
   it("encaminha versionId ao buscar o resumo", async () => {
