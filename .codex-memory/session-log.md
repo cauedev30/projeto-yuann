@@ -1,5 +1,12 @@
 # Session Log
 
+- Data: 2026-03-30 22:58:50 -03:00
+  - tarefa: remover `Leitura orientada / Principais Pontos` do sucesso de upload e substitui-la por um card clicável do contrato analisado.
+  - resultado: `ContractsScreen` passou a montar um item único compatível com `ContractsListPanel` a partir do contrato recém-enviado, renderizando `Contrato analisado` entre `Resumo da triagem` e `Resumo do contrato`; o card abre o detalhe da análise em `/contracts/{id}` e os testes agora travam a ausência de `Principais Pontos` e a navegação pelo novo card.
+  - arquivos alterados: `web/src/features/contracts/screens/contracts-screen.tsx`, `web/src/features/contracts/screens/contracts-screen.test.tsx`, `.codex-memory/current-state.md`, `.codex-memory/session-log.md`
+  - verificacao: `cd web && npm run test -- src/features/contracts/screens/contracts-screen.test.tsx`; `cd web && npm run test -- src/features/contracts/screens/contracts-screen.test.tsx src/features/contracts/screens/acervo-screen.test.tsx src/features/contracts/screens/historico-screen.test.tsx src/features/contracts/components/contract-summary-panel.test.tsx`; `cd web && npx tsc --noEmit`
+  - proximos passos: validar visualmente a rota `/contracts` no navegador e decidir se o card `Contrato analisado` tambem deve mostrar CTA textual explicito alem do clique em toda a linha.
+
 - Data: 2026-03-30 22:36:47 -03:00
   - tarefa: corrigir o deploy quebrado do Railway em banco legado e publicar a correção em `main`.
   - resultado: a investigação mostrou que o `Failed to fetch` da Vercel vinha de `500` reais em `/api/dashboard` e `/api/contracts`; o backend ganhou reconciliação de schema legado no boot, o Alembic passou a ler `DATABASE_URL`, a migration `0009` virou idempotente para bancos já alterados manualmente, e dois testes novos/verdes cobrem o caso de banco antigo e a presença da migration.

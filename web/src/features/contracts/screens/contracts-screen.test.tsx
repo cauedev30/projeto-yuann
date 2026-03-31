@@ -148,7 +148,7 @@ describe("ContractsScreen", () => {
     expect(scope.getByRole("button", { name: "Enviar contrato" })).toBeEnabled();
   });
 
-  it("renders the summary before findings and extracted text after success", async () => {
+  it("renders the summary before the uploaded contract card and the AI summary after success", async () => {
     const user = userEvent.setup();
     const loadContracts = vi.fn().mockResolvedValue({ items: [] });
     const submitContract = vi.fn().mockResolvedValue(buildUploadResult());
@@ -164,19 +164,39 @@ describe("ContractsScreen", () => {
     );
 
     const summaryHeading = screen.getAllByRole("heading", { name: "Resumo da triagem" }).at(-1) as HTMLElement;
-    const findingsHeading = screen.getAllByRole("heading", { name: "Principais Pontos" }).at(-1) as HTMLElement;
+    const uploadedContractHeading = screen.getAllByRole("heading", { name: "Contrato analisado" }).at(-1) as HTMLElement;
     const aiSummaryHeading = screen.getAllByRole("heading", { name: "Resumo do contrato" }).at(-1) as HTMLElement;
 
     expect(
-      summaryHeading.compareDocumentPosition(findingsHeading) &
+      summaryHeading.compareDocumentPosition(uploadedContractHeading) &
         Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
     expect(
-      findingsHeading.compareDocumentPosition(aiSummaryHeading) &
+      uploadedContractHeading.compareDocumentPosition(aiSummaryHeading) &
         Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
     expect(screen.getByText("Contrato padrão analisado na sessao atual.")).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Principais Pontos" })).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Loja Centro/i })).toBeInTheDocument();
+    expect(screen.getByText("Ref: LOC-001")).toBeInTheDocument();
     expect(screen.queryByText("Score de risco")).not.toBeInTheDocument();
+  });
+
+  it("opens the uploaded contract analysis when the user clicks the new contract card", async () => {
+    const user = userEvent.setup();
+    const loadContracts = vi.fn().mockResolvedValue({ items: [] });
+    const submitContract = vi.fn().mockResolvedValue(buildUploadResult());
+
+    render(<ContractsScreen submitContract={submitContract} loadContracts={loadContracts} />);
+    const scope = getScreenScope();
+
+    await waitFor(() => expect(loadContracts).toHaveBeenCalledTimes(1));
+    await user.click(scope.getByRole("button", { name: "Enviar contrato" }));
+
+    const uploadedContractLink = await screen.findByRole("link", { name: /Loja Centro/i });
+    await user.click(uploadedContractLink);
+
+    expect(pushMock).toHaveBeenCalledWith("/contracts/contract-1");
   });
 
   it("shows the mapped upload error returned by the transport client", async () => {

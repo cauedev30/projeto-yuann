@@ -1,11 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import React from "react";
 import { useCallback, useEffect, useState } from "react";
 
 import {
   type ContractFinding,
+  type ContractListItemSummary,
   type ContractListResponse,
   type ContractUploadInput,
   type ContractUploadResult,
@@ -13,7 +15,7 @@ import {
 import { listContracts, uploadContract } from "../../../lib/api/contracts";
 import { ContractsHero } from "../components/contracts-hero";
 import { ContractSummaryPanel } from "../components/contract-summary-panel";
-import { FindingsSection } from "../components/findings-section";
+import { ContractsListPanel } from "../components/contracts-list-panel";
 import { SessionStatusCard } from "../components/session-status-card";
 import { UploadSummaryCards } from "../components/upload-summary-cards";
 import { UploadForm } from "../components/upload-form";
@@ -55,12 +57,48 @@ function buildPreviewFindings(text: string): ContractFinding[] {
   ];
 }
 
+function extractTermMonths(text: string): number | null {
+  const termMatch = text.match(/(\d+)\s*meses/i);
+  return termMatch ? Number(termMatch[1]) : null;
+}
+
+function buildUploadedContractListItem(
+  payload: Pick<ContractUploadInput, "title" | "externalReference" | "source">,
+  result: ContractUploadResult,
+  findings: ContractFinding[],
+): ContractListItemSummary {
+  const hasCriticalFinding = findings.some((item) => item.status === "critical");
+
+  return {
+    id: result.contractId,
+    title: payload.title,
+    externalReference: payload.externalReference,
+    status: hasCriticalFinding ? "revisao_prioritaria" : "analisado",
+    signatureDate: null,
+    startDate: null,
+    endDate: null,
+    termMonths: extractTermMonths(result.text),
+    isActive: false,
+    activatedAt: null,
+    lastAccessedAt: null,
+    lastAnalyzedAt: null,
+    latestAnalysisStatus: "completed",
+    latestRiskScore: null,
+    latestVersionSource: result.source,
+  };
+}
+
 export function ContractsScreen({
   submitContract = uploadContract,
   loadContracts = listContracts,
+  navigateToContract,
 }: ContractsScreenProps) {
+  const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [result, setResult] = useState<ContractUploadResult | null>(null);
+  const [submittedContract, setSubmittedContract] = useState<
+    Pick<ContractUploadInput, "title" | "externalReference" | "source"> | null
+  >(null);
   const [error, setError] = useState<string | null>(null);
   const [contracts, setContracts] = useState<ContractListResponse["items"]>([]);
   const [isLoadingContracts, setIsLoadingContracts] = useState(true);
@@ -70,6 +108,10 @@ export function ContractsScreen({
   const [showSuccessBanner, setShowSuccessBanner] = useState(false);
 
   const findings = result ? buildPreviewFindings(result.text) : [];
+  const uploadedContract =
+    result && submittedContract
+      ? buildUploadedContractListItem(submittedContract, result, findings)
+      : null;
 
   const statusState = error
     ? "error"
@@ -154,8 +196,14 @@ export function ContractsScreen({
     setIsSubmitting(true);
     setError(null);
     setResult(null);
+    setSubmittedContract(null);
     try {
       const response = await submitContract(payload);
+      setSubmittedContract({
+        title: payload.title,
+        externalReference: payload.externalReference,
+        source: payload.source,
+      });
       setResult(response);
       setShowSuccessBanner(true);
       await refreshPersistedContracts();
@@ -228,7 +276,22 @@ export function ContractsScreen({
             source={result.source}
             usedOcr={result.usedOcr}
           />
-          <FindingsSection items={findings} />
+          {uploadedContract ? (
+            <ContractsListPanel
+              items={[uploadedContract]}
+              isLoading={false}
+              isRefreshing={false}
+              error={null}
+              onRefresh={() => undefined}
+              eyebrow="Análise pronta"
+              title="Contrato analisado"
+              navigateToContract={(contractId) =>
+                navigateToContract
+                  ? navigateToContract(contractId)
+                  : router.push(`/contracts/${contractId}`)
+              }
+            />
+          ) : null}
           <ContractSummaryPanel contractId={result.contractId} />
         </>
       ) : (
