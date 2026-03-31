@@ -75,6 +75,12 @@ Resposta esperada:
 {"status":"ok"}
 ```
 
+Se o banco do Railway ja existia antes das colunas mais recentes do projeto, rode as migrations do backend antes de validar as rotas:
+
+```txt
+cd backend && alembic upgrade head
+```
+
 ## Passo 2: Frontend no Vercel
 
 ### 2.1 Criar o projeto

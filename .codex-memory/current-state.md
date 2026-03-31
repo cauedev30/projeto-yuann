@@ -7,6 +7,7 @@
 - Interface canonica de memoria compartilhada: `./.codex-memory/`
 
 ## Snapshot verificado
+- Fix deploy Railway com schema legado (2026-03-30 22:36 -03:00): a investigacao do erro `Failed to fetch` na Vercel mostrou que a causa real era `500` no backend publicado (`/api/dashboard` e `/api/contracts`) por schema antigo no Postgres do Railway; o backend agora reconcilia colunas legadas no boot antes de abrir a sessao ORM, o Alembic passou a respeitar `DATABASE_URL`, e a migration `0009` para `contract_analyses.corrected_text/corrections_summary` ficou idempotente para nao quebrar bancos que receberam `ALTER TABLE` manual. A regressao ficou coberta em `backend/tests/core/test_app_factory.py` com um banco SQLite legado e em `backend/tests/core/test_migrations.py` para garantir que o historico do Alembic inclui as colunas novas.
 - Remocao do refresh manual no detalhe (2026-03-30 00:31 -03:00): o botao `Atualizar detalhe` foi removido de `ContractDetailScreen`; a tela agora depende apenas do carregamento automatico inicial e do fluxo `Tentar novamente` quando houver erro, sem estados de refresh manual ou feedback de sucesso intermediario no header.
 - Fix refresh do detalhe + navegação harmonizada (2026-03-30 00:27 -03:00): `ContractDetailScreen` voltou a recarregar detalhe, histórico de versões e comparação ao clicar em `Atualizar detalhe`, e o botão agora expõe feedback explícito `Atualizado!`; na tela de contratos, os CTAs `Abrir Acervo` e `Abrir Histórico` deixaram os estilos inline destoantes e passaram a reutilizar os botões do design system, alinhados ao restante do glassmorphism da aplicação; o copy residual do upload também trocou `findings` por `achados`, e a navegação ganhou `aria-labels`/labels PT-BR com acentuação correta.
 - Limpeza PT-BR complementar no fluxo de contratos (2026-03-30 00:24 -03:00): `Data de assinatura` saiu do card de metadados; `penalty_months` passou a ser exibido como `Multa (meses)` e o fallback dos termos financeiros deixou de despejar `snake_case` cru; `Minuta de terceiro` foi padronizado para `Contrato padrão` tambem no detalhe/listas; a linha `Política v1.0 com status concluída.` foi removida do bloco `Análise da versão`; e o fluxo de versões trocou `diff/baseline` por `Painel de comparação` / `Base de comparação`. O componente órfão `web/src/features/analysis/components/risk-score-card.tsx` foi removido.
@@ -69,6 +70,7 @@
 - O arquivo legado `backend/legalboard.db` continua no clone, mas o runtime local corrigido agora usa `backend/legaltech.db` por padrao; qualquer script/manual setup apontando para `legalboard.db` deve ser tratado como obsoleto.
 - A API real da OpenAI para `gpt-5-mini` rejeita `temperature` customizada neste endpoint; o adapter agora omite `temperature` automaticamente para modelos `gpt-5*`.
 - O deploy real ainda depende de configurar `DATABASE_URL`, `UPLOAD_DIR`, `CORS_ORIGINS`, `JWT_SECRET` e `NEXT_PUBLIC_API_URL` na plataforma.
+- O banco de producao do Railway pode continuar retornando `500` ate o backend redeployar com o bootstrap novo; validar `/health`, `/api/dashboard` e `/api/contracts` apos o push.
 - O backend continua usando storage local; em producao isso exige volume persistente no Railway montado em `/data`.
 - `backend/pyproject.toml` continua declarando `requires-python = ">=3.12"`; a verificacao local usou `Python 3.12.3`.
 - Testes E2E Playwright nao foram re-executados nesta sessao (podem precisar de ajustes para o auth guard + traducoes).
@@ -78,6 +80,7 @@
 - Cleanup de `.worktrees/`, `tmp/`, uploads legados permanece fora do escopo.
 
 ## Proximo passo recomendado
+- Aguardar o redeploy do backend em `main` e validar `https://projeto-yuann-production.up.railway.app/health`, `https://projeto-yuann-production.up.railway.app/api/dashboard` e `https://projeto-yuann-production.up.railway.app/api/contracts`; se algum `500` permanecer, inspecionar o schema real do Postgres do Railway e os logs do container.
 - Recarregar o navegador em `http://127.0.0.1:3000` no detalhe do contrato para validar o botão `Atualizar detalhe`, a UI sem score/pontuacao, sem `Data de assinatura`, com termos financeiros em PT-BR e com `Painel de comparação` / `Base de comparação` no fluxo de versões; na tela `/contracts`, conferir os CTAs `Abrir Acervo` / `Abrir Histórico` já harmonizados com o restante do site.
 - Se o ambiente local for compartilhado, rotacionar a chave OpenAI após a sessão, porque ela foi digitada no chat.
 - Opcionalmente remover do repositório o artefato legado `backend/legalboard.db` para evitar novo desvio entre clone limpo e runtime local.

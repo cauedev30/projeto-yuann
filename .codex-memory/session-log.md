@@ -1,5 +1,12 @@
 # Session Log
 
+- Data: 2026-03-30 22:36:47 -03:00
+  - tarefa: corrigir o deploy quebrado do Railway em banco legado e publicar a correção em `main`.
+  - resultado: a investigação mostrou que o `Failed to fetch` da Vercel vinha de `500` reais em `/api/dashboard` e `/api/contracts`; o backend ganhou reconciliação de schema legado no boot, o Alembic passou a ler `DATABASE_URL`, a migration `0009` virou idempotente para bancos já alterados manualmente, e dois testes novos/verdes cobrem o caso de banco antigo e a presença da migration.
+  - arquivos alterados: `backend/app/core/database_url.py`, `backend/app/core/app_factory.py`, `backend/alembic/env.py`, `backend/alembic/versions/0009_add_contract_analysis_corrections.py`, `backend/tests/core/test_app_factory.py`, `backend/tests/core/test_migrations.py`, `DEPLOY_GUIDE.md`, `.codex-memory/current-state.md`, `.codex-memory/session-log.md`
+  - verificacao: `cd backend && .venv/bin/python -m pytest tests/core/test_app_factory.py tests/core/test_migrations.py -q`; `cd backend && .venv/bin/python -m py_compile app/core/database_url.py app/core/app_factory.py alembic/env.py alembic/versions/0009_add_contract_analysis_corrections.py tests/core/test_app_factory.py tests/core/test_migrations.py`; `git diff --check`
+  - proximos passos: publicar em `origin/main`, aguardar o redeploy do Railway e revalidar `/health`, `/api/dashboard` e `/api/contracts` em produção.
+
 - Data: 2026-03-30 00:02:00 -03:00
   - tarefa: corrigir a exibicao do horario no card `Historico de versoes` do detalhe do contrato.
   - resultado: `VersionHistoryPanel` ganhou formatacao de `createdAt` em `pt-BR` com `Intl.DateTimeFormat`, substituindo o ISO cru visto na UI; um teste novo do componente cobre esse caso e o smoke do `contract-detail-screen` permaneceu verde.
