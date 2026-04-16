@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import logging
 from datetime import datetime, timezone
 from typing import AsyncGenerator, Literal
 
@@ -67,6 +68,7 @@ from app.schemas.contract import (
 
 router = APIRouter(prefix="/api/contracts", tags=["contracts"])
 ContractScope = Literal["all", "active", "history"]
+logger = logging.getLogger(__name__)
 
 
 class UploadContractResponse(BaseModel):
@@ -526,6 +528,53 @@ async def _analysis_stream(
                         session.commit()
 
                 session.commit()
+
+                try:
+                    from app.db.models.embedding import ContractEmbedding
+                    from app.core.app_factory import get_embedding_client
+
+                    embedding_client = get_embedding_client()
+                    if embedding_client:
+                        for finding in analysis.findings:
+                            chunk_text = (
+                                f"{finding.clause_name}: {finding.current_summary}"
+                            )
+                            emb = embedding_client.generate_embedding(chunk_text)
+                            if emb:
+                                session.add(
+                                    ContractEmbedding(
+                                        contract_id=contract.id,
+                                        chunk_type="finding_summary",
+                                        chunk_text=chunk_text,
+                                        embedding=emb,
+                                        metadata_json={
+                                            "clause_name": finding.clause_name,
+                                            "severity": finding.severity,
+                                            "status": finding.status,
+                                        },
+                                    )
+                                )
+                        if result.summary:
+                            summary_emb = embedding_client.generate_embedding(
+                                result.summary
+                            )
+                            if summary_emb:
+                                session.add(
+                                    ContractEmbedding(
+                                        contract_id=contract.id,
+                                        chunk_type="analysis_summary",
+                                        chunk_text=result.summary,
+                                        embedding=summary_emb,
+                                        metadata_json={
+                                            "policy_version": policy.version
+                                            if policy
+                                            else "v1.0"
+                                        },
+                                    )
+                                )
+                        session.commit()
+                except Exception:
+                    logger.exception("Failed to index embeddings for semantic search")
 
         yield f"data: {json.dumps({'stage': 'completed', 'message': 'Análise concluída!', 'risk_score': result.contract_risk_score, 'findings_count': len(result.items)})}\n\n"
 

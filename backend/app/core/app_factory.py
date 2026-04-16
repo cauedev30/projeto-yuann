@@ -17,6 +17,7 @@ from app.api.routes.contracts import router as contracts_router
 from app.api.routes.dashboard import router as dashboard_router
 from app.api.routes.notifications import router as notifications_router
 from app.api.routes.policies import router as policies_router
+from app.api.routes.search import router as search_router
 from app.api.routes.uploads import router as uploads_router
 from app.db.base import Base
 from app.db.models import Policy, PolicyRule
@@ -25,6 +26,13 @@ from app.infrastructure.openai_client import OpenAIAnalysisClient
 from app.infrastructure.notifications import NoopEmailSender, SmtpEmailSender
 from app.infrastructure.ocr import NoopOcrClient
 from app.infrastructure.storage import LocalStorageService
+from app.infrastructure.embeddings import EmbeddingClient
+
+_embedding_client: EmbeddingClient | None = None
+
+
+def get_embedding_client() -> EmbeddingClient | None:
+    return _embedding_client
 
 
 def _get_database_url(database_url: str | None) -> str:
@@ -51,7 +59,9 @@ def _get_cors_origins(cors_origins: list[str] | None) -> list[str]:
         return cors_origins
 
     configured_origins = os.environ.get("CORS_ORIGINS", "")
-    return [origin.strip() for origin in configured_origins.split(",") if origin.strip()]
+    return [
+        origin.strip() for origin in configured_origins.split(",") if origin.strip()
+    ]
 
 
 def _seed_default_policy(session: Session) -> None:
@@ -64,11 +74,36 @@ def _seed_default_policy(session: Session) -> None:
     session.flush()
 
     rules = [
-        PolicyRule(policy_id=policy.id, code="MIN_TERM_MONTHS", value=48, description="Prazo minimo de vigencia: 48 meses"),
-        PolicyRule(policy_id=policy.id, code="MAX_TERM_MONTHS", value=60, description="Prazo maximo de vigencia: 60 meses"),
-        PolicyRule(policy_id=policy.id, code="MAX_FINE_MONTHS", value=3, description="Multa maxima: 3 alugueis"),
-        PolicyRule(policy_id=policy.id, code="MAX_VALUE", value=3000, description="Valor maximo do contrato: R$ 3.000"),
-        PolicyRule(policy_id=policy.id, code="GRACE_PERIOD_DAYS", value=[0, 30, 60, 90], description="Periodos de carencia permitidos (dias)"),
+        PolicyRule(
+            policy_id=policy.id,
+            code="MIN_TERM_MONTHS",
+            value=48,
+            description="Prazo minimo de vigencia: 48 meses",
+        ),
+        PolicyRule(
+            policy_id=policy.id,
+            code="MAX_TERM_MONTHS",
+            value=60,
+            description="Prazo maximo de vigencia: 60 meses",
+        ),
+        PolicyRule(
+            policy_id=policy.id,
+            code="MAX_FINE_MONTHS",
+            value=3,
+            description="Multa maxima: 3 alugueis",
+        ),
+        PolicyRule(
+            policy_id=policy.id,
+            code="MAX_VALUE",
+            value=3000,
+            description="Valor maximo do contrato: R$ 3.000",
+        ),
+        PolicyRule(
+            policy_id=policy.id,
+            code="GRACE_PERIOD_DAYS",
+            value=[0, 30, 60, 90],
+            description="Periodos de carencia permitidos (dias)",
+        ),
     ]
     session.add_all(rules)
     session.commit()
@@ -90,11 +125,15 @@ def _reconcile_legacy_schema(engine) -> None:
     timestamp_type = _timestamp_column_type(dialect_name)
     false_literal = "false" if dialect_name == "postgresql" else "0"
 
-    def add_missing_columns(table_name: str, definitions: list[tuple[str, str]]) -> None:
+    def add_missing_columns(
+        table_name: str, definitions: list[tuple[str, str]]
+    ) -> None:
         if table_name not in table_names:
             return
 
-        existing_columns = {column["name"] for column in inspector.get_columns(table_name)}
+        existing_columns = {
+            column["name"] for column in inspector.get_columns(table_name)
+        }
         statements = [
             f"ALTER TABLE {table_name} ADD COLUMN {column_name} {column_definition}"
             for column_name, column_definition in definitions
@@ -145,15 +184,19 @@ def _reconcile_legacy_schema(engine) -> None:
 
     if "contract_versions" in table_names:
         with engine.begin() as connection:
-            version_rows = connection.execute(
-                text(
-                    """
+            version_rows = (
+                connection.execute(
+                    text(
+                        """
                     SELECT id, contract_id, created_at
                     FROM contract_versions
                     ORDER BY contract_id, created_at, id
                     """
+                    )
                 )
-            ).mappings().all()
+                .mappings()
+                .all()
+            )
             current_numbers: dict[str, int] = {}
             for row in version_rows:
                 contract_id = str(row["contract_id"])
@@ -174,15 +217,19 @@ def _reconcile_legacy_schema(engine) -> None:
 
     if "contract_versions" in table_names and "contract_analyses" in table_names:
         with engine.begin() as connection:
-            version_rows = connection.execute(
-                text(
-                    """
+            version_rows = (
+                connection.execute(
+                    text(
+                        """
                     SELECT id, contract_id, created_at
                     FROM contract_versions
                     ORDER BY contract_id, created_at, id
                     """
+                    )
                 )
-            ).mappings().all()
+                .mappings()
+                .all()
+            )
             versions_by_contract: dict[str, list[dict[str, object]]] = {}
             for row in version_rows:
                 contract_id = str(row["contract_id"])
@@ -193,16 +240,20 @@ def _reconcile_legacy_schema(engine) -> None:
                     }
                 )
 
-            analysis_rows = connection.execute(
-                text(
-                    """
+            analysis_rows = (
+                connection.execute(
+                    text(
+                        """
                     SELECT id, contract_id, created_at
                     FROM contract_analyses
                     WHERE contract_id IS NOT NULL
                     ORDER BY contract_id, created_at, id
                     """
+                    )
                 )
-            ).mappings().all()
+                .mappings()
+                .all()
+            )
             for row in analysis_rows:
                 contract_id = str(row["contract_id"])
                 versions = versions_by_contract.get(contract_id, [])
@@ -215,7 +266,9 @@ def _reconcile_legacy_schema(engine) -> None:
                     or version["created_at"] is None
                     or version["created_at"] <= row["created_at"]
                 ]
-                chosen_version = matching_versions[-1] if matching_versions else versions[-1]
+                chosen_version = (
+                    matching_versions[-1] if matching_versions else versions[-1]
+                )
                 connection.execute(
                     text(
                         """
@@ -255,7 +308,9 @@ def create_app(
 
     engine = create_engine(
         resolved_database_url,
-        connect_args={"check_same_thread": False} if resolved_database_url.startswith("sqlite") else {},
+        connect_args={"check_same_thread": False}
+        if resolved_database_url.startswith("sqlite")
+        else {},
     )
     Base.metadata.create_all(bind=engine)
     _reconcile_legacy_schema(engine)
@@ -275,6 +330,7 @@ def create_app(
     app.include_router(uploads_router)
     app.include_router(notifications_router)
     app.include_router(dashboard_router)
+    app.include_router(search_router)
     app.state.storage_service = LocalStorageService(resolved_storage_directory)
     app.state.ocr_client = NoopOcrClient()
 
@@ -286,6 +342,8 @@ def create_app(
             api_key=openai_api_key,
             model=openai_model,
         )
+        global _embedding_client
+        _embedding_client = EmbeddingClient(api_key=openai_api_key)
     else:
         app.state.llm_client = None
 
@@ -298,7 +356,9 @@ def create_app(
 
     jwt_secret = os.environ.get("JWT_SECRET", "dev-secret-change-in-production")
     app.state.jwt_secret = jwt_secret
-    app.state.jwt_expiration_minutes = int(os.environ.get("JWT_EXPIRATION_MINUTES", "480"))
+    app.state.jwt_expiration_minutes = int(
+        os.environ.get("JWT_EXPIRATION_MINUTES", "480")
+    )
 
     @app.get("/health")
     def healthcheck() -> dict[str, str]:
