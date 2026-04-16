@@ -5,7 +5,18 @@ import json
 from datetime import datetime, timezone
 from typing import AsyncGenerator, Literal
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, Request, Response, UploadFile, status
+from fastapi import (
+    APIRouter,
+    Depends,
+    File,
+    Form,
+    HTTPException,
+    Query,
+    Request,
+    Response,
+    UploadFile,
+    status,
+)
 from fastapi.responses import StreamingResponse
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session, selectinload
@@ -21,7 +32,10 @@ from app.api.serializers.contracts import (
     serialize_contract_version_list,
 )
 from app.application.analysis import mark_contract_analysis_completed
-from app.application.contract_upload import ContractUploadError, upload_contract_version_file
+from app.application.contract_upload import (
+    ContractUploadError,
+    upload_contract_version_file,
+)
 from app.application.contract_pipeline import run_contract_pipeline
 from app.application.version_diff import (
     build_contract_version_comparison,
@@ -84,7 +98,9 @@ def _get_contract_or_404(session: Session, contract_id: str) -> Contract:
     return contract
 
 
-def _get_contract_version_or_404(contract: Contract, contract_version_id: str) -> ContractVersion:
+def _get_contract_version_or_404(
+    contract: Contract, contract_version_id: str
+) -> ContractVersion:
     for version in contract.versions:
         if version.id == contract_version_id:
             return version
@@ -119,9 +135,7 @@ def list_contracts(
 ) -> PaginatedContractListResponse:
     """List contracts with pagination."""
     filters = _contract_scope_filters(scope)
-    total = session.scalar(
-        select(func.count()).select_from(Contract).where(*filters)
-    )
+    total = session.scalar(select(func.count()).select_from(Contract).where(*filters))
 
     offset = (page - 1) * per_page
     contracts = session.scalars(
@@ -244,7 +258,7 @@ def delete_contract(
     contract = session.scalar(_contract_query().where(Contract.id == contract_id))
     if contract is None:
         raise HTTPException(status_code=404, detail="Contract not found")
-    
+
     session.delete(contract)
     session.commit()
     return Response(status_code=204)
@@ -265,7 +279,10 @@ def update_contract(
 
     if "is_active" in update_data:
         requested_is_active = update_data.pop("is_active")
-        if requested_is_active is not None and requested_is_active != contract.is_active:
+        if (
+            requested_is_active is not None
+            and requested_is_active != contract.is_active
+        ):
             if not contract.is_active and requested_is_active:
                 contract.activated_at = _utcnow()
             contract.is_active = requested_is_active
@@ -292,11 +309,21 @@ def analyze_contract(
     contract = _get_contract_or_404(session, contract_id)
     latest_version = latest_contract_version(contract)
     if latest_version is None or not latest_version.text_content:
-        raise HTTPException(status_code=422, detail="No text content available for analysis")
+        raise HTTPException(
+            status_code=422, detail="No text content available for analysis"
+        )
 
     llm_client = getattr(request.app.state, "llm_client", None)
     run_contract_pipeline(session, contract, latest_version, llm_client=llm_client)
     session.commit()
+
+    if (
+        latest_version is not None
+        and latest_version.source == ContractSource.signed_contract
+    ):
+        contract.is_active = True
+        contract.activated_at = _utcnow()
+        session.commit()
 
     contract = _get_contract_or_404(session, contract_id)
     return serialize_contract_detail(contract)
@@ -316,7 +343,9 @@ def get_contract_summary(
         else latest_contract_version(contract)
     )
     if selected_version is None or not selected_version.text_content:
-        raise HTTPException(status_code=422, detail="No text content available for summary")
+        raise HTTPException(
+            status_code=422, detail="No text content available for summary"
+        )
 
     llm_client = getattr(request.app.state, "llm_client", None)
     if llm_client is None:
@@ -346,7 +375,9 @@ def compare_contract_versions(
         else latest_contract_version(contract)
     )
     if selected_version is None:
-        raise HTTPException(status_code=422, detail="No contract versions available for comparison")
+        raise HTTPException(
+            status_code=422, detail="No contract versions available for comparison"
+        )
 
     baseline_version = resolve_baseline_version(
         contract,
@@ -375,32 +406,42 @@ async def _analysis_stream(
     """Generate SSE events for contract analysis progress."""
     yield f"data: {json.dumps({'stage': 'started', 'message': 'Iniciando análise...'})}\n\n"
     await asyncio.sleep(0.1)
-    
+
     # Chunk the contract
     yield f"data: {json.dumps({'stage': 'chunking', 'message': 'Dividindo contrato em cláusulas...'})}\n\n"
     chunks = chunk_contract(contract_text)
     chunk_texts = [c.content for c in chunks]
     total_chunks = len(chunks)
     await asyncio.sleep(0.1)
-    
+
     yield f"data: {json.dumps({'stage': 'analyzing', 'message': f'Analisando {total_chunks} seções...', 'total': total_chunks})}\n\n"
-    
+
     # Call the OpenAI-backed analysis adapter
     try:
         result = llm_client.analyze_contract(
             chunks=chunk_texts,
             playbook=list(PLAYBOOK_CLAUSES),
         )
-        
-        from app.db.models.analysis import AnalysisStatus, ContractAnalysis, ContractAnalysisFinding
+
+        from app.db.models.analysis import (
+            AnalysisStatus,
+            ContractAnalysis,
+            ContractAnalysisFinding,
+        )
         from app.db.models.contract import Contract
         from app.db.models.policy import Policy
-        
+
         with session_factory() as session:
-            contract = session.scalar(select(Contract).where(Contract.id == contract_id))
+            contract = session.scalar(
+                select(Contract).where(Contract.id == contract_id)
+            )
             policy = session.scalar(select(Policy).order_by(Policy.created_at.desc()))
             rules_dicts = [
-                {"code": rule.code, "value": rule.value, "description": rule.description}
+                {
+                    "code": rule.code,
+                    "value": rule.value,
+                    "description": rule.description,
+                }
                 for rule in (policy.rules if policy and policy.rules else [])
             ]
             deterministic_result = evaluate_rules(
@@ -420,7 +461,8 @@ async def _analysis_stream(
                         "category": "essencial"
                         if item.clause_code in {"EXCLUSIVIDADE", "PRAZO", "ASSINATURAS"}
                         else "redacao",
-                        "essential_clause": item.clause_code in {"EXCLUSIVIDADE", "PRAZO", "ASSINATURAS"},
+                        "essential_clause": item.clause_code
+                        in {"EXCLUSIVIDADE", "PRAZO", "ASSINATURAS"},
                         "risk_score": item.risk_score,
                         "clause_code": item.clause_code,
                         "page_reference": item.page_reference,
@@ -428,9 +470,13 @@ async def _analysis_stream(
                 )
                 for item in result.items
             ]
-            merged_items = merge_analysis_items(llm_analysis_items, deterministic_result.items)
-            filtered_items = [item for item in merged_items if item.status != "conforme"]
-            
+            merged_items = merge_analysis_items(
+                llm_analysis_items, deterministic_result.items
+            )
+            filtered_items = [
+                item for item in merged_items if item.status != "conforme"
+            ]
+
             if contract:
                 analysis = ContractAnalysis(
                     contract_id=contract.id,
@@ -445,7 +491,9 @@ async def _analysis_stream(
                     raw_payload={
                         "summary": result.summary,
                         "llm_items": [item.model_dump() for item in result.items],
-                        "deterministic_items": [item.model_dump() for item in deterministic_result.items],
+                        "deterministic_items": [
+                            item.model_dump() for item in deterministic_result.items
+                        ],
                         "merged_items": [item.model_dump() for item in filtered_items],
                     },
                     findings=[
@@ -465,10 +513,22 @@ async def _analysis_stream(
                 session.add(analysis)
                 mark_contract_analysis_completed(contract)
                 contract.status = "analisado"
+
+                if contract:
+                    source_enum = None
+                    for version in contract.versions:
+                        if version.id == contract_version_id:
+                            source_enum = version.source
+                            break
+                    if source_enum == ContractSource.signed_contract:
+                        contract.is_active = True
+                        contract.activated_at = datetime.now(timezone.utc)
+                        session.commit()
+
                 session.commit()
-        
+
         yield f"data: {json.dumps({'stage': 'completed', 'message': 'Análise concluída!', 'risk_score': result.contract_risk_score, 'findings_count': len(result.items)})}\n\n"
-        
+
     except Exception as e:
         yield f"data: {json.dumps({'stage': 'error', 'message': f'Erro na análise: {str(e)}'})}\n\n"
 
@@ -483,7 +543,9 @@ async def analyze_contract_stream(
     contract = _get_contract_or_404(session, contract_id)
     latest_version = latest_contract_version(contract)
     if latest_version is None or not latest_version.text_content:
-        raise HTTPException(status_code=422, detail="No text content available for analysis")
+        raise HTTPException(
+            status_code=422, detail="No text content available for analysis"
+        )
 
     llm_client = getattr(request.app.state, "llm_client", None)
     if llm_client is None:
@@ -505,14 +567,16 @@ async def analyze_contract_stream(
     )
 
 
-@router.post("/{contract_id}/generate-corrected", response_model=CorrectedContractResponse)
+@router.post(
+    "/{contract_id}/generate-corrected", response_model=CorrectedContractResponse
+)
 def generate_corrected_contract(
     contract_id: str,
     request: Request,
     session: Session = Depends(get_session),
 ) -> CorrectedContractResponse:
     """Generate a corrected version of the contract based on analysis findings.
-    
+
     Saves the result to the database for fast download later.
     """
     contract = _get_contract_or_404(session, contract_id)
@@ -522,7 +586,9 @@ def generate_corrected_contract(
 
     latest_analysis = latest_version_analysis(latest_version)
     if latest_analysis is None:
-        raise HTTPException(status_code=422, detail="No analysis available. Run analysis first.")
+        raise HTTPException(
+            status_code=422, detail="No analysis available. Run analysis first."
+        )
 
     # Check if we already have a corrected version for this analysis
     if latest_analysis.corrected_text:
@@ -588,25 +654,27 @@ def download_corrected_contract_docx(
     session: Session = Depends(get_session),
 ):
     """Download corrected contract as DOCX file.
-    
+
     Requires generate-corrected to be called first. Downloads are instant
     since the corrected text is retrieved from the database.
     """
     contract = _get_contract_or_404(session, contract_id)
     latest_analysis = latest_version_analysis(latest_contract_version(contract))
     if latest_analysis is None:
-        raise HTTPException(status_code=422, detail="No analysis available. Run analysis first.")
+        raise HTTPException(
+            status_code=422, detail="No analysis available. Run analysis first."
+        )
 
     # Check if corrected version exists in DB
     if not latest_analysis.corrected_text:
         raise HTTPException(
-            status_code=422, 
-            detail="Corrected contract not generated yet. Click 'Gerar Contrato Corrigido' first."
+            status_code=422,
+            detail="Corrected contract not generated yet. Click 'Gerar Contrato Corrigido' first.",
         )
 
     # Build a simple result object for docx generator
     from app.infrastructure.llm_models import CorrectedContractResult, CorrectionItem
-    
+
     corrections = latest_analysis.corrections_summary or []
     result = CorrectedContractResult(
         corrected_text=latest_analysis.corrected_text,
@@ -627,7 +695,7 @@ def download_corrected_contract_docx(
     )
 
     filename = f"contrato-corrigido-{contract_id[:8]}.docx"
-    
+
     return StreamingResponse(
         docx_buffer,
         media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
