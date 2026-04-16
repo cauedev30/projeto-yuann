@@ -5,7 +5,7 @@ from typing import Any
 from uuid import uuid4
 
 from sqlalchemy import Enum, ForeignKey, Numeric, String, Text
-from sqlalchemy.dialects.sqlite import JSON
+from sqlalchemy.dialects.postgresql import JSONB as JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base, TimestampMixin
@@ -20,8 +20,12 @@ class AnalysisStatus(str, enum.Enum):
 class ContractAnalysis(TimestampMixin, Base):
     __tablename__ = "contract_analyses"
 
-    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid4()))
-    contract_id: Mapped[str | None] = mapped_column(ForeignKey("contracts.id", ondelete="CASCADE"))
+    id: Mapped[str] = mapped_column(
+        String(36), primary_key=True, default=lambda: str(uuid4())
+    )
+    contract_id: Mapped[str | None] = mapped_column(
+        ForeignKey("contracts.id", ondelete="CASCADE")
+    )
     contract_version_id: Mapped[str] = mapped_column(
         ForeignKey("contract_versions.id", ondelete="CASCADE"),
         nullable=False,
@@ -34,13 +38,17 @@ class ContractAnalysis(TimestampMixin, Base):
     )
     contract_risk_score: Mapped[float | None] = mapped_column(Numeric(5, 2))
     raw_payload: Mapped[dict[str, Any] | None] = mapped_column(JSON)
-    
+
     # New fields for corrected contract storage
     corrected_text: Mapped[str | None] = mapped_column(Text, nullable=True)
-    corrections_summary: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
+    corrections_summary: Mapped[dict[str, Any] | None] = mapped_column(
+        JSON, nullable=True
+    )
 
     contract: Mapped["Contract"] = relationship(back_populates="analyses")
-    contract_version: Mapped["ContractVersion"] = relationship(back_populates="analyses")
+    contract_version: Mapped["ContractVersion"] = relationship(
+        back_populates="analyses"
+    )
     findings: Mapped[list["ContractAnalysisFinding"]] = relationship(
         back_populates="analysis",
         cascade="all, delete-orphan",
@@ -50,7 +58,9 @@ class ContractAnalysis(TimestampMixin, Base):
 class ContractAnalysisFinding(TimestampMixin, Base):
     __tablename__ = "contract_analysis_findings"
 
-    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid4()))
+    id: Mapped[str] = mapped_column(
+        String(36), primary_key=True, default=lambda: str(uuid4())
+    )
     analysis_id: Mapped[str] = mapped_column(
         ForeignKey("contract_analyses.id", ondelete="CASCADE"),
         nullable=False,
