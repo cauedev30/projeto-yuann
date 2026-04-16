@@ -17,6 +17,17 @@ describe("getDashboardSnapshot", () => {
             critical_findings: 1,
             expiring_soon: 2,
           },
+          expiring_contracts: [
+            {
+              id: "ctr-1",
+              title: "Loja Centro",
+              unit: "Andar 1",
+              source_label: "Contrato assinado",
+              end_date: "2026-05-15",
+              days_remaining: 29,
+              urgency_level: "red",
+            },
+          ],
           events: [
             {
               id: "evt-1",
@@ -67,6 +78,7 @@ describe("getDashboardSnapshot", () => {
             critical_findings: 0,
             expiring_soon: 0,
           },
+          expiring_contracts: [],
           events: [],
           notifications: [],
         }),

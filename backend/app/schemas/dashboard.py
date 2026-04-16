@@ -5,6 +5,16 @@ from datetime import date, datetime, timezone
 from pydantic import BaseModel, field_serializer
 
 
+class ExpiringContractResponse(BaseModel):
+    id: str
+    title: str
+    unit: str | None
+    source_label: str
+    end_date: date | None
+    days_remaining: int | None
+    urgency_level: str
+
+
 class DashboardSummaryResponse(BaseModel):
     active_contracts: int
     critical_findings: int
@@ -39,11 +49,16 @@ class DashboardNotificationResponse(BaseModel):
         if sent_at is None:
             return None
 
-        normalized = sent_at if sent_at.tzinfo is not None else sent_at.replace(tzinfo=timezone.utc)
+        normalized = (
+            sent_at
+            if sent_at.tzinfo is not None
+            else sent_at.replace(tzinfo=timezone.utc)
+        )
         return normalized.isoformat().replace("+00:00", "Z")
 
 
 class DashboardSnapshotResponse(BaseModel):
     summary: DashboardSummaryResponse
+    expiring_contracts: list[ExpiringContractResponse]
     events: list[DashboardEventResponse]
     notifications: list[DashboardNotificationResponse]

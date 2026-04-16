@@ -28,8 +28,19 @@ export type DashboardNotification = {
   externalReference: string;
 };
 
+export type ExpiringContract = {
+  id: string;
+  title: string;
+  unit: string | null;
+  source_label: string;
+  end_date: string | null;
+  days_remaining: number | null;
+  urgency_level: "red" | "yellow" | "green";
+};
+
 export type DashboardSnapshot = {
   summary: DashboardSummary;
+  expiring_contracts: ExpiringContract[];
   events: DashboardEvent[];
   notifications: DashboardNotification[];
 };
@@ -64,8 +75,19 @@ export type DashboardNotificationPayload = {
   external_reference: string;
 };
 
+export type ExpiringContractPayload = {
+  id: string;
+  title: string;
+  unit: string | null;
+  source_label: string;
+  end_date: string | null;
+  days_remaining: number | null;
+  urgency_level: string;
+};
+
 export type DashboardSnapshotPayload = {
   summary: DashboardSummaryPayload;
+  expiring_contracts: ExpiringContractPayload[];
   events: DashboardEventPayload[];
   notifications: DashboardNotificationPayload[];
 };
@@ -77,6 +99,15 @@ export function mapDashboardSnapshotPayload(payload: DashboardSnapshotPayload): 
       criticalFindings: payload.summary.critical_findings,
       expiringSoon: payload.summary.expiring_soon,
     },
+    expiring_contracts: payload.expiring_contracts.map((c) => ({
+      id: c.id,
+      title: c.title,
+      unit: c.unit,
+      source_label: c.source_label,
+      end_date: c.end_date,
+      days_remaining: c.days_remaining,
+      urgency_level: c.urgency_level as "red" | "yellow" | "green",
+    })),
     events: payload.events.map((event) => ({
       id: event.id,
       eventType: event.event_type,

@@ -39,7 +39,7 @@ describe("DashboardScreen", () => {
     render(<DashboardScreen loadDashboardSnapshot={async () => buildDashboardSnapshotFixture()} />);
 
     expect(await screen.findByText("Resumo geral")).toBeInTheDocument();
-    expect(screen.getByText("Timeline de eventos")).toBeInTheDocument();
+    expect(screen.getByText("Contratos próximos do vencimento")).toBeInTheDocument();
     expect(screen.getByText("Histórico de notificações")).toBeInTheDocument();
   });
 });

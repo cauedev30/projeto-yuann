@@ -13,13 +13,16 @@ from app.schemas.dashboard import (
     DashboardNotificationResponse,
     DashboardSnapshotResponse,
     DashboardSummaryResponse,
+    ExpiringContractResponse,
 )
 
 
 def _latest_analysis(contract: Contract) -> ContractAnalysis | None:
     if not contract.analyses:
         return None
-    return max(contract.analyses, key=lambda analysis: (analysis.created_at, analysis.id))
+    return max(
+        contract.analyses, key=lambda analysis: (analysis.created_at, analysis.id)
+    )
 
 
 def _is_operational_contract(contract: Contract) -> bool:
@@ -41,8 +44,51 @@ def build_dashboard_snapshot(
         )
     ).all()
 
-    operational_contracts = [contract for contract in contracts if _is_operational_contract(contract)]
+    operational_contracts = [
+        contract for contract in contracts if _is_operational_contract(contract)
+    ]
     active_contracts = len(operational_contracts)
+
+    from app.api.serializers.contracts import SOURCE_LABELS
+
+    expiring_contracts: list[ExpiringContractResponse] = []
+    for contract in operational_contracts:
+        if contract.end_date is None or not contract.is_active:
+            continue
+        days_remaining = (contract.end_date - reference_date).days
+        if days_remaining > 365:
+            continue
+        if days_remaining < 30:
+            urgency = "red"
+        elif days_remaining < 90:
+            urgency = "yellow"
+        else:
+            urgency = "green"
+        unit = None
+        if contract.parties and isinstance(contract.parties, dict):
+            unit = contract.parties.get("locatario") or contract.parties.get(
+                "locatário"
+            )
+        source_label = (
+            SOURCE_LABELS.get(
+                contract.versions[0].source.value if contract.versions else "",
+                contract.versions[0].source.value if contract.versions else "",
+            )
+            if contract.versions
+            else ""
+        )
+        expiring_contracts.append(
+            ExpiringContractResponse(
+                id=contract.id,
+                title=contract.title,
+                unit=unit,
+                source_label=source_label,
+                end_date=contract.end_date,
+                days_remaining=days_remaining,
+                urgency_level=urgency,
+            )
+        )
+    expiring_contracts.sort(key=lambda c: c.days_remaining or 999999)
 
     critical_findings = 0
     event_items: list[DashboardEventResponse] = []
@@ -50,7 +96,9 @@ def build_dashboard_snapshot(
         latest_analysis = _latest_analysis(contract)
         if latest_analysis is not None:
             critical_findings += sum(
-                1 for finding in latest_analysis.findings if finding.severity == "critical"
+                1
+                for finding in latest_analysis.findings
+                if finding.severity == "critical"
             )
 
         for event in contract.events:
@@ -124,6 +172,7 @@ def build_dashboard_snapshot(
             critical_findings=critical_findings,
             expiring_soon=len(event_items),
         ),
+        expiring_contracts=expiring_contracts[:10],
         events=event_items,
         notifications=notification_items,
     )

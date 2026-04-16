@@ -7,6 +7,26 @@ export function buildDashboardSnapshotFixture() {
       critical_findings: 3,
       expiring_soon: 2,
     },
+    expiring_contracts: [
+      {
+        id: "ctr-1",
+        title: "Loja Centro",
+        unit: "Andar 1",
+        source_label: "Contrato assinado",
+        end_date: "2026-05-15",
+        days_remaining: 29,
+        urgency_level: "red",
+      },
+      {
+        id: "ctr-2",
+        title: "Loja Norte",
+        unit: "Andar 2",
+        source_label: "Contrato assinado",
+        end_date: "2026-07-20",
+        days_remaining: 95,
+        urgency_level: "green",
+      },
+    ],
     events: [
       {
         id: "evt-1",

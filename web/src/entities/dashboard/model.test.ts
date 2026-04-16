@@ -10,6 +10,17 @@ describe("dashboard entity mapping", () => {
         critical_findings: 3,
         expiring_soon: 2,
       },
+      expiring_contracts: [
+        {
+          id: "ctr-1",
+          title: "Loja Centro",
+          unit: "Andar 1",
+          source_label: "Contrato assinado",
+          end_date: "2026-05-15",
+          days_remaining: 29,
+          urgency_level: "red",
+        },
+      ],
       events: [
         {
           id: "evt-1",
@@ -39,6 +50,7 @@ describe("dashboard entity mapping", () => {
     });
 
     expect(snapshot.summary.activeContracts).toBe(12);
+    expect(snapshot.expiring_contracts[0].urgency_level).toBe("red");
     expect(snapshot.events[0].eventType).toBe("renewal");
     expect(snapshot.events[0].contractTitle).toBe("Loja Centro");
     expect(snapshot.events[0].leadTimeDays).toBe(30);

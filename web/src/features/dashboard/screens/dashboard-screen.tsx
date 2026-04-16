@@ -12,7 +12,7 @@ import { getDashboardSnapshot } from "../../../lib/api/dashboard";
 import { NotificationHistory } from "../../notifications/components/notification-history";
 import { ContractsSummary } from "../components/contracts-summary";
 import { EmptyDashboardState } from "../components/empty-dashboard-state";
-import { EventsTimeline } from "../components/events-timeline";
+import { ExpiringContractsTable } from "../components/expiring-contracts-table";
 import styles from "./dashboard-screen.module.css";
 
 type DashboardScreenProps = {
@@ -132,8 +132,8 @@ export function DashboardScreen({
           </SurfaceCard>
 
           <div className={styles.detailGrid}>
-            <SurfaceCard title="Timeline de eventos">
-              <EventsTimeline events={snapshot.events} showTitle={false} />
+            <SurfaceCard title="Contratos próximos do vencimento">
+              <ExpiringContractsTable contracts={snapshot.expiring_contracts} />
             </SurfaceCard>
 
             <SurfaceCard title="Histórico de notificações">
