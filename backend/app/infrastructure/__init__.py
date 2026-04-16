@@ -1,10 +1,16 @@
-from app.infrastructure.notifications import EmailSender, NoopEmailSender, dispatch_email_notification
+from app.infrastructure.embeddings import EmbeddingClient
+from app.infrastructure.notifications import (
+    EmailSender,
+    NoopEmailSender,
+    dispatch_email_notification,
+)
 from app.infrastructure.ocr import OCRClient, NoopOcrClient
 from app.infrastructure.pdf_text import TextExtractionResult, extract_contract_text
 from app.infrastructure.storage import LocalStorageService
 
 __all__ = [
     "EmailSender",
+    "EmbeddingClient",
     "LocalStorageService",
     "NoopEmailSender",
     "NoopOcrClient",

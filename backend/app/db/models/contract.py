@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import enum
-from typing import Any
+from typing import TYPE_CHECKING, Any
 from uuid import uuid4
 
 from datetime import date, datetime
@@ -21,6 +21,10 @@ from sqlalchemy.dialects.postgresql import JSONB as JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base, TimestampMixin
+
+
+if TYPE_CHECKING:
+    from app.db.models.embedding import ContractEmbedding
 
 
 class ContractSource(str, enum.Enum):
@@ -60,6 +64,10 @@ class Contract(TimestampMixin, Base):
         cascade="all, delete-orphan",
     )
     events: Mapped[list["ContractEvent"]] = relationship(
+        back_populates="contract",
+        cascade="all, delete-orphan",
+    )
+    embeddings: Mapped[list["ContractEmbedding"]] = relationship(
         back_populates="contract",
         cascade="all, delete-orphan",
     )
