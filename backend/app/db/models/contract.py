@@ -26,6 +26,7 @@ from app.db.base import Base, TimestampMixin
 class ContractSource(str, enum.Enum):
     third_party_draft = "third_party_draft"
     signed_contract = "signed_contract"
+    third_party_contract = "third_party_contract"
 
 
 class Contract(TimestampMixin, Base):
