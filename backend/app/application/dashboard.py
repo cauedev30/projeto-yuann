@@ -53,7 +53,9 @@ def build_dashboard_snapshot(
         if contract.end_date is None or not contract.is_active:
             continue
         days_remaining = (contract.end_date - reference_date).days
-        if days_remaining < 30:
+        if days_remaining <= 0:
+            urgency = "red"
+        elif days_remaining < 30:
             urgency = "red"
         elif days_remaining < 90:
             urgency = "yellow"

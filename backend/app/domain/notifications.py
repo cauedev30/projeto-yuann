@@ -2,7 +2,13 @@ from __future__ import annotations
 
 from datetime import date, datetime, timedelta
 
+import os
+
 from app.db.models.event import ContractEvent, Notification, NotificationChannel
+
+_DEFAULT_RECIPIENT = os.environ.get(
+    "NOTIFICATION_RECIPIENT", "alerts@legalboard.com.br"
+)
 
 
 def _recipient_for_event(event: ContractEvent, user_email: str | None = None) -> str:
@@ -10,7 +16,14 @@ def _recipient_for_event(event: ContractEvent, user_email: str | None = None) ->
         event.metadata_json.get("notification_recipient"), str
     ):
         return event.metadata_json["notification_recipient"]
-    return user_email or "alerts@legalboard.com.br"
+    if user_email:
+        return user_email
+    contract = event.contract
+    if contract and contract.parties and isinstance(contract.parties, dict):
+        owner_email = contract.parties.get("notification_email")
+        if isinstance(owner_email, str) and owner_email:
+            return owner_email
+    return _DEFAULT_RECIPIENT
 
 
 def is_event_due(event: ContractEvent, *, today: date) -> bool:

@@ -21,18 +21,6 @@ class DashboardSummaryResponse(BaseModel):
     expiring_soon: int
 
 
-class DashboardEventResponse(BaseModel):
-    id: str
-    event_type: str
-    event_date: date
-    lead_time_days: int
-    contract_id: str
-    contract_title: str
-    external_reference: str
-    days_until_due: int
-    is_overdue: bool
-
-
 class DashboardNotificationResponse(BaseModel):
     id: str
     contract_event_id: str

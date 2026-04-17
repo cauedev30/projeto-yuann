@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+from datetime import date
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -364,4 +365,60 @@ def create_app(
     def healthcheck() -> dict[str, str]:
         return {"status": "ok"}
 
+    _start_notification_scheduler(app)
+
     return app
+
+
+def _start_notification_scheduler(app: FastAPI) -> None:
+    import threading
+    import logging
+
+    _scheduler_logger = logging.getLogger(__name__ + ".notification_scheduler")
+    _SCHEDULER_INTERVAL_SECONDS = int(
+        os.environ.get("NOTIFICATION_SCHEDULER_INTERVAL_SECONDS", str(24 * 60 * 60))
+    )
+
+    def _run_scheduler() -> None:
+        if os.environ.get("NOTIFICATION_SCHEDULER_ENABLED", "").lower() not in (
+            "1",
+            "true",
+        ):
+            return
+
+        def _tick() -> None:
+            try:
+                session_factory = app.state.session_factory
+                email_sender = getattr(app.state, "email_sender", None)
+                from app.application.alerts import process_due_events
+
+                with session_factory() as session:
+                    result = process_due_events(
+                        session=session,
+                        today=date.today(),
+                        email_sender=email_sender,
+                    )
+                    _scheduler_logger.info(
+                        "Notification scheduler: sent=%d skipped=%d failed=%d",
+                        result.sent,
+                        result.skipped,
+                        result.failed,
+                    )
+            except Exception:
+                _scheduler_logger.exception("Notification scheduler error")
+            finally:
+                timer = threading.Timer(_SCHEDULER_INTERVAL_SECONDS, _tick)
+                timer.daemon = True
+                timer.start()
+
+        initial_delay = int(
+            os.environ.get("NOTIFICATION_SCHEDULER_INITIAL_DELAY_SECONDS", "60")
+        )
+        timer = threading.Timer(initial_delay, _tick)
+        timer.daemon = True
+        timer.start()
+        _scheduler_logger.info(
+            "Notification scheduler: enabled (interval=%ds, initial_delay=%ds)",
+            _SCHEDULER_INTERVAL_SECONDS,
+            initial_delay,
+        )

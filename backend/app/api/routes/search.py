@@ -54,10 +54,16 @@ def search_contracts(
             limit=payload.limit,
             min_similarity=payload.min_similarity,
         )
-    except OperationalError:
+    except (OperationalError, Exception) as exc:
+        err_msg = str(exc).lower()
+        if "vector" in err_msg or "pgvector" in err_msg or "embedding" in err_msg:
+            raise HTTPException(
+                status_code=503,
+                detail="Semantic search unavailable. pgvector extension not enabled on this database.",
+            )
         raise HTTPException(
             status_code=503,
-            detail="Embedding service not configured. pgvector extension not available.",
+            detail=f"Search service error: {str(exc)[:200]}",
         )
 
     return SearchResponse(
