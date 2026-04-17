@@ -20,7 +20,6 @@ import { useGenerateCorrectedContract } from "../../../lib/hooks/use-contracts";
 import { ContractSummaryPanel } from "../components/contract-summary-panel";
 import { ClauseStepper } from "../components/clause-stepper";
 import { EventTimeline } from "../components/event-timeline";
-import { ExtractedTextPanel } from "../components/extracted-text-panel";
 import { FindingsSection } from "../components/findings-section";
 import { MetadataSection } from "../components/metadata-section";
 import styles from "./contract-detail-screen.module.css";
@@ -392,18 +391,6 @@ export function ContractDetailScreen({
             <ContractSummaryPanel contractId={contractId} versionId={versionId} />
           </div>
         </details>
-
-        {selectedVersion?.text ? (
-          <details className={styles.collapsible}>
-            <summary className={styles.collapsibleSummary}>
-              <span className={styles.collapsibleTitle}>Texto extraído</span>
-              <span className={styles.collapsibleChevron} aria-hidden="true" />
-            </summary>
-            <div className={styles.collapsibleContent}>
-              <ExtractedTextPanel text={selectedVersion.text} />
-            </div>
-          </details>
-        ) : null}
       </div>
     </section>
   );

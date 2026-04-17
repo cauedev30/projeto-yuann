@@ -18,8 +18,12 @@
 }
 
 .bellIcon {
-  font-size: 1.1rem;
-  line-height: 1;
+  color: var(--ink-soft, #a1a1aa);
+  transition: color 0.15s;
+}
+
+.badgeLink:hover .bellIcon {
+  color: var(--ink, #fff);
 }
 
 .countBadge {

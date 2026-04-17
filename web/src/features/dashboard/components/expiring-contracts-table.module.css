@@ -1,65 +1,194 @@
-.empty {
-  color: var(--color-text-muted);
-  font-style: italic;
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 2rem 1rem;
+  color: var(--ink-muted, #71717a);
+}
+
+.emptyText {
+  margin: 0;
+  font-size: 0.9rem;
   text-align: center;
-  padding: 1rem;
 }
 
-.table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.875rem;
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
 }
 
-.table th {
-  text-align: left;
-  padding: 0.5rem 0.75rem;
-  font-weight: 600;
-  color: var(--color-text-muted);
-  border-bottom: 1px solid var(--color-border);
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  padding: 1.25rem;
+  border: 1px solid var(--glass-border, rgba(255,255,255,0.08));
+  border-radius: 0.75rem;
+  background: linear-gradient(145deg, rgba(20,20,26,0.7), rgba(13,13,18,0.5));
+  backdrop-filter: blur(12px);
+  text-decoration: none;
+  transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+  cursor: pointer;
 }
 
-.table td {
-  padding: 0.625rem 0.75rem;
-  border-bottom: 1px solid var(--color-border);
+.card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(255,255,255,0.18);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.06);
 }
 
 .urgency-red {
-  background: color-mix(in srgb, var(--color-red) 8%, transparent);
+  border-top: 3px solid #ef4444;
 }
 
 .urgency-yellow {
-  background: color-mix(in srgb, var(--color-yellow) 6%, transparent);
+  border-top: 3px solid #f59e0b;
+}
+
+.urgency-green {
+  border-top: 3px solid #10b981;
+}
+
+.urgency-blue {
+  border-top: 3px solid #3b82f6;
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.contractInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
 }
 
 .contractTitle {
-  font-weight: 500;
-}
-
-.daysRemaining {
-  font-variant-numeric: tabular-nums;
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ink, #e4e4e7);
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.badge {
-  display: inline-block;
-  padding: 0.15rem 0.5rem;
+.unitLabel {
+  font-size: 0.78rem;
+  color: var(--ink-soft, #a1a1aa);
+  line-height: 1.4;
+}
+
+.urgencyBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
   border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 600;
+  padding: 0.25rem 0.65rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
 }
 
 .badge-red {
-  background: color-mix(in srgb, var(--color-red) 15%, transparent);
-  color: var(--color-red);
+  background: rgba(239,68,68,0.14);
+  color: #fca5a5;
+  border: 1px solid rgba(239,68,68,0.25);
 }
 
 .badge-yellow {
-  background: color-mix(in srgb, var(--color-yellow) 15%, transparent);
-  color: var(--color-yellow);
+  background: rgba(245,158,11,0.14);
+  color: #fcd34d;
+  border: 1px solid rgba(245,158,11,0.25);
 }
 
 .badge-green {
-  background: color-mix(in srgb, var(--color-green) 15%, transparent);
-  color: var(--color-green);
+  background: rgba(16,185,129,0.14);
+  color: #6ee7b7;
+  border: 1px solid rgba(16,185,129,0.25);
+}
+
+.badge-blue {
+  background: rgba(59,130,246,0.12);
+  color: #93c5fd;
+  border: 1px solid rgba(59,130,246,0.2);
+}
+
+.cardBody {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.detailRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.detailLabel {
+  font-size: 0.75rem;
+  color: var(--ink-muted, #71717a);
+  flex-shrink: 0;
+}
+
+.detailValue {
+  font-size: 0.82rem;
+  color: var(--ink-soft, #a1a1aa);
+  text-align: right;
+  min-width: 0;
+}
+
+.daysValue {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--ink, #e4e4e7);
+}
+
+.daysCritical {
+  color: #fca5a5;
+}
+
+.progressBarTrack {
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(255,255,255,0.06);
+  overflow: hidden;
+}
+
+.progressBarFill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.5s ease;
+}
+
+.fill-red {
+  background: linear-gradient(90deg, #ef4444, #dc2626);
+}
+
+.fill-yellow {
+  background: linear-gradient(90deg, #f59e0b, #d97706);
+}
+
+.fill-green {
+  background: linear-gradient(90deg, #10b981, #059669);
+}
+
+.fill-blue {
+  background: linear-gradient(90deg, #3b82f6, #2563eb);
+}
+
+@media (max-width: 640px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
 }

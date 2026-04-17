@@ -2,56 +2,75 @@ import React from "react";
 
 import type { ContractFinding } from "@/entities/contracts/model";
 
-import { StatusBadge } from "../../../components/ui/status-badge";
 import styles from "../screens/contracts-screen.module.css";
 
 type FindingsSectionProps = {
   items: ContractFinding[];
 };
 
-const statusLabelMap: Record<ContractFinding["status"], string> = {
-  critical: "Critico",
-  attention: "Atencao",
-  conforme: "Conforme",
+const classificationLabel: Record<string, string> = {
+  adequada: "Presente",
+  risco_medio: "Parcial",
+  ausente: "Ausente",
+  conflitante: "Conflitante",
 };
 
-const severityBorderClass: Record<ContractFinding["status"], string> = {
-  critical: styles.findingCritical,
-  attention: styles.findingAttention,
-  conforme: styles.findingConforme,
-};
+function getClassification(item: ContractFinding): string {
+  if (item.metadata?.classification) return String(item.metadata.classification);
+  if (item.status === "conforme") return "adequada";
+  if (item.status === "critical") return "ausente";
+  return "risco_medio";
+}
+
+function classificationIcon(cls: string): string {
+  if (cls === "adequada") return "\u2713";
+  if (cls === "ausente") return "\u2717";
+  if (cls === "conflitante") return "\u26A0";
+  return "~";
+}
 
 export function FindingsSection({ items }: FindingsSectionProps) {
+  const present = items.filter((i) => getClassification(i) === "adequada").length;
+  const missing = items.filter((i) => getClassification(i) === "ausente").length;
+  const partial = items.length - present - missing;
+
   return (
     <section className={`${styles.panel} ${styles.findingsSection}`}>
       <div className={styles.sectionHeader}>
         <div>
-          <p className={styles.panelEyebrow}>Leitura orientada</p>
+          <p className={styles.panelEyebrow}>Verificacao de clausulas</p>
           <h2 className={styles.sectionTitle}>Principais Pontos</h2>
         </div>
-        <span className={styles.sectionMeta}>{items.length} item(ns) destacados</span>
+        <span className={styles.sectionMeta}>
+          {present} presentes &middot; {partial} parciais &middot; {missing} ausentes
+        </span>
       </div>
 
       <ul className={styles.findingsList}>
-        {items.map((item) => (
-          <li
-            className={`${styles.findingItem} ${severityBorderClass[item.status] ?? ""}`}
-            key={`${item.clauseName}-${item.status}`}
-          >
-            <div className={styles.findingHeader}>
-              <strong className={styles.findingTitle}>{item.clauseName}</strong>
-              <StatusBadge
-                variant={item.status}
-                size="md"
-              >
-                {statusLabelMap[item.status]}
-              </StatusBadge>
-            </div>
-            <p className={styles.findingDescription}>{item.riskExplanation}</p>
-            <p className={styles.findingMeta}>Atual: {item.currentSummary}</p>
-            <p className={styles.findingMeta}>Direcao sugerida: {item.suggestedAdjustmentDirection}</p>
-          </li>
-        ))}
+        {items.map((item) => {
+          const cls = getClassification(item);
+          return (
+            <li
+              className={`${styles.findingItem} ${
+                cls === "ausente" || cls === "conflitante"
+                  ? styles.findingCritical
+                  : cls === "risco_medio"
+                    ? styles.findingAttention
+                    : styles.findingConforme
+              }`}
+              key={`${item.clauseName}-${item.status}`}
+            >
+              <div className={styles.findingHeader}>
+                <strong className={styles.findingTitle}>{item.clauseName}</strong>
+                <span className={`${styles.classificationBadge} ${styles[`cls-${cls}`] || ""}`}>
+                  <span aria-hidden="true">{classificationIcon(cls)}</span>
+                  {" "}
+                  {classificationLabel[cls] || cls}
+                </span>
+              </div>
+            </li>
+          );
+        })}
       </ul>
     </section>
   );
