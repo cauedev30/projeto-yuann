@@ -27,30 +27,6 @@ export function buildDashboardSnapshotFixture() {
         urgency_level: "green",
       },
     ],
-    events: [
-      {
-        id: "evt-1",
-        event_type: "renewal",
-        event_date: "2030-09-30",
-        lead_time_days: 45,
-        contract_id: "ctr-1",
-        contract_title: "Loja Centro",
-        external_reference: "LOC-001",
-        days_until_due: -5,
-        is_overdue: true,
-      },
-      {
-        id: "evt-2",
-        event_type: "expiration",
-        event_date: "2031-03-31",
-        lead_time_days: 30,
-        contract_id: "ctr-2",
-        contract_title: "Loja Norte",
-        external_reference: "LOC-002",
-        days_until_due: 30,
-        is_overdue: false,
-      },
-    ],
     notifications: [
       {
         id: "ntf-1",

@@ -19,6 +19,13 @@ CATEGORY_WEIGHTS = {
     "other": 16,
 }
 
+CLASSIFICATION_TO_STATUS = {
+    "adequada": "conforme",
+    "risco_medio": "attention",
+    "ausente": "critical",
+    "conflitante": "critical",
+}
+
 STATUS_MULTIPLIERS = {
     "critical": 1.0,
     "attention": 0.55,
@@ -98,8 +105,12 @@ def extract_contract_facts(contract_text: str) -> dict[str, object]:
                 break
 
     # Grace period
-    grace_days_match = re.search(r"car[eê]ncia\s*(?:de\s*)?(\d+)\s*dias", contract_text, re.IGNORECASE)
-    grace_months_match = re.search(r"car[eê]ncia\s*(?:de\s*)?(\d+)\s*meses", contract_text, re.IGNORECASE)
+    grace_days_match = re.search(
+        r"car[eê]ncia\s*(?:de\s*)?(\d+)\s*dias", contract_text, re.IGNORECASE
+    )
+    grace_months_match = re.search(
+        r"car[eê]ncia\s*(?:de\s*)?(\d+)\s*meses", contract_text, re.IGNORECASE
+    )
 
     if grace_days_match:
         facts["grace_period_days"] = int(grace_days_match.group(1))
@@ -130,7 +141,9 @@ def _score_items(items: list[AnalysisItem], *, source: str) -> float:
         if item.metadata.get("essential_clause"):
             weight = max(weight, CATEGORY_WEIGHTS["essencial"])
 
-        item_score = weight * status_multiplier * severity_multiplier * source_multiplier
+        item_score = (
+            weight * status_multiplier * severity_multiplier * source_multiplier
+        )
         if item.metadata.get("essential_clause") and item.status == "critical":
             item_score += 8
         if item.metadata.get("missing_clause") and item.status == "critical":
@@ -150,7 +163,9 @@ def calculate_final_risk_score(
     llm_component = min(float(llm_score) * 0.18, 18.0)
     llm_item_component = _score_items(llm_items, source="llm")
     deterministic_component = _score_items(deterministic_items, source="deterministic")
-    final_score = min(llm_component + llm_item_component + deterministic_component, 100.0)
+    final_score = min(
+        llm_component + llm_item_component + deterministic_component, 100.0
+    )
     return round(final_score, 2)
 
 
@@ -175,18 +190,34 @@ def evaluate_rules(
     items: list[AnalysisItem] = []
 
     actual_term = _coerce_number(extracted.get("term_months"))
-    min_term = next((_coerce_number(r.get("value")) for r in rules if str(r.get("code", "")).upper() == "MIN_TERM_MONTHS"), None)
-    max_term = next((_coerce_number(r.get("value")) for r in rules if str(r.get("code", "")).upper() == "MAX_TERM_MONTHS"), None)
+    min_term = next(
+        (
+            _coerce_number(r.get("value"))
+            for r in rules
+            if str(r.get("code", "")).upper() == "MIN_TERM_MONTHS"
+        ),
+        None,
+    )
+    max_term = next(
+        (
+            _coerce_number(r.get("value"))
+            for r in rules
+            if str(r.get("code", "")).upper() == "MAX_TERM_MONTHS"
+        ),
+        None,
+    )
 
     if actual_term is not None and (min_term is not None or max_term is not None):
         is_critical_min = min_term is not None and actual_term < min_term
         is_critical_max = max_term is not None and actual_term > max_term
         is_critical = is_critical_min or is_critical_max
-        
+
         policy_str_parts = []
-        if min_term is not None: policy_str_parts.append(f"Minimo: {min_term} meses")
-        if max_term is not None: policy_str_parts.append(f"Maximo: {max_term} meses")
-        
+        if min_term is not None:
+            policy_str_parts.append(f"Minimo: {min_term} meses")
+        if max_term is not None:
+            policy_str_parts.append(f"Maximo: {max_term} meses")
+
         if is_critical_min:
             explanation = "O prazo encontrado esta abaixo da politica minima."
             suggestion = f"Solicitar prazo minimo de {min_term} meses."
@@ -261,7 +292,12 @@ def evaluate_rules(
             actual_value_raw = extracted.get("contract_value")
             actual_value = None
             if isinstance(actual_value_raw, (int, float)):
-                actual_value = int(actual_value_raw) if isinstance(actual_value_raw, float) and actual_value_raw == int(actual_value_raw) else actual_value_raw
+                actual_value = (
+                    int(actual_value_raw)
+                    if isinstance(actual_value_raw, float)
+                    and actual_value_raw == int(actual_value_raw)
+                    else actual_value_raw
+                )
 
             if max_value is None or actual_value is None:
                 continue
@@ -295,7 +331,9 @@ def evaluate_rules(
 
         if code == "GRACE_PERIOD_DAYS":
             allowed_raw = rule.get("value")
-            allowed_values = allowed_raw if isinstance(allowed_raw, list) else [allowed_raw]
+            allowed_values = (
+                allowed_raw if isinstance(allowed_raw, list) else [allowed_raw]
+            )
             allowed_days = [int(v) for v in allowed_values if v is not None]
             actual_grace = _coerce_number(extracted.get("grace_period_days"))
 

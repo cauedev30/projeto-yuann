@@ -60,5 +60,4 @@ class DashboardNotificationResponse(BaseModel):
 class DashboardSnapshotResponse(BaseModel):
     summary: DashboardSummaryResponse
     expiring_contracts: list[ExpiringContractResponse]
-    events: list[DashboardEventResponse]
     notifications: list[DashboardNotificationResponse]

@@ -1,7 +1,7 @@
 # Spec: LegalTech — Assertividade da LLM, UX e Notificações
 
 **Data:** 2026-04-17  
-**Status:** Draft  
+**Status:** Revised  
 **Abordagem:** Prompt Profundo + RAG complementar
 
 ---
@@ -27,7 +27,10 @@ Transformar os 9 DOCXs em regras de decisão estruturadas no `SYSTEM_PROMPT`. Ca
 - **Regras de verificação** — lista explícita do que a LLM deve checar
 - **Classificação objetiva** — critérios claros para adequada/risco_medio/ausente/conflitante
 - **Exemplos de achado** — o que constitui um achado forte vs. raso
+- **Sugestão de correção por cláusula** — `suggested_adjustment_direction` obrigatório por cláusula
 - **Peso no score** — quais cláusulas têm peso maior
+
+> **Nota sobre schema:** Atualmente `ContractFinding.status` aceita `"critical" | "attention" | "conforme"`. O prompt precisa mapear as 4 classificações canônicas para os valores existentes: `adequada → conforme`, `risco_medio → attention`, `ausente → critical`, `conflitante → critical`. O campo `severity` já suporta `high/medium` e será mantido. Não criaremos novos valores no enum — faremos o mapeamento no prompt.
 
 **Estrutura de cada cláusula no prompt:**
 
@@ -90,9 +93,9 @@ Componente React que exibe **uma cláusula por vez** com:
 | Item | Problema | Solução |
 |------|----------|---------|
 | Dashboard - ExpiringContracts | Sempre vazio (filtra > 365 dias) | Remover filtro de 365 dias, mostrar todos com urgência |
-| Dashboard - Timeline | Deve ser removida da visão geral | Remover `events` do dashboard, manter só expiring_contracts + summary + notifications |
-| Dashboard - Summary | `active_contracts: 10` conta todos | Corrigir para contar só `is_active=True` |
-| Dashboard - `expiring_soon` | Conta events, não contratos | Contar contratos vencendo em 365 dias |
+| Dashboard - Timeline | Deve ser removida da visão geral | Remover `EventsTimeline` do dashboard, remover `events` do `DashboardSnapshotResponse` schema, e remover o componente `events-timeline.tsx` |
+| Dashboard - Summary | `active_contracts: 10` usa `status != "draft"` | Corrigir para contar só `is_active=True` (mudar `_is_operational_contract` ou adicionar filtro) |
+| Dashboard - `expiring_soon` | Conta `len(event_items)`, não contratos | Mudar para `len(expiring_contracts)` após corrigir a tabela |
 | Acervo | Não mostra sugestões (OK) | Manter como está |
 | Histórico | Deve mostrar sugestões | Adicionar findings resumidos na listagem |
 | Version history/diff panels | Deviam ter sido removidos | Remover arquivos e rotas |
@@ -299,6 +302,8 @@ CREATE EXTENSION IF NOT EXISTS vector;
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
 ```
 
+> **Nota operacional:** Railway Postgres gerenciado pode não permitir `CREATE EXTENSION` sem permissões de superuser. Se necessário, abrir ticket no Railway solicitando habilitação da extensão `vector`. Fallback: se pgvector não estiver disponível, o endpoint `/api/search` retorna 503 "Embedding service not configured" (já implementado). A indexação de embeddings na análise será feita com try/except (já implementado em `contracts.py:532-577`).
+
 ### 6.2 Corrigir ContractEmbedding para SQLite
 
 ```python
@@ -352,13 +357,13 @@ def _recipient_for_event(event: ContractEvent, user_email: str | None = None) ->
 
 Criar 3 sequências de alerta por evento de vencimento:
 
-| Sequência | Dias antes | Tipo | Urgência |
-|-----------|-----------|------|----------|
-| 1 | 90 | `expiration` | Informação |
-| 2 | 30 | `expiration` | Urgente |
+| Sequência | Meses antes | Tipo | Urgência |
+|-----------|------------|------|----------|
+| 1 | 12 | `expiration` | Informação |
+| 2 | 9 | `expiration` | Urgente |
 | 3 | 7 | `expiration` | Crítico |
 
-Cada contrato com `end_date` gera 3 `ContractEvent` com `lead_time_days` diferentes.
+Cada contrato com `end_date` gera 3 `ContractEvent` com `lead_time_days` diferentes (365, 270, 210).
 
 ---
 

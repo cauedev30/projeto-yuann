@@ -59,6 +59,7 @@ def test_analyze_contract_returns_typed_result(mock_openai, sample_playbook) -> 
             AnalysisFindingItem(
                 clause_code="PRAZO",
                 clause_title="Prazo contratual",
+                classification="ausente",
                 severity="critical",
                 risk_score=47,
                 explanation="O contrato nao fixa prazo minimo compativel com o playbook.",
@@ -113,7 +114,9 @@ def test_summarize_contract_returns_typed_result(mock_openai) -> None:
 
 
 @patch("app.infrastructure.openai_client.openai")
-def test_generate_corrected_contract_returns_typed_result(mock_openai, sample_playbook) -> None:
+def test_generate_corrected_contract_returns_typed_result(
+    mock_openai, sample_playbook
+) -> None:
     parsed = CorrectedContractResult(
         corrected_text="Contrato corrigido completo.",
         corrections=[
@@ -142,9 +145,13 @@ def test_generate_corrected_contract_returns_typed_result(mock_openai, sample_pl
 
 
 @patch("app.infrastructure.openai_client.openai")
-def test_analyze_contract_returns_typed_fallback_on_failure(mock_openai, sample_playbook) -> None:
+def test_analyze_contract_returns_typed_fallback_on_failure(
+    mock_openai, sample_playbook
+) -> None:
     sdk_client = MagicMock()
-    sdk_client.beta.chat.completions.parse.side_effect = RuntimeError("upstream timeout")
+    sdk_client.beta.chat.completions.parse.side_effect = RuntimeError(
+        "upstream timeout"
+    )
     mock_openai.OpenAI.return_value = sdk_client
 
     client = OpenAIAnalysisClient(api_key="test-key")

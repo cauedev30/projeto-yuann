@@ -1,10 +1,18 @@
 from app.schemas.analysis import AnalysisItem
 
 from app.domain.contract_analysis import (
+    CLASSIFICATION_TO_STATUS,
     calculate_final_risk_score,
     extract_contract_facts,
     merge_analysis_items,
 )
+
+
+def test_classification_to_status_maps_correctly() -> None:
+    assert CLASSIFICATION_TO_STATUS["adequada"] == "conforme"
+    assert CLASSIFICATION_TO_STATUS["risco_medio"] == "attention"
+    assert CLASSIFICATION_TO_STATUS["ausente"] == "critical"
+    assert CLASSIFICATION_TO_STATUS["conflitante"] == "critical"
 
 
 def test_merge_analysis_items_prefers_deterministic_result_for_same_clause() -> None:
@@ -88,7 +96,11 @@ def test_calculate_final_risk_score_penalizes_missing_essential_clause() -> None
                 current_summary="Clausula nao encontrada.",
                 policy_rule="Clausula obrigatoria.",
                 suggested_adjustment_direction="Inserir clausula de exclusividade.",
-                metadata={"category": "essencial", "essential_clause": True, "missing_clause": True},
+                metadata={
+                    "category": "essencial",
+                    "essential_clause": True,
+                    "missing_clause": True,
+                },
             )
         ],
     )
@@ -102,3 +114,66 @@ def test_extract_contract_facts_parses_aluguel_mensal_sera_de_pattern() -> None:
     )
 
     assert facts["contract_value"] == 8500.0
+
+
+def test_auto_activate_signed_contract_sets_is_active() -> None:
+    from app.application.analysis import auto_activate_signed_contract
+    from app.db.models.contract import Contract, ContractSource, ContractVersion
+
+    contract = Contract(
+        title="Test",
+        external_reference="TEST-001",
+        status="analyzed",
+        is_active=False,
+    )
+    version = ContractVersion(
+        version_number=1,
+        source=ContractSource.signed_contract,
+        original_filename="test.pdf",
+        storage_key="fixtures/test.pdf",
+    )
+    contract.versions.append(version)
+
+    class FakeSession:
+        committed = False
+
+        def commit(self):
+            self.committed = True
+
+    session = FakeSession()
+    auto_activate_signed_contract(contract, session)  # type: ignore
+
+    assert contract.is_active is True
+    assert contract.activated_at is not None
+    assert session.committed is True
+
+
+def test_auto_activate_skips_non_signed_contracts() -> None:
+    from app.application.analysis import auto_activate_signed_contract
+    from app.db.models.contract import Contract, ContractSource, ContractVersion
+
+    contract = Contract(
+        title="Test",
+        external_reference="TEST-002",
+        status="draft",
+        is_active=False,
+    )
+    version = ContractVersion(
+        version_number=1,
+        source=ContractSource.third_party_draft,
+        original_filename="test.pdf",
+        storage_key="fixtures/test.pdf",
+    )
+    contract.versions.append(version)
+
+    class FakeSession:
+        committed = False
+
+        def commit(self):
+            self.committed = True
+
+    session = FakeSession()
+    auto_activate_signed_contract(contract, session)  # type: ignore
+
+    assert contract.is_active is False
+    assert session.committed is False

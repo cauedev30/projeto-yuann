@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import React from "react";
 import { useCallback, useEffect, useState } from "react";
 
@@ -12,21 +11,18 @@ import { StatCard } from "../../../components/ui/stat-card";
 import { SurfaceCard } from "../../../components/ui/surface-card";
 import type { ContractDetail } from "../../../entities/contracts/model";
 import {
-  compareContractVersions,
   ContractsApiError,
   getContractDetail,
-  listContractVersions,
   getContractVersionDetail,
   getDownloadCorrectedUrl,
 } from "../../../lib/api/contracts";
 import { useGenerateCorrectedContract } from "../../../lib/hooks/use-contracts";
 import { ContractSummaryPanel } from "../components/contract-summary-panel";
+import { ClauseStepper } from "../components/clause-stepper";
 import { EventTimeline } from "../components/event-timeline";
 import { ExtractedTextPanel } from "../components/extracted-text-panel";
 import { FindingsSection } from "../components/findings-section";
 import { MetadataSection } from "../components/metadata-section";
-import { VersionDiffPanel } from "../components/version-diff-panel";
-import { VersionHistoryPanel } from "../components/version-history-panel";
 import styles from "./contract-detail-screen.module.css";
 
 const SOURCE_LABELS: Record<string, string> = {
@@ -44,10 +40,9 @@ const CONTRACT_STATUS_LABELS: Record<string, string> = {
 type ContractDetailScreenProps = {
   contractId: string;
   versionId?: string | null;
+  context?: "acervo" | "historico" | "contracts";
   loadContractDetail?: (contractId: string) => Promise<ContractDetail>;
   loadContractVersionDetail?: (contractId: string, versionId: string) => Promise<ContractDetail>;
-  loadContractVersions?: typeof listContractVersions;
-  compareVersions?: typeof compareContractVersions;
 };
 
 function buildContractDescription(detail: ContractDetail): string {
@@ -89,55 +84,17 @@ function formatContractStatus(status: string): string {
   return CONTRACT_STATUS_LABELS[status] ?? status;
 }
 
-function getSelectedVersionId(detail: ContractDetail | null): string | null {
-  if (!detail) {
-    return null;
-  }
-
-  return detail.selectedVersion?.contractVersionId ?? detail.latestVersion?.contractVersionId ?? null;
-}
-
-function getDefaultBaselineId(
-  versions: Awaited<ReturnType<typeof listContractVersions>>["items"],
-  selectedVersionId: string | null,
-): string | null {
-  if (!selectedVersionId) {
-    return null;
-  }
-
-  const selectedIndex = versions.findIndex((item) => item.contractVersionId === selectedVersionId);
-  if (selectedIndex === -1) {
-    return versions.find((item) => item.contractVersionId !== selectedVersionId)?.contractVersionId ?? null;
-  }
-  if (selectedIndex + 1 < versions.length) {
-    return versions[selectedIndex + 1]?.contractVersionId ?? null;
-  }
-  if (selectedIndex > 0) {
-    return versions[selectedIndex - 1]?.contractVersionId ?? null;
-  }
-  return null;
-}
-
 export function ContractDetailScreen({
   contractId,
   versionId,
+  context = "contracts",
   loadContractDetail = getContractDetail,
   loadContractVersionDetail = getContractVersionDetail,
-  loadContractVersions = listContractVersions,
-  compareVersions = compareContractVersions,
 }: ContractDetailScreenProps) {
-  const router = useRouter();
   const [detail, setDetail] = useState<ContractDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [correctedReady, setCorrectedReady] = useState(false);
-  const [versions, setVersions] = useState<Awaited<ReturnType<typeof listContractVersions>>["items"]>([]);
-  const [isLoadingVersions, setIsLoadingVersions] = useState(true);
-  const [versionsError, setVersionsError] = useState<string | null>(null);
-  const [comparisonBaselineId, setComparisonBaselineId] = useState<string | null>(null);
-  const [comparison, setComparison] = useState<Awaited<ReturnType<typeof compareContractVersions>> | null>(null);
-  const [isLoadingComparison, setIsLoadingComparison] = useState(false);
-  const [comparisonError, setComparisonError] = useState<string | null>(null);
 
   const generateCorrected = useGenerateCorrectedContract();
 
@@ -147,30 +104,11 @@ export function ContractDetailScreen({
     setCorrectedReady(false);
   }, [contractId, versionId]);
 
-  useEffect(() => {
-    setComparisonBaselineId(null);
-  }, [contractId, versionId]);
-
   const loadCurrentSelection = useCallback(async () => (
     versionId
       ? loadContractVersionDetail(contractId, versionId)
       : loadContractDetail(contractId)
   ), [contractId, loadContractDetail, loadContractVersionDetail, versionId]);
-
-  const loadVersionsSnapshot = useCallback(async () => {
-    const response = await loadContractVersions(contractId);
-    return response.items;
-  }, [contractId, loadContractVersions]);
-
-  const loadComparisonSnapshot = useCallback(
-    async (selectedId: string, baselineId: string) => (
-      compareVersions(contractId, {
-        selectedVersionId: selectedId,
-        baselineVersionId: baselineId,
-      })
-    ),
-    [compareVersions, contractId],
-  );
 
   useEffect(() => {
     let isActive = true;
@@ -206,97 +144,6 @@ export function ContractDetailScreen({
       isActive = false;
     };
   }, [loadCurrentSelection]);
-
-  useEffect(() => {
-    let isActive = true;
-
-    async function loadVersions() {
-      setIsLoadingVersions(true);
-      setVersionsError(null);
-
-      try {
-        const response = await loadVersionsSnapshot();
-        if (!isActive) {
-          return;
-        }
-
-        setVersions(response);
-      } catch (loadVersionsError) {
-        if (!isActive) {
-          return;
-        }
-
-        setVersions([]);
-        setVersionsError(
-          loadVersionsError instanceof Error
-            ? loadVersionsError.message
-            : "Não foi possível carregar o histórico de versões.",
-        );
-      } finally {
-        if (isActive) {
-          setIsLoadingVersions(false);
-        }
-      }
-    }
-
-    void loadVersions();
-
-    return () => {
-      isActive = false;
-    };
-  }, [loadVersionsSnapshot]);
-
-  const selectedVersionId = getSelectedVersionId(detail);
-  const effectiveBaselineId =
-    comparisonBaselineId && comparisonBaselineId !== selectedVersionId
-      ? comparisonBaselineId
-      : getDefaultBaselineId(versions, selectedVersionId);
-
-  useEffect(() => {
-    let isActive = true;
-
-    async function loadComparison() {
-      if (!selectedVersionId || !effectiveBaselineId) {
-        setComparison(null);
-        setComparisonError(null);
-        setIsLoadingComparison(false);
-        return;
-      }
-
-      setIsLoadingComparison(true);
-      setComparisonError(null);
-
-      try {
-        const response = await loadComparisonSnapshot(selectedVersionId, effectiveBaselineId);
-        if (!isActive) {
-          return;
-        }
-
-        setComparison(response);
-      } catch (loadComparisonError) {
-        if (!isActive) {
-          return;
-        }
-
-        setComparison(null);
-        setComparisonError(
-          loadComparisonError instanceof Error
-            ? loadComparisonError.message
-            : "Não foi possível comparar as versões.",
-        );
-      } finally {
-        if (isActive) {
-          setIsLoadingComparison(false);
-        }
-      }
-    }
-
-    void loadComparison();
-
-    return () => {
-      isActive = false;
-    };
-  }, [effectiveBaselineId, loadComparisonSnapshot, selectedVersionId]);
 
   async function handleRetry() {
     setIsLoading(true);
@@ -383,16 +230,6 @@ export function ContractDetailScreen({
 
   const selectedVersion = detail.selectedVersion;
   const selectedAnalysis = detail.selectedAnalysis;
-  const currentVersionId = detail.latestVersion?.contractVersionId ?? null;
-
-  function handleOpenVersion(nextVersionId: string | null) {
-    if (!nextVersionId || nextVersionId === currentVersionId) {
-      router.push(`/contracts/${contractId}`);
-      return;
-    }
-
-    router.push(`/contracts/${contractId}?versionId=${nextVersionId}`);
-  }
 
   return (
     <section className={styles.page}>
@@ -473,22 +310,15 @@ export function ContractDetailScreen({
           </SurfaceCard>
         </div>
 
-        <div className={styles.detailGrid}>
-          <VersionHistoryPanel
-            versions={versions}
-            isLoading={isLoadingVersions}
-            errorMessage={versionsError}
-            selectedVersionId={selectedVersionId}
-            comparisonBaselineId={effectiveBaselineId}
-            onOpenVersion={handleOpenVersion}
-            onCompareWith={setComparisonBaselineId}
-          />
-          <VersionDiffPanel
-            comparison={comparison}
-            isLoading={isLoadingComparison}
-            errorMessage={comparisonError}
-          />
-        </div>
+        {selectedAnalysis && selectedAnalysis.findings.length > 0 && (
+          <SurfaceCard title="Análise de Cláusulas">
+            <ClauseStepper
+              findings={selectedAnalysis.findings}
+              context={context}
+              riskScore={selectedAnalysis.contractRiskScore}
+            />
+          </SurfaceCard>
+        )}
 
         <details className={styles.collapsible} open>
           <summary className={styles.collapsibleSummary}>

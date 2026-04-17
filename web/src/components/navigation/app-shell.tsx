@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { useAuth } from "../../contexts/auth-context";
+import { NotificationBadge } from "../../features/notifications/components/notification-badge";
 import { ScrollToBottom } from "../ui/scroll-to-bottom";
 import styles from "./app-shell.module.css";
 
@@ -160,6 +161,7 @@ export function AppShell({ children }: AppShellProps) {
             <p className={styles.topbarEyebrow}>{topbar.title}</p>
             <strong className={styles.topbarTitle}>{topbar.subtitle}</strong>
           </div>
+          <NotificationBadge />
         </header>
 
         <main className={styles.content} id="main-content">

@@ -4,7 +4,7 @@ import { ContractDetailScreen } from "../../../../features/contracts/screens/con
 
 type ContractDetailPageProps = {
   params: Promise<{ contractId: string }>;
-  searchParams: Promise<{ versionId?: string | string[] }>;
+  searchParams: Promise<{ versionId?: string | string[]; context?: string | string[] }>;
 };
 
 export default async function ContractDetailPage({
@@ -16,6 +16,9 @@ export default async function ContractDetailPage({
   const versionId = Array.isArray(resolvedSearchParams.versionId)
     ? resolvedSearchParams.versionId[0] ?? null
     : resolvedSearchParams.versionId ?? null;
+  const context = Array.isArray(resolvedSearchParams.context)
+    ? resolvedSearchParams.context[0] ?? "contracts"
+    : resolvedSearchParams.context ?? "contracts";
 
-  return <ContractDetailScreen contractId={contractId} versionId={versionId} />;
+  return <ContractDetailScreen contractId={contractId} versionId={versionId} context={context as "acervo" | "historico" | "contracts"} />;
 }

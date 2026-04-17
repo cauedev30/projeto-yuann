@@ -36,6 +36,8 @@ class ContractEmbedding(TimestampMixin, Base):
     else:
         embedding = mapped_column(Text, nullable=False)
 
-    metadata_json: Mapped[dict[str, Any] | None] = mapped_column(PgJSONB)
+    metadata_json: Mapped[dict[str, Any] | None] = mapped_column(
+        SqJSON().with_variant(PgJSONB, "postgresql")
+    )
 
     contract: Mapped["Contract"] = relationship(back_populates="embeddings")

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
+from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session
 
 from app.api.dependencies import get_session
@@ -46,12 +47,18 @@ def search_contracts(
             status_code=503, detail="Failed to generate query embedding"
         )
 
-    results = search_similar_contracts(
-        session=session,
-        query_embedding=query_embedding,
-        limit=payload.limit,
-        min_similarity=payload.min_similarity,
-    )
+    try:
+        results = search_similar_contracts(
+            session=session,
+            query_embedding=query_embedding,
+            limit=payload.limit,
+            min_similarity=payload.min_similarity,
+        )
+    except OperationalError:
+        raise HTTPException(
+            status_code=503,
+            detail="Embedding service not configured. pgvector extension not available.",
+        )
 
     return SearchResponse(
         results=[

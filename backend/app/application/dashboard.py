@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import date, datetime, timedelta, timezone
+from datetime import date, datetime, timezone
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
@@ -9,7 +9,6 @@ from app.db.models.analysis import ContractAnalysis
 from app.db.models.contract import Contract
 from app.db.models.event import ContractEvent, Notification
 from app.schemas.dashboard import (
-    DashboardEventResponse,
     DashboardNotificationResponse,
     DashboardSnapshotResponse,
     DashboardSummaryResponse,
@@ -26,7 +25,7 @@ def _latest_analysis(contract: Contract) -> ContractAnalysis | None:
 
 
 def _is_operational_contract(contract: Contract) -> bool:
-    return contract.status != "draft"
+    return contract.is_active
 
 
 def build_dashboard_snapshot(
@@ -35,19 +34,17 @@ def build_dashboard_snapshot(
     today: date | str,
 ) -> DashboardSnapshotResponse:
     reference_date = date.fromisoformat(today) if isinstance(today, str) else today
-    horizon_end = reference_date + timedelta(days=365)
 
     contracts = session.scalars(
         select(Contract).options(
             selectinload(Contract.analyses).selectinload(ContractAnalysis.findings),
-            selectinload(Contract.events),
         )
     ).all()
 
     operational_contracts = [
         contract for contract in contracts if _is_operational_contract(contract)
     ]
-    active_contracts = len(operational_contracts)
+    active_contracts = sum(1 for c in contracts if c.is_active)
 
     from app.api.serializers.contracts import SOURCE_LABELS
 
@@ -56,14 +53,14 @@ def build_dashboard_snapshot(
         if contract.end_date is None or not contract.is_active:
             continue
         days_remaining = (contract.end_date - reference_date).days
-        if days_remaining > 365:
-            continue
         if days_remaining < 30:
             urgency = "red"
         elif days_remaining < 90:
             urgency = "yellow"
-        else:
+        elif days_remaining < 365:
             urgency = "green"
+        else:
+            urgency = "blue"
         unit = None
         if contract.parties and isinstance(contract.parties, dict):
             unit = contract.parties.get("locatario") or contract.parties.get(
@@ -91,7 +88,6 @@ def build_dashboard_snapshot(
     expiring_contracts.sort(key=lambda c: c.days_remaining or 999999)
 
     critical_findings = 0
-    event_items: list[DashboardEventResponse] = []
     for contract in operational_contracts:
         latest_analysis = _latest_analysis(contract)
         if latest_analysis is not None:
@@ -100,31 +96,6 @@ def build_dashboard_snapshot(
                 for finding in latest_analysis.findings
                 if finding.severity == "critical"
             )
-
-        for event in contract.events:
-            if event.event_date is None:
-                continue
-            if event.event_date > horizon_end:
-                continue
-
-            days_until_due = (event.event_date - reference_date).days
-            event_items.append(
-                DashboardEventResponse(
-                    id=event.id,
-                    event_type=event.event_type.value
-                    if hasattr(event.event_type, "value")
-                    else str(event.event_type),
-                    event_date=event.event_date,
-                    lead_time_days=event.lead_time_days,
-                    contract_id=contract.id,
-                    contract_title=contract.title,
-                    external_reference=contract.external_reference,
-                    days_until_due=days_until_due,
-                    is_overdue=days_until_due < 0,
-                )
-            )
-
-    event_items.sort(key=lambda event: (event.event_date, event.id))
 
     notifications = session.scalars(
         select(Notification).options(
@@ -166,13 +137,14 @@ def build_dashboard_snapshot(
         reverse=True,
     )
 
+    expiring_soon_count = len(expiring_contracts)
+
     return DashboardSnapshotResponse(
         summary=DashboardSummaryResponse(
             active_contracts=active_contracts,
             critical_findings=critical_findings,
-            expiring_soon=len(event_items),
+            expiring_soon=expiring_soon_count,
         ),
         expiring_contracts=expiring_contracts[:10],
-        events=event_items,
         notifications=notification_items,
     )

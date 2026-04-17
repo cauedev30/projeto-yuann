@@ -5,10 +5,12 @@ from datetime import date, datetime, timedelta
 from app.db.models.event import ContractEvent, Notification, NotificationChannel
 
 
-def _recipient_for_event(event: ContractEvent) -> str:
-    if event.metadata_json and isinstance(event.metadata_json.get("notification_recipient"), str):
+def _recipient_for_event(event: ContractEvent, user_email: str | None = None) -> str:
+    if event.metadata_json and isinstance(
+        event.metadata_json.get("notification_recipient"), str
+    ):
         return event.metadata_json["notification_recipient"]
-    return "alerts@example.com"
+    return user_email or "alerts@legalboard.com.br"
 
 
 def is_event_due(event: ContractEvent, *, today: date) -> bool:
@@ -18,11 +20,13 @@ def is_event_due(event: ContractEvent, *, today: date) -> bool:
     return trigger_date <= today
 
 
-def build_email_notification(event: ContractEvent, *, today: date) -> Notification:
+def build_email_notification(
+    event: ContractEvent, *, today: date, user_email: str | None = None
+) -> Notification:
     return Notification(
         contract_event_id=event.id,
         channel=NotificationChannel.email,
-        recipient=_recipient_for_event(event),
+        recipient=_recipient_for_event(event, user_email=user_email),
         status="pending",
         idempotency_key=f"{event.id}:email:{today.isoformat()}",
     )

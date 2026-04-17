@@ -186,66 +186,6 @@ function buildContractDetail({
   };
 }
 
-function buildContractVersionsResponse() {
-  return {
-    items: [
-      {
-        contractVersionId: "ver-2",
-        versionNumber: 2,
-        createdAt: "2026-03-21T12:00:00Z",
-        source: "third_party_draft" as const,
-        originalFilename: "contract-v2.pdf",
-        usedOcr: false,
-        analysisStatus: "completed",
-        contractRiskScore: 80,
-        isCurrent: true,
-      },
-      {
-        contractVersionId: "ver-1",
-        versionNumber: 1,
-        createdAt: "2026-03-20T12:00:00Z",
-        source: "third_party_draft" as const,
-        originalFilename: "contract-v1.pdf",
-        usedOcr: false,
-        analysisStatus: "completed",
-        contractRiskScore: 92,
-        isCurrent: false,
-      },
-    ],
-  };
-}
-
-function buildVersionComparisonResponse() {
-  return {
-    selectedVersion: {
-      contractVersionId: "ver-2",
-      versionNumber: 2,
-      createdAt: "2026-03-21T12:00:00Z",
-      source: "third_party_draft" as const,
-      originalFilename: "contract-v2.pdf",
-      usedOcr: false,
-      text: "Texto da versao 2",
-    },
-    baselineVersion: {
-      contractVersionId: "ver-1",
-      versionNumber: 1,
-      createdAt: "2026-03-20T12:00:00Z",
-      source: "third_party_draft" as const,
-      originalFilename: "contract-v1.pdf",
-      usedOcr: false,
-      text: "Texto da versao 1",
-    },
-    summary: "A versao 2 corrige o prazo e adiciona fiador.",
-    textDiff: {
-      hasChanges: true,
-      lines: [],
-    },
-    findingsDiff: {
-      items: [],
-    },
-  };
-}
-
 describe("ContractDetailScreen", () => {
   it("shows a loading skeleton while detail data is pending", () => {
     render(
@@ -431,32 +371,5 @@ describe("ContractDetailScreen", () => {
     expect(screen.getByText("Renovação")).toBeInTheDocument();
     expect(screen.getByText("Resumo ctr-1 current")).toBeInTheDocument();
     expect(screen.getByText("Texto da versao 2")).toBeInTheDocument();
-  });
-
-  it("carrega o historico de versoes e o diff no detalhe do contrato", async () => {
-    const loadContractDetail = vi.fn().mockResolvedValue(buildContractDetail());
-    const loadContractVersions = vi.fn().mockResolvedValue(buildContractVersionsResponse());
-    const compareVersions = vi.fn().mockResolvedValue(buildVersionComparisonResponse());
-
-    render(
-      <ContractDetailScreen
-        contractId="ctr-1"
-        loadContractDetail={loadContractDetail}
-        loadContractVersions={loadContractVersions}
-        compareVersions={compareVersions}
-      />,
-    );
-
-    expect(await screen.findByText("Histórico de versões")).toBeInTheDocument();
-    expect(screen.getByText("Versoes carregadas: 2, 1")).toBeInTheDocument();
-    expect(screen.getByText("Painel de comparação")).toBeInTheDocument();
-    expect(
-      await screen.findByText("A versao 2 corrige o prazo e adiciona fiador."),
-    ).toBeInTheDocument();
-    expect(loadContractVersions).toHaveBeenCalledWith("ctr-1");
-    expect(compareVersions).toHaveBeenCalledWith("ctr-1", {
-      selectedVersionId: "ver-2",
-      baselineVersionId: "ver-1",
-    });
   });
 });

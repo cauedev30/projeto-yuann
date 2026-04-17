@@ -30,7 +30,9 @@ def test_upload_contract_file_persists_version_and_extraction(
     assert result.contract_version.source == ContractSource.third_party_draft
     assert result.contract_version.version_number == 1
     assert result.extraction.text == "Prazo de vigencia 60 meses"
-    assert result.contract_version.extraction_metadata["version_snapshot"]["contract"] == {
+    assert result.contract_version.extraction_metadata["version_snapshot"][
+        "contract"
+    ] == {
         "signature_date": None,
         "start_date": None,
         "end_date": None,
@@ -49,7 +51,9 @@ def test_upload_contract_file_persists_version_and_extraction(
             "penalty_months": 0.0,
         },
     }
-    assert result.contract_version.extraction_metadata["version_snapshot"]["events"] == []
+    assert (
+        result.contract_version.extraction_metadata["version_snapshot"]["events"] == []
+    )
 
 
 def test_upload_contract_file_rolls_back_state_when_pdf_is_invalid(
@@ -116,7 +120,9 @@ def test_upload_signed_contract_persists_snapshot_and_rebuilds_events(
         "readjustment_type": "annual",
     }
     assert version.version_number == 1
-    assert version.extraction_metadata["embedded_text_length"] == len(result.extraction.text)
+    assert version.extraction_metadata["embedded_text_length"] == len(
+        result.extraction.text
+    )
     assert version.extraction_metadata["ocr_attempted"] is False
     assert version.extraction_metadata["signed_contract_snapshot"] == {
         "fields": {
@@ -185,7 +191,7 @@ def test_upload_signed_contract_persists_snapshot_and_rebuilds_events(
     assert event_types_sorted.count("renewal") == 1
     assert event_types_sorted.count("readjustment") == 1
     assert event_types_sorted.count("grace_period_end") == 1
-    assert event_types_sorted.count("expiration") == 5  # 1 base + 4 notifications
+    assert event_types_sorted.count("expiration") == 4  # 1 base + 3 notifications
 
     base_events = {
         event.event_type.value: event.metadata_json
@@ -212,14 +218,16 @@ def test_upload_signed_contract_persists_snapshot_and_rebuilds_events(
     }
 
     notification_events = [
-        event for event in events
+        event
+        for event in events
         if (event.metadata_json or {}).get("notification_sequence")
     ]
-    assert len(notification_events) == 4
+    assert len(notification_events) == 3
     assert {
         item["event_type"]: item["metadata"]["source_contract_version_id"]
         for item in version_snapshot["events"]
-        if item["event_type"] != "expiration" or "notification_sequence" not in item["metadata"]
+        if item["event_type"] != "expiration"
+        or "notification_sequence" not in item["metadata"]
     } == {
         "renewal": version.id,
         "expiration": version.id,
@@ -281,10 +289,20 @@ def test_upload_signed_contract_replaces_existing_schedule_with_latest_version(
     assert contract.start_date.isoformat() == "2027-05-01"
     assert contract.end_date.isoformat() == "2029-04-30"
     assert contract.term_months == 24
-    assert versions[0].extraction_metadata["version_snapshot"]["contract"]["term_months"] == 60
-    assert versions[1].extraction_metadata["version_snapshot"]["contract"]["term_months"] == 24
-    base_events = [e for e in events if not (e.metadata_json or {}).get("notification_sequence")]
-    notification_events = [e for e in events if (e.metadata_json or {}).get("notification_sequence")]
+    assert (
+        versions[0].extraction_metadata["version_snapshot"]["contract"]["term_months"]
+        == 60
+    )
+    assert (
+        versions[1].extraction_metadata["version_snapshot"]["contract"]["term_months"]
+        == 24
+    )
+    base_events = [
+        e for e in events if not (e.metadata_json or {}).get("notification_sequence")
+    ]
+    notification_events = [
+        e for e in events if (e.metadata_json or {}).get("notification_sequence")
+    ]
     assert sorted(e.event_type.value for e in base_events) == ["expiration", "renewal"]
     assert {e.event_type.value: e.event_date.isoformat() for e in base_events} == {
         "renewal": "2028-11-01",
@@ -297,7 +315,7 @@ def test_upload_signed_contract_replaces_existing_schedule_with_latest_version(
         "renewal": second_result.contract_version.id,
         "expiration": second_result.contract_version.id,
     }
-    assert len(notification_events) == 4
+    assert len(notification_events) == 3
 
 
 def test_upload_contract_file_links_new_analysis_to_uploaded_version(

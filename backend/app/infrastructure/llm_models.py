@@ -10,6 +10,11 @@ from pydantic import BaseModel, Field
 class AnalysisFindingItem(BaseModel):
     clause_code: str = Field(description="Codigo interno da clausula analisada.")
     clause_title: str = Field(description="Nome amigavel da clausula em portugues.")
+    classification: Literal["adequada", "risco_medio", "ausente", "conflitante"] = (
+        Field(
+            description="Classificacao canonica: adequada, risco_medio, ausente ou conflitante."
+        )
+    )
     severity: Literal["critical", "attention"] = Field(
         description="Severidade do achado: critical ou attention."
     )

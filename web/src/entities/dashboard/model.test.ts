@@ -21,19 +21,6 @@ describe("dashboard entity mapping", () => {
           urgency_level: "red",
         },
       ],
-      events: [
-        {
-          id: "evt-1",
-          event_type: "renewal",
-          event_date: "2030-09-30",
-          lead_time_days: 30,
-          contract_id: "ctr-1",
-          contract_title: "Loja Centro",
-          external_reference: "LOC-001",
-          days_until_due: -5,
-          is_overdue: true,
-        },
-      ],
       notifications: [
         {
           id: "ntf-1",
@@ -51,9 +38,6 @@ describe("dashboard entity mapping", () => {
 
     expect(snapshot.summary.activeContracts).toBe(12);
     expect(snapshot.expiring_contracts[0].urgency_level).toBe("red");
-    expect(snapshot.events[0].eventType).toBe("renewal");
-    expect(snapshot.events[0].contractTitle).toBe("Loja Centro");
-    expect(snapshot.events[0].leadTimeDays).toBe(30);
     expect(snapshot.notifications[0].sentAt).toBeNull();
     expect(snapshot.notifications[0].eventType).toBe("renewal");
   });

@@ -140,7 +140,7 @@ export function HistoricoScreen() {
         isLoading={isLoading}
         isRefreshing={isRefreshing}
         items={contracts}
-        navigateToContract={(id) => router.push(`/contracts/${id}`)}
+        navigateToContract={(id) => router.push(`/contracts/${id}?context=historico`)}
         onRefresh={handleRefresh}
         renderRowActions={renderRowActions}
         renderExtraMeta={renderExtraMeta}

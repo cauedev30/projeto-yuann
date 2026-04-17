@@ -28,19 +28,6 @@ describe("getDashboardSnapshot", () => {
               urgency_level: "red",
             },
           ],
-          events: [
-            {
-              id: "evt-1",
-              event_type: "renewal",
-              event_date: "2026-03-27",
-              lead_time_days: 30,
-              contract_id: "ctr-1",
-              contract_title: "Loja Centro",
-              external_reference: "LOC-001",
-              days_until_due: -5,
-              is_overdue: true,
-            },
-          ],
           notifications: [
             {
               id: "ntf-1",
@@ -64,7 +51,6 @@ describe("getDashboardSnapshot", () => {
     const snapshot = await getDashboardSnapshot(fetchImpl);
 
     expect(snapshot?.summary.activeContracts).toBe(2);
-    expect(snapshot?.events[0].daysUntilDue).toBe(-5);
     expect(snapshot?.notifications[0].contractTitle).toBe("Loja Centro");
   });
 
@@ -79,7 +65,6 @@ describe("getDashboardSnapshot", () => {
             expiring_soon: 0,
           },
           expiring_contracts: [],
-          events: [],
           notifications: [],
         }),
         {

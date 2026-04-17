@@ -47,12 +47,15 @@ def _notification_conditions(
         conditions.append(Notification.dismissed_at.is_(None))
     if from_date is not None:
         conditions.append(
-            Notification.created_at >= datetime.combine(from_date, time.min, tzinfo=timezone.utc)
+            Notification.created_at
+            >= datetime.combine(from_date, time.min, tzinfo=timezone.utc)
         )
     if to_date is not None:
         conditions.append(
             Notification.created_at
-            < datetime.combine(to_date + timedelta(days=1), time.min, tzinfo=timezone.utc)
+            < datetime.combine(
+                to_date + timedelta(days=1), time.min, tzinfo=timezone.utc
+            )
         )
 
     return conditions
@@ -76,7 +79,12 @@ def list_notifications(
         from_date=from_date,
         to_date=to_date,
     )
-    total = session.scalar(select(func.count()).select_from(Notification).where(*conditions)) or 0
+    total = (
+        session.scalar(
+            select(func.count()).select_from(Notification).where(*conditions)
+        )
+        or 0
+    )
     notifications = session.scalars(
         select(Notification)
         .where(*conditions)
@@ -89,6 +97,11 @@ def list_notifications(
 
 
 @router.post("/{notification_id}/dismiss", response_model=NotificationListItem)
+@router.patch(
+    "/{notification_id}/dismiss",
+    response_model=NotificationListItem,
+    include_in_schema=False,
+)
 def dismiss_notification_endpoint(
     notification_id: str,
     session: Session = Depends(get_session),
@@ -109,9 +122,17 @@ def dismiss_notifications_bulk(
     session: Session = Depends(get_session),
 ) -> NotificationDismissBulkResponse:
     ordered_ids = list(dict.fromkeys(payload.ids))
-    notifications = session.scalars(select(Notification).where(Notification.id.in_(ordered_ids))).all()
-    notifications_by_id = {notification.id: notification for notification in notifications}
-    ordered_notifications = [notifications_by_id[notification_id] for notification_id in ordered_ids if notification_id in notifications_by_id]
+    notifications = session.scalars(
+        select(Notification).where(Notification.id.in_(ordered_ids))
+    ).all()
+    notifications_by_id = {
+        notification.id: notification for notification in notifications
+    }
+    ordered_notifications = [
+        notifications_by_id[notification_id]
+        for notification_id in ordered_ids
+        if notification_id in notifications_by_id
+    ]
 
     now = datetime.now(timezone.utc)
     dismissed_count = 0
@@ -127,7 +148,10 @@ def dismiss_notifications_bulk(
 
     return NotificationDismissBulkResponse(
         dismissed_count=dismissed_count,
-        items=[_serialize_notification(notification) for notification in ordered_notifications],
+        items=[
+            _serialize_notification(notification)
+            for notification in ordered_notifications
+        ],
     )
 
 

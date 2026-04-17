@@ -8,24 +8,35 @@ from sqlalchemy.orm import Session
 from app.db.base import Base
 from app.db.models.analysis import ContractAnalysis, ContractAnalysisFinding
 from app.db.models.contract import Contract, ContractSource, ContractVersion
-from app.db.models.event import ContractEvent, EventType, Notification, NotificationChannel
+from app.db.models.event import (
+    ContractEvent,
+    EventType,
+    Notification,
+    NotificationChannel,
+)
 
 
 def reset_database(database_url: str) -> None:
     engine = create_engine(
         database_url,
-        connect_args={"check_same_thread": False} if database_url.startswith("sqlite") else {},
+        connect_args={"check_same_thread": False}
+        if database_url.startswith("sqlite")
+        else {},
     )
     Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
 
 
-def seed_dashboard_data(session: Session, *, reference_date: date = date(2026, 4, 1)) -> None:
+def seed_dashboard_data(
+    session: Session, *, reference_date: date = date(2026, 4, 1)
+) -> None:
 
     uploaded_contract = Contract(
         title="Loja Centro",
         external_reference="LOC-001",
         status="uploaded",
+        is_active=True,
+        end_date=date(2026, 5, 15),
         parties={"locador": "Imobiliaria Centro", "locatario": "Rede Comercial X"},
         financial_terms={"valor_mensal": "R$ 12.500,00", "indice_reajuste": "IGPM"},
     )
@@ -33,7 +44,12 @@ def seed_dashboard_data(session: Session, *, reference_date: date = date(2026, 4
         title="Loja Norte",
         external_reference="LOC-002",
         status="active",
-        parties={"locador": "Patrimonio Norte S.A.", "locatario": "Operacao Varejo Norte"},
+        is_active=True,
+        end_date=date(2026, 5, 1),
+        parties={
+            "locador": "Patrimonio Norte S.A.",
+            "locatario": "Operacao Varejo Norte",
+        },
         financial_terms={"valor_mensal": "R$ 18.000,00", "indice_reajuste": "IPCA"},
     )
     draft_contract = Contract(

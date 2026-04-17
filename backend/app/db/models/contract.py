@@ -17,7 +17,10 @@ from sqlalchemy import (
     Text,
     UniqueConstraint,
 )
-from sqlalchemy.dialects.postgresql import JSONB as JSON
+from sqlalchemy.dialects.postgresql import JSONB as PgJSONB
+from sqlalchemy.dialects.sqlite import JSON as SqJSON
+
+JSON = SqJSON().with_variant(PgJSONB, "postgresql")
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base, TimestampMixin

@@ -36,7 +36,6 @@ function isOperationallyEmpty(snapshot: DashboardSnapshot): boolean {
     snapshot.summary.activeContracts === 0 &&
     snapshot.summary.criticalFindings === 0 &&
     snapshot.summary.expiringSoon === 0 &&
-    snapshot.events.length === 0 &&
     snapshot.notifications.length === 0
   );
 }

@@ -11,10 +11,15 @@ from app.application.contract_versions import (
     replace_contract_events,
 )
 from app.application.analysis import mark_contract_analysis_completed
-from app.db.models.analysis import AnalysisStatus, ContractAnalysis, ContractAnalysisFinding
+from app.db.models.analysis import (
+    AnalysisStatus,
+    ContractAnalysis,
+    ContractAnalysisFinding,
+)
 from app.db.models.contract import Contract, ContractVersion
 from app.db.models.policy import Policy
 from app.domain.contract_analysis import (
+    CLASSIFICATION_TO_STATUS,
     calculate_final_risk_score,
     evaluate_rules,
     extract_contract_facts,
@@ -73,27 +78,35 @@ def run_policy_analysis(
             chunks=chunk_texts,
             playbook=list(PLAYBOOK_CLAUSES),
         )
-        llm_analysis_items = [
-            AnalysisItem(
-                clause_name=item.clause_title,
-                status=item.severity,
-                severity="high" if item.severity == "critical" else "medium",
-                current_summary=item.explanation,
-                policy_rule=item.clause_code,
-                risk_explanation=item.explanation,
-                suggested_adjustment_direction=item.suggested_correction or "",
-                metadata={
-                    "category": "essencial"
-                    if item.clause_code in {"EXCLUSIVIDADE", "PRAZO", "ASSINATURAS"}
-                    else "redacao",
-                    "essential_clause": item.clause_code in {"EXCLUSIVIDADE", "PRAZO", "ASSINATURAS"},
-                    "risk_score": item.risk_score,
-                    "clause_code": item.clause_code,
-                    "page_reference": item.page_reference,
-                },
+        llm_analysis_items = []
+        for item in llm_result.items:
+            classification = getattr(item, "classification", None)
+            if classification and classification in CLASSIFICATION_TO_STATUS:
+                mapped_status = CLASSIFICATION_TO_STATUS[classification]
+            else:
+                mapped_status = item.severity
+            llm_analysis_items.append(
+                AnalysisItem(
+                    clause_name=item.clause_title,
+                    status=mapped_status,
+                    severity="high" if mapped_status == "critical" else "medium",
+                    current_summary=item.explanation,
+                    policy_rule=item.clause_code,
+                    risk_explanation=item.explanation,
+                    suggested_adjustment_direction=item.suggested_correction or "",
+                    metadata={
+                        "category": "essencial"
+                        if item.clause_code in {"EXCLUSIVIDADE", "PRAZO", "ASSINATURAS"}
+                        else "redacao",
+                        "essential_clause": item.clause_code
+                        in {"EXCLUSIVIDADE", "PRAZO", "ASSINATURAS"},
+                        "risk_score": item.risk_score,
+                        "clause_code": item.clause_code,
+                        "page_reference": item.page_reference,
+                        "classification": classification or "",
+                    },
+                )
             )
-            for item in llm_result.items
-        ]
         merged_items = merge_analysis_items(llm_analysis_items, fallback_result.items)
         filtered_items = [item for item in merged_items if item.status != "conforme"]
         analysis = ContractAnalysis(
@@ -109,7 +122,9 @@ def run_policy_analysis(
             raw_payload={
                 "summary": llm_result.summary,
                 "llm_items": [item.model_dump() for item in llm_result.items],
-                "deterministic_items": [item.model_dump() for item in fallback_result.items],
+                "deterministic_items": [
+                    item.model_dump() for item in fallback_result.items
+                ],
                 "merged_items": [item.model_dump() for item in filtered_items],
             },
             findings=[

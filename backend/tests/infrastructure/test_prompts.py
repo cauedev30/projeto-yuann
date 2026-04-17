@@ -17,6 +17,7 @@ from app.infrastructure.prompts import (
 # Fixtures
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture
 def sample_playbook() -> list[PlaybookClause]:
     return [
@@ -48,6 +49,7 @@ SAMPLE_CONTRACT = "Contrato de locação entre LOCADOR e LOCATÁRIO com prazo de
 # SYSTEM_PROMPT tests
 # ---------------------------------------------------------------------------
 
+
 class TestSystemPrompt:
     def test_references_playbook(self):
         assert "playbook" in SYSTEM_PROMPT.lower()
@@ -74,7 +76,7 @@ class TestSystemPrompt:
         assert "exclusividade" in prompt
         assert "prazo" in prompt
         assert "reajuste" in prompt
-        assert "vistorias" in prompt
+        assert "vistoria" in prompt
         assert "obras" in prompt
         assert "infraestrutura" in prompt
         assert "fiador" in prompt
@@ -83,6 +85,7 @@ class TestSystemPrompt:
 # ---------------------------------------------------------------------------
 # SUMMARY_SYSTEM_PROMPT tests
 # ---------------------------------------------------------------------------
+
 
 class TestSummarySystemPrompt:
     def test_still_has_instructions(self):
@@ -110,16 +113,23 @@ class TestSummarySystemPrompt:
 # CORRECTION_SYSTEM_PROMPT tests
 # ---------------------------------------------------------------------------
 
+
 class TestCorrectionSystemPrompt:
     def test_exists_and_references_correction(self):
-        assert "corrig" in CORRECTION_SYSTEM_PROMPT.lower() or "correc" in CORRECTION_SYSTEM_PROMPT.lower()
+        assert (
+            "corrig" in CORRECTION_SYSTEM_PROMPT.lower()
+            or "correc" in CORRECTION_SYSTEM_PROMPT.lower()
+        )
 
     def test_references_playbook(self):
         assert "playbook" in CORRECTION_SYSTEM_PROMPT.lower()
 
     def test_references_findings(self):
         # Should mention findings / achados
-        assert "achado" in CORRECTION_SYSTEM_PROMPT.lower() or "finding" in CORRECTION_SYSTEM_PROMPT.lower()
+        assert (
+            "achado" in CORRECTION_SYSTEM_PROMPT.lower()
+            or "finding" in CORRECTION_SYSTEM_PROMPT.lower()
+        )
 
     def test_requires_preserving_business_data(self):
         prompt = CORRECTION_SYSTEM_PROMPT.lower()
@@ -131,6 +141,7 @@ class TestCorrectionSystemPrompt:
 # ---------------------------------------------------------------------------
 # build_user_prompt tests
 # ---------------------------------------------------------------------------
+
 
 class TestBuildUserPrompt:
     def test_contains_clause_codes(self, sample_playbook):
@@ -154,7 +165,7 @@ class TestBuildUserPrompt:
         result = build_user_prompt(SAMPLE_CONTRACT, sample_playbook)
         assert isinstance(result, str)
 
-    def test_truncates_long_full_text(self):
+    def test_includes_full_playbook_text(self):
         long_clause = PlaybookClause(
             code="OBRAS",
             title="Das Obras",
@@ -162,9 +173,8 @@ class TestBuildUserPrompt:
             category="obras",
         )
         result = build_user_prompt("contrato", [long_clause])
-        # Full text should be truncated (not all 500 chars present)
-        assert "A" * 500 not in result
         assert "OBRAS" in result
+        assert "A" * 500 in result
 
     def test_no_json_return_instruction(self, sample_playbook):
         result = build_user_prompt(SAMPLE_CONTRACT, sample_playbook)
@@ -181,6 +191,7 @@ class TestBuildUserPrompt:
 # build_correction_prompt tests
 # ---------------------------------------------------------------------------
 
+
 class TestBuildCorrectionPrompt:
     def test_contains_original_text(self, sample_playbook):
         findings = [{"clause_code": "PRAZO", "severity": "critical"}]
@@ -188,7 +199,14 @@ class TestBuildCorrectionPrompt:
         assert SAMPLE_CONTRACT in result
 
     def test_contains_findings(self, sample_playbook):
-        findings = [{"clause_code": "PRAZO", "severity": "critical", "explanation": "Prazo insuficiente", "suggested_correction": "Ajustar prazo"}]
+        findings = [
+            {
+                "clause_code": "PRAZO",
+                "severity": "critical",
+                "explanation": "Prazo insuficiente",
+                "suggested_correction": "Ajustar prazo",
+            }
+        ]
         result = build_correction_prompt(SAMPLE_CONTRACT, findings, sample_playbook)
         assert "PRAZO" in result
         assert "critical" in result
@@ -203,6 +221,7 @@ class TestBuildCorrectionPrompt:
 # ---------------------------------------------------------------------------
 # build_summary_user_prompt tests
 # ---------------------------------------------------------------------------
+
 
 class TestBuildSummaryUserPrompt:
     def test_contains_contract(self):

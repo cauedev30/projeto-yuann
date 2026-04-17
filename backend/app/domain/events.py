@@ -19,7 +19,12 @@ def build_contract_events(
     *,
     default_lead_times: dict[str, int] | None = None,
 ) -> list[ScheduledEvent]:
-    defaults = {"renewal": 180, "expiration": 30, "readjustment": 30, "grace_period_end": 15}
+    defaults = {
+        "renewal": 180,
+        "expiration": 30,
+        "readjustment": 30,
+        "grace_period_end": 15,
+    }
     if default_lead_times:
         defaults.update(default_lead_times)
 
@@ -46,9 +51,8 @@ def build_contract_events(
         )
 
         notification_schedule = [
-            (300, "10_months_before"),
+            (365, "12_months_before"),
             (270, "9_months_before"),
-            (240, "8_months_before"),
             (210, "7_months_before"),
         ]
         for lead_days, sequence_label in notification_schedule:
@@ -64,13 +68,18 @@ def build_contract_events(
                 )
             )
 
-    if metadata.start_date is not None and metadata.financial_terms.get("readjustment_type") == "annual":
+    if (
+        metadata.start_date is not None
+        and metadata.financial_terms.get("readjustment_type") == "annual"
+    ):
         events.append(
             ScheduledEvent(
                 event_type="readjustment",
                 event_date=_add_months(metadata.start_date, 12),
                 lead_time_days=defaults["readjustment"],
-                metadata={"derived_from": ["start_date", "financial_terms.readjustment_type"]},
+                metadata={
+                    "derived_from": ["start_date", "financial_terms.readjustment_type"]
+                },
             )
         )
 
@@ -81,7 +90,12 @@ def build_contract_events(
                 event_type="grace_period_end",
                 event_date=_add_months(metadata.start_date, grace_months),
                 lead_time_days=defaults["grace_period_end"],
-                metadata={"derived_from": ["start_date", "financial_terms.grace_period_months"]},
+                metadata={
+                    "derived_from": [
+                        "start_date",
+                        "financial_terms.grace_period_months",
+                    ]
+                },
             )
         )
 

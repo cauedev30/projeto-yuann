@@ -5,9 +5,23 @@ from datetime import datetime, timezone
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.db.models.analysis import AnalysisStatus, ContractAnalysis, ContractAnalysisFinding
-from app.db.models.contract import Contract, ContractVersion
+from app.db.models.analysis import (
+    AnalysisStatus,
+    ContractAnalysis,
+    ContractAnalysisFinding,
+)
+from app.db.models.contract import Contract, ContractSource, ContractVersion
 from app.schemas.analysis import ContractAnalysisResult
+
+
+def auto_activate_signed_contract(contract: Contract, session: Session) -> None:
+    if not contract.is_active:
+        for version in contract.versions:
+            if version.source == ContractSource.signed_contract:
+                contract.is_active = True
+                contract.activated_at = datetime.now(timezone.utc)
+                session.commit()
+                return
 
 
 def mark_contract_analysis_completed(
@@ -66,6 +80,7 @@ def persist_contract_analysis(
     contract = session.get(Contract, contract_id)
     if contract is not None:
         mark_contract_analysis_completed(contract)
+        auto_activate_signed_contract(contract, session)
     session.commit()
     session.refresh(analysis)
     return analysis

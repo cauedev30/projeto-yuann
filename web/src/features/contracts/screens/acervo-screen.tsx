@@ -102,7 +102,7 @@ export function AcervoScreen() {
         isLoading={isLoading}
         isRefreshing={isRefreshing}
         items={contracts}
-        navigateToContract={(id) => router.push(`/contracts/${id}`)}
+        navigateToContract={(id) => router.push(`/contracts/${id}?context=acervo`)}
         onRefresh={handleRefresh}
         renderRowActions={renderRowActions}
       />

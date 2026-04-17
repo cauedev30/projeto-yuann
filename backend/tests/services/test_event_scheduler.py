@@ -10,7 +10,9 @@ def test_event_scheduler_creates_renewal_and_expiration_events() -> None:
         "critical_events": [],
     }
 
-    events = build_contract_events(metadata, default_lead_times={"renewal": 180, "expiration": 30})
+    events = build_contract_events(
+        metadata, default_lead_times={"renewal": 180, "expiration": 30}
+    )
 
     event_types = [event.event_type for event in events]
     assert "renewal" in event_types
@@ -54,10 +56,12 @@ def test_event_scheduler_generates_full_schedule_with_derivation_metadata() -> N
         "metadata": {"derived_from": ["end_date"]},
     }
 
-    notification_events = [e for e in serialized if e.get("metadata", {}).get("notification_sequence")]
-    assert len(notification_events) == 4
+    notification_events = [
+        e for e in serialized if e.get("metadata", {}).get("notification_sequence")
+    ]
+    assert len(notification_events) == 3
     sequences = [e["metadata"]["notification_sequence"] for e in notification_events]
-    assert sequences == ["10_months_before", "9_months_before", "8_months_before", "7_months_before"]
+    assert sequences == ["12_months_before", "9_months_before", "7_months_before"]
 
     readjustment = [e for e in serialized if e["event_type"] == "readjustment"]
     assert len(readjustment) == 1
@@ -65,7 +69,9 @@ def test_event_scheduler_generates_full_schedule_with_derivation_metadata() -> N
         "event_type": "readjustment",
         "event_date": "2027-04-01",
         "lead_time_days": 30,
-        "metadata": {"derived_from": ["start_date", "financial_terms.readjustment_type"]},
+        "metadata": {
+            "derived_from": ["start_date", "financial_terms.readjustment_type"]
+        },
     }
 
     grace = [e for e in serialized if e["event_type"] == "grace_period_end"]
@@ -74,5 +80,7 @@ def test_event_scheduler_generates_full_schedule_with_derivation_metadata() -> N
         "event_type": "grace_period_end",
         "event_date": "2026-07-01",
         "lead_time_days": 15,
-        "metadata": {"derived_from": ["start_date", "financial_terms.grace_period_months"]},
+        "metadata": {
+            "derived_from": ["start_date", "financial_terms.grace_period_months"]
+        },
     }
