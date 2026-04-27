@@ -13,27 +13,19 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import create_engine, inspect, select, text
 from sqlalchemy.orm import Session, sessionmaker
 
+from app.api.routes.admin import router as admin_router
 from app.api.routes.auth import router as auth_router
 from app.api.routes.contracts import router as contracts_router
 from app.api.routes.dashboard import router as dashboard_router
 from app.api.routes.notifications import router as notifications_router
 from app.api.routes.policies import router as policies_router
-from app.api.routes.search import router as search_router
 from app.api.routes.uploads import router as uploads_router
 from app.db.base import Base
 from app.db.models import Policy, PolicyRule
 from app.core.database_url import resolve_database_url
-from app.infrastructure.openai_client import OpenAIAnalysisClient
 from app.infrastructure.notifications import NoopEmailSender, SmtpEmailSender
 from app.infrastructure.ocr import NoopOcrClient
 from app.infrastructure.storage import LocalStorageService
-from app.infrastructure.embeddings import EmbeddingClient
-
-_embedding_client: EmbeddingClient | None = None
-
-
-def get_embedding_client() -> EmbeddingClient | None:
-    return _embedding_client
 
 
 def _get_database_url(database_url: str | None) -> str:
@@ -331,22 +323,8 @@ def create_app(
     app.include_router(uploads_router)
     app.include_router(notifications_router)
     app.include_router(dashboard_router)
-    app.include_router(search_router)
     app.state.storage_service = LocalStorageService(resolved_storage_directory)
     app.state.ocr_client = NoopOcrClient()
-
-    openai_api_key = os.environ.get("OPENAI_API_KEY")
-    openai_model = os.environ.get("OPENAI_MODEL", "gpt-5-mini")
-
-    if openai_api_key:
-        app.state.llm_client = OpenAIAnalysisClient(
-            api_key=openai_api_key,
-            model=openai_model,
-        )
-        global _embedding_client
-        _embedding_client = EmbeddingClient(api_key=openai_api_key)
-    else:
-        app.state.llm_client = None
 
     smtp_host = os.environ.get("MAILPIT_SMTP_HOST", "localhost")
     smtp_port = int(os.environ.get("MAILPIT_SMTP_PORT", "1025"))
