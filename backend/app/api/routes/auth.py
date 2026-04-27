@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.api.dependencies import get_current_user, get_session
+from app.api.dependencies import get_current_user, get_session, require_admin
 from app.db.models.user import User
 from app.domain.auth import create_access_token, hash_password, verify_password
 
@@ -16,6 +16,7 @@ class RegisterInput(BaseModel):
     email: str
     password: str
     full_name: str
+    role: str = "user"
 
 
 class LoginInput(BaseModel):
@@ -29,6 +30,7 @@ class AuthResponse(BaseModel):
     user_id: str
     email: str
     full_name: str
+    role: str
 
 
 class UserResponse(BaseModel):
@@ -36,6 +38,7 @@ class UserResponse(BaseModel):
     email: str
     full_name: str
     is_active: bool
+    role: str
 
 
 @router.post("/register", response_model=AuthResponse, status_code=201)
@@ -43,6 +46,7 @@ def register(
     payload: RegisterInput,
     request: Request,
     session: Session = Depends(get_session),
+    current_user: User = Depends(require_admin),
 ) -> AuthResponse:
     existing = session.scalar(select(User).where(User.email == payload.email))
     if existing is not None:
@@ -52,6 +56,7 @@ def register(
         email=payload.email,
         hashed_password=hash_password(payload.password),
         full_name=payload.full_name,
+        role=payload.role,
     )
     session.add(user)
     session.commit()
@@ -66,6 +71,7 @@ def register(
         user_id=user.id,
         email=user.email,
         full_name=user.full_name,
+        role=user.role,
     )
 
 
@@ -91,6 +97,7 @@ def login(
         user_id=user.id,
         email=user.email,
         full_name=user.full_name,
+        role=user.role,
     )
 
 
@@ -101,4 +108,5 @@ def get_me(current_user: User = Depends(get_current_user)) -> UserResponse:
         email=current_user.email,
         full_name=current_user.full_name,
         is_active=current_user.is_active,
+        role=current_user.role,
     )
