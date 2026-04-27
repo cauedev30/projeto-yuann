@@ -46,6 +46,7 @@ export function AppShell({ children }: AppShellProps) {
   const pathname = usePathname();
   const topbar = getTopbarContext(pathname);
   const { logout, user } = useAuth();
+  const isAdmin = user?.role === "admin";
 
   function navLinkClass(href: string): string {
     const isActive = pathname.startsWith(href);
@@ -97,6 +98,14 @@ export function AppShell({ children }: AppShellProps) {
               Entrada, triagem e achados
             </small>
           </Link>
+          {isAdmin && (
+            <Link aria-label="Admin" className={navLinkClass("/admin")} href="/admin/usuarios">
+              <span className={styles.navTitle}>Admin</span>
+              <small aria-hidden="true" className={styles.navMeta}>
+                Gerenciar usuários
+              </small>
+            </Link>
+          )}
         </nav>
 
         <div className={styles.sidebarFooter}>
@@ -142,6 +151,14 @@ export function AppShell({ children }: AppShellProps) {
                   Entrada, triagem e achados
                 </small>
               </Link>
+              {isAdmin && (
+                <Link aria-label="Admin" className={navLinkClass("/admin")} href="/admin/usuarios">
+                  <span className={styles.navTitle}>Admin</span>
+                  <small aria-hidden="true" className={styles.navMeta}>
+                    Gerenciar usuários
+                  </small>
+                </Link>
+              )}
             </nav>
             <div className={styles.mobileLogout}>
               {user ? (
