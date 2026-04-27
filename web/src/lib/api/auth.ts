@@ -6,6 +6,7 @@ export type AuthResponse = {
   userId: string;
   email: string;
   fullName: string;
+  role: string;
 };
 
 type AuthResponsePayload = {
@@ -14,6 +15,7 @@ type AuthResponsePayload = {
   user_id: string;
   email: string;
   full_name: string;
+  role: string;
 };
 
 export type AuthUser = {
@@ -21,6 +23,7 @@ export type AuthUser = {
   email: string;
   fullName: string;
   isActive: boolean;
+  role: string;
 };
 
 type UserPayload = {
@@ -28,6 +31,7 @@ type UserPayload = {
   email: string;
   full_name: string;
   is_active: boolean;
+  role: string;
 };
 
 function mapAuthResponse(payload: AuthResponsePayload): AuthResponse {
@@ -37,6 +41,7 @@ function mapAuthResponse(payload: AuthResponsePayload): AuthResponse {
     userId: payload.user_id,
     email: payload.email,
     fullName: payload.full_name,
+    role: payload.role,
   };
 }
 
@@ -46,6 +51,7 @@ function mapUser(payload: UserPayload): AuthUser {
     email: payload.email,
     fullName: payload.full_name,
     isActive: payload.is_active,
+    role: payload.role,
   };
 }
 

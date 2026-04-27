@@ -62,6 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       email: res.email,
       fullName: res.fullName,
       isActive: true,
+      role: res.role,
     });
   }, []);
 
