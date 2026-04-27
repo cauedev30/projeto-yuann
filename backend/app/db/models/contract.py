@@ -57,6 +57,10 @@ class Contract(TimestampMixin, Base):
     activated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     last_accessed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     last_analyzed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    owner_id: Mapped[str | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL"),
+        nullable=True,
+    )
 
     versions: Mapped[list["ContractVersion"]] = relationship(
         back_populates="contract",
