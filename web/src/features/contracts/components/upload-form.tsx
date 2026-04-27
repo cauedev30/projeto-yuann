@@ -13,7 +13,7 @@ type UploadFormProps = {
 
 const contractTypeOptions: ReadonlyArray<{ value: ContractSource; label: string }> = [
   { value: "third_party_draft", label: "Contrato padrão" },
-  { value: "signed_contract", label: "Contrato assinado" },
+  { value: "signed_contract", label: "Contrato de Terceiro" },
 ];
 
 export function UploadForm({ onSubmit, isSubmitting }: UploadFormProps) {

@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import datetime, timezone
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.application.contract_pipeline import run_contract_pipeline, run_policy_analysis
+from app.application.contract_pipeline import run_contract_pipeline
 from app.application.contract_versions import next_contract_version_number
 from app.db.models.contract import Contract, ContractSource, ContractVersion
 from app.infrastructure.pdf_text import TextExtractionError
@@ -35,7 +36,6 @@ def upload_contract_version_file(
     content: bytes,
     storage_service: LocalStorageService,
     ocr_client: OCRClient | None = None,
-    llm_client: object | None = None,
 ) -> ContractUploadResult:
     storage_key = storage_service.store_bytes(filename, content)
     contract_version = ContractVersion(
@@ -58,19 +58,14 @@ def upload_contract_version_file(
 
         if contract_version.source == ContractSource.signed_contract:
             process_signed_contract_archive(session, contract_version=contract_version)
-            run_policy_analysis(
-                session,
-                contract,
-                contract_version.text_content or "",
-                contract_version=contract_version,
-                llm_client=llm_client,
-            )
+            if not contract.is_active:
+                contract.is_active = True
+                contract.activated_at = datetime.now(timezone.utc)
         else:
             run_contract_pipeline(
                 session,
                 contract,
                 contract_version,
-                llm_client=llm_client,
             )
         session.commit()
     except TextExtractionError as exc:
@@ -102,11 +97,14 @@ def upload_contract_file(
     content: bytes,
     storage_service: LocalStorageService,
     ocr_client: OCRClient | None = None,
-    llm_client: object | None = None,
 ) -> ContractUploadResult:
-    contract = session.scalar(select(Contract).where(Contract.external_reference == external_reference))
+    contract = session.scalar(
+        select(Contract).where(Contract.external_reference == external_reference)
+    )
     if contract is None:
-        contract = Contract(title=title, external_reference=external_reference, status="enviado")
+        contract = Contract(
+            title=title, external_reference=external_reference, status="enviado"
+        )
         session.add(contract)
     else:
         contract.title = title
@@ -119,5 +117,4 @@ def upload_contract_file(
         content=content,
         storage_service=storage_service,
         ocr_client=ocr_client,
-        llm_client=llm_client,
     )

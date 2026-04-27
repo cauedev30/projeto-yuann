@@ -1,4 +1,3 @@
-from app.infrastructure.embeddings import EmbeddingClient
 from app.infrastructure.notifications import (
     EmailSender,
     NoopEmailSender,
@@ -10,7 +9,6 @@ from app.infrastructure.storage import LocalStorageService
 
 __all__ = [
     "EmailSender",
-    "EmbeddingClient",
     "LocalStorageService",
     "NoopEmailSender",
     "NoopOcrClient",

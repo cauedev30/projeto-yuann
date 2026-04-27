@@ -318,6 +318,7 @@ def create_app(
         _seed_default_policy(session)
 
     app.include_router(auth_router)
+    app.include_router(admin_router)
     app.include_router(policies_router)
     app.include_router(contracts_router)
     app.include_router(uploads_router)

@@ -10,7 +10,7 @@ import styles from "../screens/contracts-screen.module.css";
 
 const SOURCE_LABELS: Record<string, string> = {
   third_party_draft: "Contrato padrão",
-  signed_contract: "Contrato assinado",
+  signed_contract: "Contrato de Terceiro",
 };
 
 type ContractsListPanelProps = {

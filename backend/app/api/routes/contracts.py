@@ -45,15 +45,6 @@ from app.application.version_diff import (
 from app.db.models.analysis import ContractAnalysis
 from app.db.models.contract import Contract, ContractSource, ContractVersion
 from app.db.models.user import User
-from app.domain.contract_analysis import (
-    calculate_final_risk_score,
-    evaluate_rules,
-    extract_contract_facts,
-    merge_analysis_items,
-)
-from app.domain.playbook import PLAYBOOK_CLAUSES
-from app.infrastructure.contract_chunker import chunk_contract
-from app.infrastructure.docx_generator import generate_corrected_contract_docx
 from app.infrastructure.storage import LocalStorageService
 from app.schemas.analysis import AnalysisItem
 from app.schemas.contract import (
@@ -319,8 +310,7 @@ def analyze_contract(
             status_code=422, detail="No text content available for analysis"
         )
 
-    llm_client = getattr(request.app.state, "llm_client", None)
-    run_contract_pipeline(session, contract, latest_version, llm_client=llm_client)
+    run_contract_pipeline(session, contract, latest_version)
     session.commit()
 
     if (

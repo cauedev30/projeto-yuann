@@ -9,7 +9,7 @@ from app.db.models.event import ContractEvent
 
 SOURCE_LABELS = {
     "third_party_draft": "Minuta de terceiro",
-    "signed_contract": "Contrato assinado",
+    "signed_contract": "Contrato de Terceiro",
     "third_party_contract": "Contrato de terceiro",
 }
 
