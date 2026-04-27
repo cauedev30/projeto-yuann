@@ -23,7 +23,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session, selectinload
 from pydantic import BaseModel
 
-from app.api.dependencies import get_session
+from app.api.dependencies import get_current_user, get_session
 from app.api.serializers.contracts import (
     latest_contract_version,
     latest_version_analysis,
@@ -44,6 +44,7 @@ from app.application.version_diff import (
 )
 from app.db.models.analysis import ContractAnalysis
 from app.db.models.contract import Contract, ContractSource, ContractVersion
+from app.db.models.user import User
 from app.domain.contract_analysis import (
     calculate_final_risk_score,
     evaluate_rules,
@@ -134,9 +135,12 @@ def list_contracts(
     per_page: int = Query(20, ge=1, le=100, description="Items per page"),
     scope: ContractScope = Query("all", description="Contract scope filter"),
     session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
 ) -> PaginatedContractListResponse:
     """List contracts with pagination."""
     filters = _contract_scope_filters(scope)
+    if current_user.role != "admin":
+        filters = (*filters, Contract.owner_id == current_user.id)
     total = session.scalar(select(func.count()).select_from(Contract).where(*filters))
 
     offset = (page - 1) * per_page

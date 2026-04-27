@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session, selectinload
 from app.db.models.analysis import ContractAnalysis
 from app.db.models.contract import Contract
 from app.db.models.event import ContractEvent, Notification
+from app.db.models.user import User
 from app.schemas.dashboard import (
     DashboardNotificationResponse,
     DashboardSnapshotResponse,
@@ -32,11 +33,15 @@ def build_dashboard_snapshot(
     *,
     session: Session,
     today: date | str,
+    current_user: User | None = None,
 ) -> DashboardSnapshotResponse:
     reference_date = date.fromisoformat(today) if isinstance(today, str) else today
 
+    stmt = select(Contract)
+    if current_user is not None and current_user.role != "admin":
+        stmt = stmt.where(Contract.owner_id == current_user.id)
     contracts = session.scalars(
-        select(Contract).options(
+        stmt.options(
             selectinload(Contract.analyses).selectinload(ContractAnalysis.findings),
         )
     ).all()
@@ -90,14 +95,6 @@ def build_dashboard_snapshot(
     expiring_contracts.sort(key=lambda c: c.days_remaining or 999999)
 
     critical_findings = 0
-    for contract in operational_contracts:
-        latest_analysis = _latest_analysis(contract)
-        if latest_analysis is not None:
-            critical_findings += sum(
-                1
-                for finding in latest_analysis.findings
-                if finding.severity == "critical"
-            )
 
     notifications = session.scalars(
         select(Notification).options(
