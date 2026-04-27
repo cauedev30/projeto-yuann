@@ -14,13 +14,9 @@ import {
   ContractsApiError,
   getContractDetail,
   getContractVersionDetail,
-  getDownloadCorrectedUrl,
 } from "../../../lib/api/contracts";
-import { useGenerateCorrectedContract } from "../../../lib/hooks/use-contracts";
 import { ContractSummaryPanel } from "../components/contract-summary-panel";
-import { ClauseStepper } from "../components/clause-stepper";
 import { EventTimeline } from "../components/event-timeline";
-import { FindingsSection } from "../components/findings-section";
 import { MetadataSection } from "../components/metadata-section";
 import styles from "./contract-detail-screen.module.css";
 
@@ -93,15 +89,8 @@ export function ContractDetailScreen({
   const [detail, setDetail] = useState<ContractDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  const [correctedReady, setCorrectedReady] = useState(false);
-
-  const generateCorrected = useGenerateCorrectedContract();
 
   const liveMessage = isLoading ? "Carregando contrato..." : error?.message ?? "";
-
-  useEffect(() => {
-    setCorrectedReady(false);
-  }, [contractId, versionId]);
 
   const loadCurrentSelection = useCallback(async () => (
     versionId
@@ -309,16 +298,6 @@ export function ContractDetailScreen({
           </SurfaceCard>
         </div>
 
-        {selectedAnalysis && selectedAnalysis.findings.length > 0 && (
-          <SurfaceCard title="Análise de Cláusulas">
-            <ClauseStepper
-              findings={selectedAnalysis.findings}
-              context={context}
-              riskScore={selectedAnalysis.contractRiskScore}
-            />
-          </SurfaceCard>
-        )}
-
         <details className={styles.collapsible} open>
           <summary className={styles.collapsibleSummary}>
             <span className={styles.collapsibleTitle}>Timeline de eventos</span>
@@ -329,58 +308,23 @@ export function ContractDetailScreen({
           </div>
         </details>
 
-        <details className={styles.collapsible} open>
-          <summary className={styles.collapsibleSummary}>
-            <span className={styles.collapsibleTitle}>Análise da versão</span>
-            <span className={styles.collapsibleChevron} aria-hidden="true" />
-          </summary>
-          <div className={styles.collapsibleContent}>
-            {selectedAnalysis ? (
-              <div className={styles.stack}>
-                <FindingsSection items={selectedAnalysis.findings} />
-
-                {!detail.isHistoricalView && selectedAnalysis.analysisStatus === "completed" ? (
-                  <div className={styles.actionRow}>
-                    {!correctedReady ? (
-                      <button
-                        className={styles.primaryButton}
-                        onClick={async () => {
-                          try {
-                            await generateCorrected.mutateAsync(contractId);
-                            setCorrectedReady(true);
-                          } catch {
-                            // error handled by mutation state
-                          }
-                        }}
-                        disabled={generateCorrected.isPending}
-                        type="button"
-                      >
-                        {generateCorrected.isPending
-                          ? "Gerando contrato corrigido..."
-                          : "Gerar Contrato Corrigido"}
-                      </button>
-                    ) : (
-                      <a
-                        className={styles.primaryButton}
-                        href={getDownloadCorrectedUrl(contractId)}
-                        download
-                      >
-                        Baixar Contrato Corrigido (.docx)
-                      </a>
-                    )}
-                    {generateCorrected.isError ? (
-                      <p className={styles.errorText}>
-                        Erro ao gerar: {generateCorrected.error?.message}
-                      </p>
-                    ) : null}
+        {selectedVersion?.extractionMetadata?.clauses?.length > 0 && (
+          <SurfaceCard title="Cláusulas do contrato">
+            <div className={styles.clausesList}>
+              {selectedVersion.extractionMetadata.clauses.map((clause: any) => (
+                <details key={clause.order_index} className={styles.collapsible}>
+                  <summary className={styles.collapsibleSummary}>
+                    <span className={styles.collapsibleTitle}>{clause.title}</span>
+                    <span className={styles.collapsibleChevron} aria-hidden="true" />
+                  </summary>
+                  <div className={styles.collapsibleContent}>
+                    <p className={styles.inlineText}>{clause.content}</p>
                   </div>
-                ) : null}
-              </div>
-            ) : (
-              <p className={styles.inlineText}>Análise ainda não disponível.</p>
-            )}
-          </div>
-        </details>
+                </details>
+              ))}
+            </div>
+          </SurfaceCard>
+        )}
 
         <details className={styles.collapsible} open>
           <summary className={styles.collapsibleSummary}>
