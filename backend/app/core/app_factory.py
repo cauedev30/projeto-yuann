@@ -296,7 +296,11 @@ def create_app(
     if resolved_cors_origins:
         cors_kwargs["allow_origins"] = resolved_cors_origins
     else:
-        cors_kwargs["allow_origin_regex"] = r"http://(127\.0\.0\.1|localhost):\d+"
+        cors_kwargs["allow_origins"] = [
+            "https://projeto-yuann.vercel.app",
+            "http://localhost:3000",
+            "http://127.0.0.1:3000",
+        ]
     app.add_middleware(CORSMiddleware, **cors_kwargs)
 
     engine = create_engine(
