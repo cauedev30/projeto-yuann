@@ -23,6 +23,7 @@ from app.api.routes.uploads import router as uploads_router
 from app.db.base import Base
 from app.db.models import Policy, PolicyRule
 from app.core.database_url import resolve_database_url
+from app.infrastructure.llm_client import OpenAiLlmClient
 from app.infrastructure.notifications import NoopEmailSender, SmtpEmailSender
 from app.infrastructure.ocr import NoopOcrClient
 from app.infrastructure.storage import LocalStorageService
@@ -330,6 +331,12 @@ def create_app(
     app.include_router(dashboard_router)
     app.state.storage_service = LocalStorageService(resolved_storage_directory)
     app.state.ocr_client = NoopOcrClient()
+
+    openai_api_key = os.environ.get("OPENAI_API_KEY", "")
+    if openai_api_key:
+        app.state.llm_client = OpenAiLlmClient(api_key=openai_api_key)
+    else:
+        app.state.llm_client = None
 
     smtp_host = os.environ.get("MAILPIT_SMTP_HOST", "localhost")
     smtp_port = int(os.environ.get("MAILPIT_SMTP_PORT", "1025"))
