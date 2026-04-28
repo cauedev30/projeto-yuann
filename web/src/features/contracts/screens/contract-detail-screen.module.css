@@ -182,6 +182,45 @@
   transform: rotate(-135deg);
 }
 
+.clausesList {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.clausesList .collapsible {
+  border-radius: var(--radius-sm);
+  border-color: var(--line-border);
+  background: var(--bg-elevated);
+}
+
+.clausesList .collapsibleSummary {
+  padding: 0.85rem 1rem;
+  min-height: auto;
+}
+
+.clausesList .collapsibleTitle {
+  font-size: var(--text-base);
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--ink);
+}
+
+.clausesList .collapsibleChevron {
+  width: 0.45rem;
+  height: 0.45rem;
+}
+
+.clausesList .collapsibleContent {
+  padding: 0 1rem 1rem;
+}
+
+.clausesList .inlineText {
+  color: var(--ink-soft);
+  font-size: var(--text-sm);
+  line-height: 1.65;
+  white-space: pre-wrap;
+}
+
 .collapsibleContent {
   padding: 0 var(--space-5) var(--space-5);
 }

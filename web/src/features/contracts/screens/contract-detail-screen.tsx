@@ -20,6 +20,36 @@ import { EventTimeline } from "../components/event-timeline";
 import { MetadataSection } from "../components/metadata-section";
 import styles from "./contract-detail-screen.module.css";
 
+type ClauseItem = {
+  order_index: number;
+  title: string;
+  content: string;
+};
+
+function cleanClauseContent(title: string, content: string): string {
+  // Remove common prefixes that repeat the title
+  const prefixes = [
+    /^CL[AÁ]USULA\s+[IVXLC\d]+[ªº]?\s*[-–—:.]?\s*/i,
+    /^Art\.?\s*\d+[º]?\s*[-–—.]\s*/i,
+    /^\d+\.\s+/,
+  ];
+
+  let cleaned = content.trim();
+  for (const prefix of prefixes) {
+    cleaned = cleaned.replace(prefix, "");
+  }
+
+  // If content starts with the exact title text, remove it
+  const titleIndex = cleaned.toLowerCase().indexOf(title.toLowerCase());
+  if (titleIndex === 0) {
+    cleaned = cleaned.slice(title.length).trim();
+    // Remove leading punctuation
+    cleaned = cleaned.replace(/^[-–—:.]\s*/, "");
+  }
+
+  return cleaned;
+}
+
 const SOURCE_LABELS: Record<string, string> = {
   third_party_draft: "Contrato padrão",
   signed_contract: "Contrato assinado",
@@ -308,17 +338,17 @@ export function ContractDetailScreen({
           </div>
         </details>
 
-        {selectedVersion?.extractionMetadata?.clauses?.length > 0 && (
+        {!!(selectedVersion?.extractionMetadata as { clauses?: ClauseItem[] })?.clauses?.length && (
           <SurfaceCard title="Cláusulas do contrato">
             <div className={styles.clausesList}>
-              {selectedVersion.extractionMetadata.clauses.map((clause: any) => (
+              {((selectedVersion?.extractionMetadata as { clauses?: ClauseItem[] })?.clauses || []).map((clause) => (
                 <details key={clause.order_index} className={styles.collapsible}>
                   <summary className={styles.collapsibleSummary}>
                     <span className={styles.collapsibleTitle}>{clause.title}</span>
                     <span className={styles.collapsibleChevron} aria-hidden="true" />
                   </summary>
                   <div className={styles.collapsibleContent}>
-                    <p className={styles.inlineText}>{clause.content}</p>
+                    <p className={styles.inlineText}>{cleanClauseContent(clause.title, clause.content)}</p>
                   </div>
                 </details>
               ))}

@@ -135,6 +135,7 @@ export type ContractVersionSummary = {
   originalFilename: string;
   usedOcr: boolean;
   text: string | null;
+  extractionMetadata: Record<string, unknown> | null;
 };
 
 export type ContractVersionListItem = {
@@ -228,6 +229,7 @@ export type ContractVersionSummaryPayload = {
   original_filename: string;
   used_ocr: boolean;
   text: string | null;
+  extraction_metadata: Record<string, unknown> | null;
 };
 
 export type ContractVersionListItemPayload = {
@@ -376,6 +378,7 @@ function mapContractVersionSummary(
     originalFilename: payload.original_filename,
     usedOcr: payload.used_ocr,
     text: payload.text,
+    extractionMetadata: payload.extraction_metadata,
   };
 }
 
